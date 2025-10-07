@@ -18,10 +18,9 @@ body {
 .main-card {
     position: relative;
     z-index: 1;
-    /* Use calc to leave 1 inch (96px) on top, left, right and 2 inches (192px) at the bottom */
-    width: calc(100vw - 2in); /* 1in left + 1in right */
-    min-height: calc(100vh - 3in); /* 1in top + 2in bottom */
-    margin: 1in auto 2in auto; /* 1in top, 2in bottom */
+    width: calc(100vw - 2in);
+    min-height: calc(100vh - 3in);
+    margin: 1in auto 2in auto;
     background: #fff;
     border-radius: 24px;
     box-shadow: 0 4px 32px rgba(0,0,0,0.10);
@@ -178,4 +177,5 @@ footer {
 .edit-btn { background: #f7f7f7; color: #444; }
 .edit-btn:hover { background: #e0e0e0; }
 .delete-btn { background: #ff6b6b; color: #fff; }
+
 .delete-btn:hover { background: #e74c3c; }
