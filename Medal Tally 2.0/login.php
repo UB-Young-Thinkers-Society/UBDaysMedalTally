@@ -1,5 +1,5 @@
 <?php
-<!-- filepath: c:\xampp\htdocs\Medal Tally 2.0\login.php -->
+// filepath: c:\xampp\htdocs\Medal Tally 2.0\login.php
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['username'];
     $password = $_POST['password'];
