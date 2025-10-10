@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabulation Head</title>
+    <link rel="stylesheet" href="/static/styles-tabulation.css">
+</head>
+<body>
+    <div class="background"></div>
+    <div class="main-card">
+        <div class="header">
+            <div class="admin-info">
+                <img src="/static/img/admin-icon.png" alt="Admin" class="admin-icon">
+                <span>Tabulation Head</span>
+            </div>
+            <a href="/" class="logout" id="logoutBtn">Log Out</a>
+        </div>
+
+        <!-- Section to Add New Events -->
+        <div class="add-event-section" style="margin-bottom: 24px; background: #f9f9f9; padding: 16px; border-radius: 12px;">
+            <h3 style="margin-top: 0;">Add New Event</h3>
+            <form id="addEventForm">
+                <input type="text" id="eventName" placeholder="Event Name" required style="width: 30%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-right: 10px;">
+                <input type="number" id="medalCount" placeholder="Medal Count" required style="width: 15%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-right: 10px;">
+                <select id="eventStatus" required style="width: 20%; padding: 10px; border-radius: 8px; border: 1px solid #ccc; margin-right: 10px;">
+                    <option value="ongoing">Ongoing</option>
+                    <option value="submitted">Submitted</option>
+                    <option value="approved">Approved</option>
+                    <option value="published">Published</option>
+                </select>
+                <button type="submit" class="edit-btn" style="background: #2d5be3; color: white;">Add Event</button>
+            </form>
+        </div>
+
+        <div class="categories">
+            <div class="category" id="athletics-category">
+                <div class="cat-title">Athletics</div>
+                <div class="cat-status" id="athletics-status">...</div>
+                <div class="cat-arrow">&#9662;</div>
+            </div>
+            <div class="category-details" id="athletics-details">
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Medal Count</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="events-table-body">
+                        <!-- Event rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+        </div>
+    </div>
+    <footer>
+        <span>Made by <img src="/static/img/UBYTeS New Logo 1.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.getElementById('events-table-body');
+            const addEventForm = document.getElementById('addEventForm');
+
+
+            const fetchEvents = async () => {
+                try {
+                    const response = await fetch('/api/events');
+                    if (!response.ok) throw new Error('Failed to fetch events.');
+                    const events = await response.json();
+                    
+                    tableBody.innerHTML = '';
+                    
+                    events.forEach(event => {
+                        const row = document.createElement('tr');
+                        row.setAttribute('data-id', event.id);
+                        row.innerHTML = `
+                            <td>${event.name}</td>
+                            <td>${event.medal_count}</td>
+                            <td><span class="status ongoing">${event.status}</span></td>
+                            <td>
+                                <button class="edit-btn" onclick="handleEdit(${event.id}, '${event.name}', ${event.medal_count}, '${event.status}')">Edit</button>
+                                <button class="delete-btn" onclick="handleDelete(${event.id})">Delete</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error fetching events:', error);
+                    tableBody.innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
+                }
+            };
+
+            
+            addEventForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const eventData = {
+                    name: document.getElementById('eventName').value,
+                    medal_count: parseInt(document.getElementById('medalCount').value),
+                    status: document.getElementById('eventStatus').value
+                };
+
+                try {
+                    const response = await fetch('/api/events', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(eventData)
+                    });
+
+                    if (!response.ok) throw new Error('Failed to create event.');
+                    
+                    addEventForm.reset();
+                    fetchEvents();
+                } catch (error) {
+                    console.error('Error creating event:', error);
+                }
+            });
+
+            
+            fetchEvents();
+        });
+
+        const handleEdit = (id, name, medalCount, status) => {
+            const newName = prompt("Enter new event name:", name);
+            if (newName === null) return;
+
+            const newMedalCount = prompt("Enter new medal count:", medalCount);
+            if (newMedalCount === null) return;
+
+            const newStatus = prompt("Enter new status (e.g., ongoing, approved):", status);
+            if (newStatus === null) return;
+
+            const eventData = {
+                name: newName,
+                medal_count: parseInt(newMedalCount),
+                status: newStatus
+            };
+
+            fetch(`/api/events/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(eventData)
+            }).then(response => {
+                if (response.ok) {
+                    location.reload(); 
+                } else {
+                    alert('Failed to update event.');
+                }
+            });
+        };
+
+        
+        const handleDelete = (id) => {
+            if (!confirm('Are you sure you want to delete this event?')) {
+                return;
+            }
+
+            fetch(`/api/events/${id}`, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    document.querySelector(`tr[data-id='${id}']`).remove();
+                } else {
+                    alert('Failed to delete event.');
+                }
+            });
+        };
+    </script>
+</body>
+</html>
