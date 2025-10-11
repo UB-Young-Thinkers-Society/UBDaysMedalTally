@@ -1,16 +1,16 @@
 async function login(username, password) {
-    const { data, error } = await supabase
-        .from('test_user')
-        .select('*')
-        .eq('username', username)
-        .eq('password', password)
-        .single();
+    const { data, error } = await supabase.auth.signInWithPassword({
+    email: username,
+    password: password,
+    }) 
 
-    if (error || !data) {
-        alert(' Invalid username or password');
+    if (error) {
+        alert('Error logging in. ' + error.message);
+        console.error('Error logging in: ' + error.message);
     } else {
-        alert('Welcome, ' + data.username + '!');
-        window.location.href = 'tabulation-head.html';
+        alert('Welcome, ' + data.user.email + '!');
+        console.log('User logged in: ' + data.session);
+        window.location.href = 'tabulation-head.html' //add separate urls here for each role
     }
 }
 

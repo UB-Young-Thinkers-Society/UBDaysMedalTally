@@ -1,0 +1,7 @@
+[Temporary] 
+Emails to use (in auth users):
+
+email				password		role(to be implemented pa)
+ubyteshris@gmail.com		123		admin
+ubbytes@gmail.com			123		tabHead
+rkpbeppu@universityofbohol.edu.ph	123		committee
