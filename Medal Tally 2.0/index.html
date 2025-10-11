@@ -24,17 +24,14 @@
                 </div>
                 <button type="submit" class="login-btn">Login</button>
             </form>
-            
+
         </div>
         <div class="image-section">
             <img src="img/Login-Group.png" alt="Group" class="group-photo">
         </div>
     </div>
-    <script>
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            window.location.href = 'tabulation-head.html';
-        });
-    </script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="db_connection.js"></script>
+    <script src="login.js"></script>
 </body>
 </html>
