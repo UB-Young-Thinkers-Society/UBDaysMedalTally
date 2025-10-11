@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tabulation Committee 1</title>
+    <link rel="stylesheet" href="styles-committee.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <span class="committee-title">Tabulation Committee 1</span>
+            </div>
+            <button class="logout-btn" id="logout-btn">Log Out</button>
+        </div>
+        <div class="search-row">
+            <div class="search-events">
+                <input type="text" id="eventSearch" placeholder="Search Events" readonly onclick="toggleDropdown()" style="cursor:pointer;">
+                <select>
+                    <option selected disabled>Select Event</option>
+                    <option>Event 1</option>
+                    <option>Event 2</option>
+                </select>
+            </div>
+            <input class="tie-group" type="text" placeholder="Tie Groups (e.g. 1 - 2)">
+        </div>
+        <form>
+            <div class="tabulation-list">
+                <div class="tab-row">
+                    <div class="tab-num">1</div>
+                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                </div>
+                <div class="tab-row">
+                    <div class="tab-num">2</div>
+                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                </div>
+                <div class="tab-row">
+                    <div class="tab-num">3</div>
+                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                </div>
+                <div class="tab-row">
+                    <div class="tab-num">4</div>
+                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                </div>
+                <div class="tab-row">
+                    <div class="tab-num" style="visibility:hidden;">5</div>
+                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                </div>
+            </div>
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+    <div class="footer">
+        Made by <img src="img/UBYTeS New Logo 1.png" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
+    </div>
+    <script>
+        document.getElementById('logout-btn').onclick = function(e) {
+            e.preventDefault();
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>
