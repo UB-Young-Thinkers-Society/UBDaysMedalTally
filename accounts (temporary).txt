@@ -1,7 +1,10 @@
 [Temporary] 
-Emails to use (in auth users):
+Accounts
 
+In Auth > users:
 email				password		role(to be implemented pa)
 ubyteshris@gmail.com		123		admin
 ubbytes@gmail.com			123		tabHead
 rkpbeppu@universityofbohol.edu.ph	123		committee
+
+Accounts in public > test-users are not included here. Feel free to add if necessary
