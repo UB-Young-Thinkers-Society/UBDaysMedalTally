@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Tabulation Committee 1</title>
     <link rel="stylesheet" href="styles-committee.css">
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="db_connection.js"></script>
+    <script src="session.js"></script> //non specific for tabHeads pa for now
 </head>
 <body>
     <div class="container">
@@ -53,10 +56,11 @@
     <div class="footer">
         Made by <img src="img/UBYTeS New Logo 1.png" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
     </div>
+    <script src="logout.js"></script>
     <script>
         document.getElementById('logout-btn').onclick = function(e) {
             e.preventDefault();
-            window.location.href = 'index.html';
+            signOut();
         };
     </script>
 </body>

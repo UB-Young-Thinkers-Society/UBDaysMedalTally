@@ -27,5 +27,5 @@ document.querySelectorAll('.category').forEach(function(catDiv) {
 
 document.getElementById('logoutBtn').onclick = function(e) {
     e.preventDefault();
-    window.location.href = 'index.html';
+    signOut();
 };
