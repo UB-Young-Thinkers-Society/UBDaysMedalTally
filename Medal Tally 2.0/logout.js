@@ -10,5 +10,12 @@ async function signOut() {
     }
 }
 
+document.querySelectorAll('.logout').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        signOut();
+    });
+});
+
 
 
