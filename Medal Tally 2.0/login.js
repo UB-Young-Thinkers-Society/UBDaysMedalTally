@@ -10,7 +10,7 @@ async function login(username, password) {
     } else {
         alert('Welcome, ' + data.user.email + '!');
         console.log('User logged in: ' + data.session);
-        window.location.href = 'tabulation-head.html' //add separate urls here for each role
+        window.location.href = 'tabulation.html' //add separate urls here for each role
     }
 }
 
