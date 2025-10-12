@@ -1,7 +1,0 @@
-{
-    "rewrites": [
-        { "source": "/welcome", "destination": "/index.html" },
-        { "source": "/tabulation", "destination": "/tabulation-head.html" },
-        { "source": "/computation", "destination": "/tabulation-committee.html" }
-    ]
-}

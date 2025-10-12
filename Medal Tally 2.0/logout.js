@@ -6,7 +6,7 @@ async function signOut() {
     } else {
         alert("Successfully logged out.")
         console.log("Successfully logged out.")
-        window.location.href = '/welcome';
+        window.location.href = 'index.html';
     }
 }
 
