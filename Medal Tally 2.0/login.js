@@ -23,11 +23,11 @@ async function checkIfLoggedIn() {
     if(user){
         console.log("Already Logged In. Redirecting to login.");
         if (userData.roles == "admin") //temporary - add a page for admins?
-            window.location.replace("tabulation.html")
+            window.location.replace("tabulation-head.html")
         else if (userData.roles == "tabHead")
-            window.location.replace("tabulation.html")
+            window.location.replace("tabulation-head.html")
         else if (userData.roles == "committee")
-            window.location.replace("computation.html")
+            window.location.replace("tabulation-committee.html")
         else {
             alert('Error Redirecting. ' + userError);
             console.error('Error Redirecting: ' + userError);
