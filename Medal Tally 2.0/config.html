@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBDays2025 Medal Tally</title>
+    <link rel="stylesheet" href="styles-config.css">
+    <link rel="icon" href="img/Login-Logo.png">
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="db_connection.js"></script>
+    <script src="session.js"></script>
+    <script>
+        checkSession("tabHead");
+    </script>
+
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="header">
+        <div class="navSection">
+            <div class="accInfo">
+                <img src="img/Login-Logo.png" alt="Admin" class="admin-icon">
+                <span>Tabulation Head</span>
+            </div>
+            <div class="navButtons">
+                <a href="tabulation.html" class="nav-btn">Events</a>
+                <a href="config.html" class="nav-btn active">Config</a>
+                <a href="#" class="nav-btn">Log</a>
+                <a href="#" class="nav-btn">About Us</a>
+            </div>
+        </div>
+        <div id="logoutBtn">
+            <a href="#" class="logout">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <div class="config-content">
+            <!-- Left: Teams List -->
+            <div class="teams-section">
+                <h2>Participating Teams</h2>
+                <div class="department-list">
+                    <div class="department">
+                        <div class="dept-logo-placeholder"></div>
+                        <span class="dept-name">Team Name</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Center: Add Participant & Events Config -->
+            <div class="config-forms">
+                <div class="add-participant-form">
+                    <div class="participant-fields">
+                        <input class="add-logo" type="text" placeholder="Add Logo">
+                        <div class="participant-names">
+                            <input class="name" type="text" placeholder="Name">
+                            <input class="acronym" type="text" placeholder="Acronym">
+                        </div>
+                    </div>
+                    <button class="add-btn">Add Participant</button>
+                </div>
+                
+                <div class="events-config-form">
+                    <h2>Events Config</h2>
+                    <input class="event-name" type="text" placeholder="Name">
+                    <input class="event-category" type="text" placeholder="Category">
+                    <input class="event-medal" type="text" placeholder="Medal Count">
+                    <button class="add-btn">Add Event</button>
+                </div>
+            </div>
+            <!-- Right: Logo -->
+            <div class="logo-section">
+                <img src="img/logoFull.png" alt="Logo" class="main-logo">
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
+    </footer>
+
+    <div class="background"></div>
+
+    <script>
+        document.getElementById('logoutBtn').onclick = function(e) {
+            e.preventDefault();
+            signOut();
+        };
+
+        window.addEventListener('load', function() {
+            document.getElementById('loader').classList.add('hide');
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+            }, 600);
+        });
+    </script>
+
+    <script src="logout.js"></script>
+</body>
+</html>

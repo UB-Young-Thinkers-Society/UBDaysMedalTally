@@ -18,6 +18,39 @@ body {
     opacity: 0.7;
 }
 
+#loader {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #fff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s;
+}
+#loader .spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #ffc800;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite, spinnerColor 4s linear infinite;
+}
+@keyframes spinnerColor {
+    0%  { border-top-color: #ffc800; }
+    25%  { border-top-color: #2d5be3; }
+    50%  { border-top-color: #af4c4c;}
+    75%  { border-top-color: #af4c4c; }
+    100%  { border-top-color: #ffc800; }
+}
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+#loader.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
 .header {
     display: flex;
     flex-direction: row;
