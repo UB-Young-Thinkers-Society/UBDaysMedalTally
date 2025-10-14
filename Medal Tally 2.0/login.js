@@ -7,9 +7,25 @@ async function login(username, password) {
         alert('Error logging in. ' + loginError.message);
         console.error('Error logging in: ' + loginError.message);
     } else {
-        alert('Welcome, ' + data.user.email + '!');
-        console.log('User logged in: ' + data.session);
-        window.location.href = 'tabulation.html' //add separate urls here for each role
+        const { data : userData, error : userError } = await supabase
+            .from('user-roles')
+            .select('*')
+            .eq('user_id', loginData.user.id)
+            .single();
+
+        alert('Welcome, ' + userData.roles + ' ' + loginData.user.email + '!');
+        console.log('User logged in: ' + loginData.session);
+
+        if (userData.roles == "admin"){ //clean this up, idk how pa - beppu
+            window.location.href = 'tabulation.html' //temporary - add a page for admins?
+        } else if (userData.roles == "tabHead"){
+            window.location.href = 'tabulation.html' 
+        } else if (userData.roles == "committee"){
+            window.location.href = 'computation.html'
+        } else {
+            alert('Error logging in. ' + userError.message);
+            console.error('Error logging in: ' + userError.message);
+        }
     }
 }
 
