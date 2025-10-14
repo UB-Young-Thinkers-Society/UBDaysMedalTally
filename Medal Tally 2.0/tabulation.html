@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBDays2025 Medal Tally</title>
+    <link rel="stylesheet" href="styles-tabulation.css">
+    <link rel="icon" href="img/Login-Logo.png">
+
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="db_connection.js"></script>
+    <script src="session.js"></script>
+    <script>
+        checkSession("tabHead");
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="navSection">
+
+            <div class="accInfo">
+                <img src="img/Login-Logo.png" alt="Admin" class="admin-icon">
+                <span>Tabulation Head</span>
+            </div>
+
+            <div class="navButtons">
+                <a href="tabulation-head.html" class="nav-btn active">Events</a>
+                <a href="#" class="nav-btn">Config</a>
+                <a href="#" class="nav-btn">Log</a>
+                <a href="#" class="nav-btn">About Us</a>
+            </div>
+
+        </div>
+
+        <div id="logoutBtn">
+            <a href="#" class="logout" >Log Out</a>
+        </div>
+        
+    </div>
+
+    <div class="main-card">
+        
+        <div class="categories">
+            <div class="category" data-details="athletics-details" id="athletics-category">
+                <div class="cat-title">Athletics</div>
+                <div class="cat-status">0 ongoing &nbsp;|&nbsp; 0 Submitted &nbsp;|&nbsp; 0 Published</div>
+                <div class="cat-arrow" id="arrow">&#9662;</div>
+            </div>
+            <div class="category-details" id="athletics-details" style="display:none;">
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Medal Count</th>
+                            <th>Status</th>
+                            <th class="filterHeader"> 
+                                <div class="filterTitle">
+                                    Filters
+                                </div>
+                                <div class="filterButtons">
+                                    <button class="filterButt ongoing"></button>
+                                    <button class="filterButt review"></button>
+                                    <button class="filterButt approved"></button>
+                                    <button class="filterButt published"></button>
+                                    <button class="filterButt locked"></button>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Archery – 10M – Women</td>
+                            <td>1</td>
+                            <td><span class="status ongoing">ongoing</span></td>
+                            <td>
+                                <button class="filter review">For Review</button>
+                                <button class="filter approved">Approved</button>
+                                <button class="filter published">Published</button>
+                                <button class="filter locked">Locked</button>
+                            </td>
+                            <td>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Archery – 10M – Men</td>
+                            <td>1</td>
+                            <td><span class="status ongoing">ongoing</span></td>
+                            <td>
+                                <button class="filter review">For Review</button>
+                                <button class="filter approved">Approved</button>
+                                <button class="filter published">Published</button>
+                                <button class="filter locked">Locked</button>
+                            </td>
+                            <td>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn">Delete</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="category" data-details="music-details">
+                <div class="cat-title">Music</div>
+                <div class="cat-status">0 ongoing &nbsp;|&nbsp; 0 Submitted &nbsp;|&nbsp; 0 Published</div>
+                <div class="cat-arrow" id="arrow">&#9662;</div>
+            </div>
+            <div class="category-details" id="music-details" style="display:none;">
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Medal Count</th>
+                            <th>Status</th>
+                            <th class="filterHeader"> 
+                                <div class="filterTitle">
+                                    Filters
+                                </div>
+                                <div class="filterButtons">
+                                    <button class="filterButt ongoing"></button>
+                                    <button class="filterButt review"></button>
+                                    <button class="filterButt approved"></button>
+                                    <button class="filterButt published"></button>
+                                    <button class="filterButt locked"></button>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+            <div class="category" data-details="dances-details">
+                <div class="cat-title">Dances</div>
+                <div class="cat-status">0 ongoing &nbsp;|&nbsp; 0 Submitted &nbsp;|&nbsp; 0 Published</div>
+                <div class="cat-arrow" id="arrow">&#9662;</div>
+            </div>
+            <div class="category-details" id="dances-details" style="display:none;">
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Medal Count</th>
+                            <th>Status</th>
+                            <th class="filterHeader"> 
+                                <div class="filterTitle">
+                                    Filters
+                                </div>
+                                <div class="filterButtons">
+                                    <button class="filterButt ongoing"></button>
+                                    <button class="filterButt review"></button>
+                                    <button class="filterButt approved"></button>
+                                    <button class="filterButt published"></button>
+                                    <button class="filterButt locked"></button>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+            <div class="category" data-details="acad-details">
+                <div class="cat-title">Academics &amp; Journalism</div>
+                <div class="cat-status">0 ongoing &nbsp;|&nbsp; 0 Submitted &nbsp;|&nbsp; 0 Published</div>
+                <div class="cat-arrow" id="arrow">&#9662;</div>
+            </div>
+            <div class="category-details" id="acad-details" style="display:none;">
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Medal Count</th>
+                            <th>Status</th>
+                            <th class="filterHeader"> 
+                                <div class="filterTitle">
+                                    Filters
+                                </div>
+                                <div class="filterButtons">
+                                    <button class="filterButt ongoing"></button>
+                                    <button class="filterButt review"></button>
+                                    <button class="filterButt approved"></button>
+                                    <button class="filterButt published"></button>
+                                    <button class="filterButt locked"></button>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+            <div class="category" data-details="esports-details">
+                <div class="cat-title">Esports</div>
+                <div class="cat-status">0 ongoing &nbsp;|&nbsp; 0 Submitted &nbsp;|&nbsp; 1 Published</div>
+                <div class="cat-arrow" id="arrow">&#9662;</div>
+            </div>
+            <div class="category-details" id="esports-details" style="display:none;">
+                <table class="events-table">
+                    <thead>
+                        <tr>
+                            <th>Event Name</th>
+                            <th>Medal Count</th>
+                            <th>Status</th>
+                            <th class="filterHeader"> 
+                                <div class="filterTitle">
+                                    Filters
+                                </div>
+                                <div class="filterButtons">
+                                    <button class="filterButt ongoing"></button>
+                                    <button class="filterButt review"></button>
+                                    <button class="filterButt approved"></button>
+                                    <button class="filterButt published"></button>
+                                    <button class="filterButt locked"></button>
+                                </div>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+        </div>
+    </div>
+    <footer>
+        <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
+    </footer>
+    <div class="background"></div>
+    <script src="logout.js"></script>
+    <script src="tabulation-head-script.js"></script>
+</body>
+</html>

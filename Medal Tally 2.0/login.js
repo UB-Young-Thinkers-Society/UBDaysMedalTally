@@ -17,11 +17,11 @@ async function login(username, password) {
         console.log('User logged in: ' + loginData.session);
 
         if (userData.roles == "admin"){ //clean this up, idk how pa - beppu
-            window.location.href = 'tabulation-head.html' //temporary - add a page for admins?
+            window.location.href = 'tabulation.html' //temporary - add a page for admins?
         } else if (userData.roles == "tabHead"){
-            window.location.href = 'tabulation-head.html' 
+            window.location.href = 'tabulation.html' 
         } else if (userData.roles == "committee"){
-            window.location.href = 'tabulation-committee.html'
+            window.location.href = 'computation.html'
         } else {
             alert('Error logging in. ' + userError.message);
             console.error('Error logging in: ' + userError.message);
@@ -39,11 +39,11 @@ async function checkIfLoggedIn() {
     if(user){
         console.log("Already Logged In. Redirecting to login.");
         if (userData.roles == "admin") //temporary - add a page for admins?
-            window.location.replace("tabulation-head.html")
+            window.location.replace("tabulation.html")
         else if (userData.roles == "tabHead")
-            window.location.replace("tabulation-head.html")
+            window.location.replace("tabulation.html")
         else if (userData.roles == "committee")
-            window.location.replace("tabulation-committee.html")
+            window.location.replace("computation.html")
         else {
             alert('Error Redirecting. ' + userError);
             console.error('Error Redirecting: ' + userError);

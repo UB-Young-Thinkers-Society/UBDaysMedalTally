@@ -14,9 +14,9 @@ async function checkSession(authorizedRole) {
             console.log("Access Forbidden. Redirecting.");
             alert("Access Forbidden. Redirecting to the " + userData.roles + " page.")
             if (userData.roles == "tabHead")
-              window.location.replace("tabulation-head.html")
+              window.location.replace("tabulation.html")
             else if (userData.roles == "committee")
-              window.location.replace("tabulation-committee.html")
+              window.location.replace("computation.html")
           }
     }
 }
