@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBDays Medal Tally</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="img/Login-Logo.png" href="img/Login-Logo.png">
+</head>
+<body>
+    <div class="container">
+        <div class="login-section">
+            <img src="img/Login-Logo.png" alt="Logo" class="logo">
+            <h2>Welcome Back</h2>
+
+            <form id="loginForm">
+                <div id="formInput">
+                    <p class="labelOne"> &nbsp&nbspEmail Address </p>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div id="formInput">
+                    <p class="labelTwo"> &nbsp&nbspPassword </p>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+
+        </div>
+        <div class="image-section">
+            <img src="img/Login-Group.png" alt="Group" class="group-photo">
+        </div>
+    </div>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="db_connection.js"></script>
+    <script src="login.js"></script>
+    <script src="logout.js"></script>
+</body>
+</html>
