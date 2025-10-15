@@ -49,5 +49,6 @@ addParticipantBtn.addEventListener('click', async () => {
         nameInput.value = '';
         acronymInput.value = '';
         logoInput.value = '';
+        location.reload();
     }
 });

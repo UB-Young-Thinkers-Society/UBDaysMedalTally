@@ -188,13 +188,44 @@ footer {
     padding: 4px 8px; 
     background-color: #fcfcfc;
 }
+
+.department > .delete-btn{
+    background: #ff4d4d;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 0.9rem;
+    margin-right: 16px; 
+}
+
+.department > .delete-btn:hover {
+    background: #e04343;
+}
+
+.department > .edit-btn {
+    background: #4CAF50;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+    color: #fff;
+    font-size: 0.9rem;
+    margin-left: auto; 
+}
+
+.department > .edit-btn:hover {
+    background: #45a049;
+}
+
 .dept-logo-placeholder {
     width: 20px; 
     height: 20px; 
     min-width: 20px; 
     min-height: 20px;
-    background-color: #d8d8d8; 
-    border-radius: 50%; 
+    /* background-color: #d8d8d8; 
+    border-radius: 50%;  */
     margin-right: 8px; 
 }
 .department-input {
@@ -230,15 +261,27 @@ footer {
     transition: border-color 0.2s, box-shadow 0.2s;
     height: 100px;
 }
-.add-logo::placeholder {
-    color: #bbb;
-    font-size: 0.6rem;
-    text-align: center;
+
+input[type="file"]::file-selector-button {
+  background-color: transparent;
+  color: transparent;
+  border: none;
+  cursor: pointer;
 }
+
 .add-logo:focus, .add-logo:hover {
     border-color: #0051ff;
     box-shadow: 0 0 0 2px #4CAF5022;
 }
+
+.logo-label {
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 6px;
+    display: inline-block;
+    text-align: center;
+}   
+
 .add-participant  .name {
     height: 100px;
     width: 15%;
@@ -307,8 +350,6 @@ footer {
     height: 28px;
     margin-right: 0;
     border-radius: 50%;
-    background: #e0e0e0;
-    border: 2px solid #d1d1d1;
     display: inline-block;
 }
 .config-forms {
@@ -422,3 +463,4 @@ hr {
     min-width: 180px;
     margin-right: 0;
 }
+
