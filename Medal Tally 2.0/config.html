@@ -9,7 +9,7 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="db_connection.js"></script>
-    <script src="session.js"></script>
+    <script src="session.js"></script>   
     <script>
         checkSession("tabHead");
     </script>
@@ -54,21 +54,21 @@
             <div class="config-forms">
                 <div class="add-participant-form">
                     <div class="participant-fields">
-                        <input class="add-logo" type="text" placeholder="Add Logo">
+                        <input class="add-logo" type="file" accept="image/*" placeholder="Add Logo">
                         <div class="participant-names">
                             <input class="name" type="text" placeholder="Name">
                             <input class="acronym" type="text" placeholder="Acronym">
                         </div>
                     </div>
-                    <button class="add-btn">Add Participant</button>
+                    <button class="add-btn add_participant_btn">Add Participant</button>
                 </div>
-                
+
                 <div class="events-config-form">
                     <h2>Events Config</h2>
                     <input class="event-name" type="text" placeholder="Name">
                     <input class="event-category" type="text" placeholder="Category">
                     <input class="event-medal" type="text" placeholder="Medal Count">
-                    <button class="add-btn">Add Event</button>
+                    <button class="add-btn add_event_btn">Add Event</button>
                 </div>
             </div>
             <!-- Right: Logo -->
@@ -85,19 +85,21 @@
     <div class="background"></div>
 
     <script>
-        document.getElementById('logoutBtn').onclick = function(e) {
+        document.getElementById('logoutBtn').onclick = function (e) {
             e.preventDefault();
             signOut();
         };
 
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             document.getElementById('loader').classList.add('hide');
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';
             }, 600);
         });
     </script>
-
+    <script src="event_input.js"></script>
+    <script src="participant_input.js"></script>
     <script src="logout.js"></script>
+    <script src="display_team.js"></script>
 </body>
 </html>
