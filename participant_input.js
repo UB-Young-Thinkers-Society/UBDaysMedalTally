@@ -51,4 +51,3 @@ addParticipantBtn.addEventListener('click', async () => {
         logoInput.value = '';
     }
 });
-
