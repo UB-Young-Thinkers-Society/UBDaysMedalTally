@@ -3,7 +3,7 @@ async function checkSession(authorizedRole) {
     if(!user){
         window.location.replace("index.html")
         console.log("Invalid session. Redirecting to login.");
-        alert("Invalid session. Redirecting to login.")
+        // alert("Invalid session. Redirecting to login.")
     } else {
         const { data : userData, error : userError } = await supabase
             .from('user-roles')
@@ -12,7 +12,7 @@ async function checkSession(authorizedRole) {
             .single();
           if (userData.roles != authorizedRole && userData.roles != "admin"){
             console.log("Access Forbidden. Redirecting.");
-            alert("Access Forbidden. Redirecting to the " + userData.roles + " page.")
+            // alert("Access Forbidden. Redirecting to the " + userData.roles + " page.")
             if (userData.roles == "tabHead")
               window.location.replace("tabulation.html")
             else if (userData.roles == "committee")

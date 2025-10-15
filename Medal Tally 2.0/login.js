@@ -4,7 +4,7 @@ async function login(username, password) {
     password: password,
     }) 
     if (loginError) {
-        alert('Error logging in. ' + loginError.message);
+        // alert('Error logging in. ' + loginError.message);
         console.error('Error logging in: ' + loginError.message);
     } else {
         const { data : userData, error : userError } = await supabase
@@ -13,7 +13,7 @@ async function login(username, password) {
             .eq('user_id', loginData.user.id)
             .single();
 
-        alert('Welcome, ' + userData.roles + ' ' + loginData.user.email + '!');
+        // alert('Welcome, ' + userData.roles + ' ' + loginData.user.email + '!');
         console.log('User logged in: ' + loginData.session);
 
         if (userData.roles == "admin"){ //clean this up, idk how pa - beppu
@@ -45,7 +45,7 @@ async function checkIfLoggedIn() {
         else if (userData.roles == "committee")
             window.location.replace("computation.html")
         else {
-            alert('Error Redirecting. ' + userError);
+            // alert('Error Redirecting. ' + userError);
             console.error('Error Redirecting: ' + userError);
         }
     }
