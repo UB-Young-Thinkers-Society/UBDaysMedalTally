@@ -1,3 +1,4 @@
+let currentEditingId = null; 
 const addParticipantBtn = document.querySelector('.add_participant_btn');
 const logoInput = document.querySelector('.add-logo');
 const nameInput = document.querySelector('.name');
@@ -8,47 +9,80 @@ addParticipantBtn.addEventListener('click', async () => {
     const name = nameInput.value.trim();
     const acronym = acronymInput.value.trim();
 
-    if (!file || !name || !acronym) {
-        alert('Please fill in all fields and select an image.');
+    if (!name || !acronym) {
+        alert('Please fill in the name and acronym.');
         return;
     }
 
-    const filePath = `${Date.now()}_${file.name}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('logos')
-        .upload(filePath, file);
+    let logoUrl = null;
 
-    if (uploadError) {
-        console.error('Upload failed:', uploadError);
-        alert('Error uploading image: ' + uploadError.message);
-        return;
+    if (file) {
+        const filePath = `${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('logos')
+            .upload(filePath, file);
+
+        if (uploadError) {
+            alert('Error uploading image: ' + uploadError.message);
+            return;
+        }
+
+        const { data: publicData } = supabase
+            .storage
+            .from('logos')
+            .getPublicUrl(filePath);
+
+        logoUrl = publicData.publicUrl;
     }
 
-    const { data: publicData } = supabase
-        .storage
-        .from('logos')
-        .getPublicUrl(filePath);
+    if (currentEditingId) {
+        const updateData = {
+            name: name,
+            acronym: acronym
+        };
 
-    const logoUrl = publicData.publicUrl;
+        if (logoUrl) updateData.logo = logoUrl;
 
-    const { data, error } = await supabase
-        .from('participants')
-        .insert([
-            {
-                name: name,
-                acronym: acronym,
-                logo: logoUrl 
-            }
-        ]);
+        const { error: updateError } = await supabase
+            .from('participants')
+            .update(updateData)
+            .eq('id', currentEditingId);
 
-    if (error) {
-        console.error('Database insert failed:', error);
-        alert('Error adding participant: ' + error.message);
+        if (updateError) {
+            alert('Error updating participant: ' + updateError.message);
+        } else {
+            alert('Participant updated successfully!');
+            currentEditingId = null; // reset
+            nameInput.value = '';
+            acronymInput.value = '';
+            logoInput.value = '';
+            location.reload();
+        }
+
     } else {
-        alert('Participant added successfully!');
-        nameInput.value = '';
-        acronymInput.value = '';
-        logoInput.value = '';
-        location.reload();
+        if (!file) {
+            alert('Please select a logo when adding a new participant.');
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('participants')
+            .insert([
+                {
+                    name: name,
+                    acronym: acronym,
+                    logo: logoUrl
+                }
+            ]);
+
+        if (error) {
+            alert('Error adding participant: ' + error.message);
+        } else {
+            alert('Participant added successfully!');
+            nameInput.value = '';
+            acronymInput.value = '';
+            logoInput.value = '';
+            location.reload();
+        }
     }
 });
