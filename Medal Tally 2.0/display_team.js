@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const { data, error } = await supabase
         .from("participants")
-        .select("acronym, logo");
+        .select("id, name, acronym, logo");
 
     if (error) {
         console.error("Error fetching teams:", error);
@@ -45,21 +45,44 @@ document.addEventListener("DOMContentLoaded", async () => {
         nameSpan.classList.add("dept-name");
         nameSpan.textContent = team.acronym;
 
-        // Edit button
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "Edit";
-        editBtn.classList.add("edit-btn");
-        editBtn.addEventListener("click", () => {
-           
-        });
+            // Edit button
+            const editBtn = document.createElement("button");
+            editBtn.textContent = "Edit";
+            editBtn.classList.add("edit-btn");
+            editBtn.addEventListener("click", async () => {
+                currentEditingId = team.id;
+                document.querySelector(".name").value = team.name;
+                document.querySelector(".acronym").value = team.acronym;
 
-        // Delete button
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "Delete";
-        deleteBtn.classList.add("delete-btn");
-        deleteBtn.addEventListener("click", () => {
-            
-        });
+                const logoPreview = document.querySelector(".logo-preview");
+                if (logoPreview && team.logo) {
+                    logoPreview.src = team.logo;
+                }
+
+                const addBtn = document.querySelector(".add_participant_btn");
+                addBtn.textContent = "Save Changes";
+            });
+
+            // Delete button
+            const deleteBtn = document.createElement("button");
+            deleteBtn.textContent = "Delete";
+            deleteBtn.classList.add("delete-btn");
+            deleteBtn.addEventListener("click", async () => { 
+                const confirmDelete = confirm(`Delete team "${team.acronym}"?`);
+                if (!confirmDelete) return;
+
+                const { error } = await supabase
+                    .from("participants")
+                    .delete()
+                    .eq("acronym", team.acronym);
+
+                if (error) {
+                    alert("Failed to delete team. Check console for details.");
+                } else {
+                    departmentDiv.remove();
+                    alert(`"${team.acronym}" has been deleted.`);
+                }
+            });
 
         // Append logo, name, and buttons to department div
         departmentDiv.appendChild(logoDiv);
