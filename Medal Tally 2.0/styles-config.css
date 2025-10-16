@@ -448,6 +448,28 @@ hr {
     margin-bottom: 7px;
 }
 
+.event-category {
+    width: 106.2%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    background: #fff;
+    color: #777;
+    appearance: none;
+    /* -webkit-appearance: none; 
+    -moz-appearance: none;  */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E'); /* Custom arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+    cursor: pointer;
+}
+
+.event-category > option {
+    color: #555;
+}
+
 .logo-section {
     flex: 1.7;
     width: 100%;
