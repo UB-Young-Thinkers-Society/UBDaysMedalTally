@@ -13,8 +13,25 @@ addBtn.addEventListener('click', async () => {
         return;
     }
 
+    // Map allowed category option values to their corresponding table names
+    const tableMap = {
+        'music': 'music-events',
+        'athletics': 'athletic-events',
+        'dances': 'dances-events',
+        'academics': 'academic-events',
+        'esports': 'esports-events'
+    };
+
+    const categoryKey = eventCategory.toLowerCase();
+    const tableName = tableMap[categoryKey];
+
+    if (!tableName) {
+        alert('Unknown event category: ' + eventCategory);
+        return;
+    }
+
     const { data, error } = await supabase
-        .from('events')
+        .from(tableName)
         .insert([
             {
                 name: eventName,
@@ -28,7 +45,7 @@ addBtn.addEventListener('click', async () => {
         alert('Error adding event: ' + error.message);
     } else {
         console.log('Inserted:', data);
-        alert(' Event added successfully!');
+        alert('Event added successfully!');
 
         eventNameInput.value = '';
         eventCategoryInput.value = '';

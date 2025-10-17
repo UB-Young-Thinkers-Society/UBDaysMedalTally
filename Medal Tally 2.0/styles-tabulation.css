@@ -314,7 +314,7 @@ footer {
     font-weight: 500;
     transition: background 0.2s;
 }
-.edit-btn { background: #f7f7f7; color: #444; }
-.edit-btn:hover { background: #e0e0e0; }
+.edit-btn { background: #4CAF50; color: #fff; }
+.edit-btn:hover { background: #317e34; }
 .delete-btn { background: #ff6b6b; color: #fff; }
 .delete-btn:hover { background: #e74c3c; }
