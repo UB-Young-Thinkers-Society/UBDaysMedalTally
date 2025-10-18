@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           <button class="filter locked">Locked</button>
         </td>
         <td>
-          <button class="edit-btn" data-id="${event.id}">Edit</button>
+          <button class="edit-btn" data-id="${event.id}" data-category="${event.category}">Edit</button>
           <button class="delete-btn" data-id="${event.id}" data-category="${event.category}">Delete</button>
         </td>
       `;
