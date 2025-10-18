@@ -39,13 +39,13 @@
         </div>
 
         <div id="logoutBtn">
-            <a href="#" class="logout" >Log Out</a>
+            <a href="#" class="logout">Log Out</a>
         </div>
-        
+
     </div>
 
     <div class="main-card">
-        
+
         <div class="categories">
             <div class="category" data-details="athletics-details" id="athletics-category">
                 <div class="cat-title">Athletics</div>
@@ -59,7 +59,7 @@
                             <th>Event Name</th>
                             <th>Medal Count</th>
                             <th>Status</th>
-                            <th class="filterHeader"> 
+                            <th class="filterHeader">
                                 <div class="filterTitle">
                                     Filters
                                 </div>
@@ -94,7 +94,7 @@
                             <th>Event Name</th>
                             <th>Medal Count</th>
                             <th>Status</th>
-                            <th class="filterHeader"> 
+                            <th class="filterHeader">
                                 <div class="filterTitle">
                                     Filters
                                 </div>
@@ -114,7 +114,7 @@
                             <td>
                         </tr>
                     </tbody>
-                </table> 
+                </table>
             </div>
             <div class="category" data-details="dances-details">
                 <div class="cat-title">Dances</div>
@@ -128,7 +128,7 @@
                             <th>Event Name</th>
                             <th>Medal Count</th>
                             <th>Status</th>
-                            <th class="filterHeader"> 
+                            <th class="filterHeader">
                                 <div class="filterTitle">
                                     Filters
                                 </div>
@@ -148,7 +148,7 @@
                             <td>
                         </tr>
                     </tbody>
-                </table> 
+                </table>
             </div>
             <div class="category" data-details="acad-details">
                 <div class="cat-title">Academics &amp; Journalism</div>
@@ -162,7 +162,7 @@
                             <th>Event Name</th>
                             <th>Medal Count</th>
                             <th>Status</th>
-                            <th class="filterHeader"> 
+                            <th class="filterHeader">
                                 <div class="filterTitle">
                                     Filters
                                 </div>
@@ -182,7 +182,7 @@
                             <td>
                         </tr>
                     </tbody>
-                </table> 
+                </table>
             </div>
             <div class="category" data-details="esports-details">
                 <div class="cat-title">Esports</div>
@@ -196,7 +196,7 @@
                             <th>Event Name</th>
                             <th>Medal Count</th>
                             <th>Status</th>
-                            <th class="filterHeader"> 
+                            <th class="filterHeader">
                                 <div class="filterTitle">
                                     Filters
                                 </div>
@@ -216,7 +216,7 @@
                             <td>
                         </tr>
                     </tbody>
-                </table> 
+                </table>
             </div>
         </div>
     </div>
@@ -232,11 +232,11 @@
     <script src="esports-events-script.js"></script>
     <script src="dance-events-script.js"></script>
     <script src="academic-events-script.js"></script>
-    
-    <script src="display_events.js"></script>
 
+    <script src="display_events.js"></script>
+    <script src="delete_event.js"></script>
     <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('load', function () {
             document.getElementById('loader').classList.add('hide');
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';

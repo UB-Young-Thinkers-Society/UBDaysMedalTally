@@ -41,10 +41,14 @@ document.addEventListener("DOMContentLoaded", async () => {
         </td>
         <td>
           <button class="edit-btn" data-id="${event.id}">Edit</button>
-          <button class="delete-btn" data-id="${event.id}">Delete</button>
+          <button class="delete-btn" data-id="${event.id}" data-category="${event.category}">Delete</button>
         </td>
       `;
             tbody.appendChild(tr);
+            const deleteBtn = tr.querySelector(".delete-btn");
+            deleteBtn.addEventListener("click", () => {
+                deleteEvent(event.id, event.name);
+            });
         });
         athleticSection.style.display = "block";
 
