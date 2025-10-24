@@ -1,9 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
 body {
-    background: url('img/BG.png') no-repeat center center fixed;
-    background-size: cover;
-    font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
-    padding: 0;
+    font-family: "Albert Sans", sans-serif;
+    position: relative;
+    min-height: 100vh;  
+}
+.background {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: -99;
+    background: url('img/BG.png') no-repeat center center;
+    background-size: cover;
+    opacity: 0.7;
 }
 .container {
     position: relative;
@@ -27,6 +36,12 @@ body {
     align-items: center;
     gap: 12px;
 }
+.committee-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
 .committee-title {
     font-size: 1.2rem;
     font-weight: 600;
@@ -35,13 +50,14 @@ body {
 .logout-btn {
     background: none;
     border: none;
-    color: #E53935;
+    color: #ff4d4d;
     font-weight: 600;
     font-size: 1rem;
     cursor: pointer;
     padding: 8px 16px;
     border-radius: 20px;
     transition: background 0.2s;
+    margin-right: 30px;
 }
 .logout-btn:hover {
     background: #ffeaea;
@@ -57,21 +73,42 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+    position: relative;
 }
-.search-events input, .search-events select {
-    padding: 10px 16px;
+.search-events .fa-search {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
+}
+.search-events input {
+    padding: 10px 40px 10px 40px;
     border-radius: 20px;
     border: 1px solid #ddd;
     font-size: 1rem;
     outline: none;
+    width: 25%;
+    box-sizing: border-box;
+}
+.search-events::after {
+    content: '▾';
+    position: absolute;
+    right: 76%;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    pointer-events: none;
 }
 .tie-group {
-    background: #f5f5f5;
+    background: #fffefe;
     border-radius: 20px;
     padding: 10px 18px;
     font-size: 1rem;
     border: 1px solid #ddd;
     color: #666;
+    margin-right: 30px;
 }
 .tabulation-list {
     margin-bottom: 32px;
@@ -81,17 +118,19 @@ body {
     align-items: center;
     gap: 16px;
     margin-bottom: 16px;
+    margin-left: 40px;
 }
 .tab-num {
-    background: #f5f5f5;
+    background: #fff;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    border: 1px solid #ddd;
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    color: #333;
+    color: #444;
     font-size: 1.1rem;
 }
 .tab-input {
@@ -103,6 +142,7 @@ body {
     outline: none;
     text-align: center;
     cursor: pointer;
+    margin-right: 30px;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 .tab-input::placeholder {
@@ -121,26 +161,54 @@ body {
     border-radius: 12px;
     padding: 12px 32px;
     font-size: 1.1rem;
-    font-weight: 600;
+    /* font-weight: 600; */
     cursor: pointer;
     position: absolute;
     right: 40px;
-    bottom: 32px;
+    bottom: 70px;
     transition: background 0.2s;
+    margin-right: 30px;
 }
 .submit-btn:hover {
     background: #388E3C;
 }
-.footer {
+footer {
+    position: fixed;
+    bottom: 18px;
+    left: 0;
+    width: 100%;
     text-align: center;
-    margin-top: 32px;
-    color: #333;
-    font-size: 1rem;
+    z-index: 2;
+    font-size: 1.4rem;
+    letter-spacing: -1px;
+    color: #222;
+    background: none;
 }
-.footer img {
+.ub-logo {
     vertical-align: middle;
-    height: 24px;
-    margin-right: 8px;
+    width: 22px;
+    height: 22px;
+    margin: 0 4px;
+}
+/* --- Styles for Draggable --- */
+.sortable-ghost {
+    background: #f0f7ff;
+    opacity: 0.8;
+    border-radius: 12px;
+}
+.sortable-ghost .tab-item-name,
+.sortable-ghost .tab-input {
+    opacity: 0.5;
+}
+
+@media (max-width: 700px) {
+    .container {
+        padding: 16px 8px;
+    }
+    .submit-btn {
+        right: 8px;
+        bottom: 16px;
+    }
 }
 @media (max-width: 700px) {
     .container {
