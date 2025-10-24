@@ -1,6 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-    if (window.location.pathname.includes("tabulation.html")) {
+    // More robust page detection: check for a known DOM node instead of a fragile pathname check
+    const isTabulationPage = window.location.pathname.toLowerCase().includes("tabulation.html")
+        || window.location.pathname.toLowerCase().includes("/tabulation")
+        || document.querySelector(".categories") !== null;
+
+    if (isTabulationPage) {
 
         document.body.addEventListener("click", async (e) => {
             if (e.target.classList.contains("edit-btn")) {
