@@ -37,7 +37,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 localStorage.setItem("edit_event_name", data.name);
                 localStorage.setItem("edit_event_medal", data.medal_count);
 
-                window.location.href = "config.html";
+                setTimeout (() => {
+                    window.location.href = "config.html";
+                }, 300);
             }
         });
     }
