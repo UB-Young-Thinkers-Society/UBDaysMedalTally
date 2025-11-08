@@ -111,6 +111,7 @@ async function loadAllEvents() {
             detailsDiv.id = `category-${category.id}-details`;
             detailsDiv.style.display = 'none';
             
+            // MODIFIED: (1) Re-added the 5th <th> for the delete button
             detailsDiv.innerHTML = `
                 <table class="events-table">
                     <thead>
@@ -119,6 +120,7 @@ async function loadAllEvents() {
                             <th>Medal Count</th>
                             <th>Status</th>
                             <th>Actions</th> 
+                            <th></th> <!-- For Delete Button -->
                         </tr>
                     </thead>
                     <tbody>
@@ -129,7 +131,8 @@ async function loadAllEvents() {
 
             const tbody = detailsDiv.querySelector('tbody');
             if (category.events.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;">No events found in this category.</td></tr>`;
+                // MODIFIED: (1) Set colspan back to 5
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No events found in this category.</td></tr>`;
             } else {
                 category.events.forEach(event => {
                     tbody.appendChild(createEventRow(event));
@@ -151,7 +154,7 @@ async function loadAllEvents() {
 }
 
 /**
- * This is the single, reusable function that builds an event row.
+ * MODIFIED: (1) Puts the Delete button back in its own <td>
  */
 function createEventRow(event) {
     const tr = document.createElement('tr');
@@ -161,18 +164,20 @@ function createEventRow(event) {
     const eventName = event.name || "Unnamed Event";
     const medalCount = event.medal_value ?? "0"; 
     const statusText = event.status || "N/A";
-    
     const statusClass = event.status ? event.status.replace(' ', '-').toLowerCase() : "none";
 
+    // (1) Changed innerHTML to have 5 <td> cells again
     tr.innerHTML = `
         <td>${eventName}</td>
         <td>${medalCount}</td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
-        <td class="actions-cell">
+        <td>
           <button class="filter review" data-status="for review">For Review</button>
           <button class="filter approved" data-status="approved">Approved</button>
           <button class="filter published" data-status="published">Published</button>
           <button class="filter locked" data-status="locked">Locked</button>
+        </td>
+        <td>
           <button class="delete-btn" data-id="${event.id}">Delete</button>
         </td>
     `;
@@ -226,9 +231,7 @@ function toggleAccordion(catDiv, detailsDiv) {
 // --- 4. API CALL HANDLERS (MODIFIED) -------------------
 
 /**
- * MODIFIED: (2) Removed all restrictions.
- * Now, only "approved" has a special check (the modal).
- * All other status changes are sent directly to the DB.
+ * MODIFIED: (3) Removed all status restrictions.
  */
 async function handleStatusUpdate(eventId, eventName, newStatus, tableRow) {
     const currentStatus = tableRow.querySelector('.status').textContent.toLowerCase();
@@ -239,6 +242,7 @@ async function handleStatusUpdate(eventId, eventName, newStatus, tableRow) {
     }
 
     // If "approved" is clicked, show modal.
+    // This is the only special check.
     if (newStatus === 'approved') {
         showApprovalModal(eventId, eventName, tableRow);
         return; // Stop here
@@ -254,7 +258,6 @@ async function handleStatusUpdate(eventId, eventName, newStatus, tableRow) {
  */
 async function updateEventStatusInDB(eventId, newStatus, tableRow) {
     try {
-        // We need an auth token to prove we are allowed to do this
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !sessionData.session) throw new Error('Session expired.');
         const accessToken = sessionData.session.access_token;
@@ -263,7 +266,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}` // Send auth token
+                'Authorization': `Bearer ${accessToken}`
             },
             body: JSON.stringify({ eventId, newStatus })
         });
@@ -273,16 +276,13 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
             throw new Error(err.error || 'Failed to update status');
         }
 
-        // Update the UI
         const newStatusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
         tableRow.querySelector('.status').textContent = newStatusText;
         tableRow.querySelector('.status').className = `status ${newStatus.replace(' ', '-').toLowerCase()}`;
         
-        // This logic now highlights the active button
         tableRow.querySelectorAll('.filter').forEach(btn => btn.disabled = false);
         tableRow.querySelector(`.filter[data-status="${newStatus}"]`).disabled = true;
 
-        // Update the category header count
         const detailsDiv = tableRow.closest('.category-details');
         if (detailsDiv) {
             updateCategoryHeader(detailsDiv);
@@ -356,9 +356,6 @@ function updateCategoryHeader(detailsDiv) {
 
 // --- 5. MODAL LOGIC ------------------------
 
-/**
- * Shows the confirmation modal and fetches the event's results.
- */
 function showApprovalModal(eventId, eventName, tableRow) {
     const modal = document.getElementById('approval-modal');
     const modalTitle = document.getElementById('modal-event-name');
@@ -388,16 +385,13 @@ function showApprovalModal(eventId, eventName, tableRow) {
     });
 }
 
-/**
- * Hides the modal.
- */
 function hideApprovalModal() {
     const modal = document.getElementById('approval-modal');
     modal.classList.remove('visible');
 }
 
 /**
- * MODIFIED: (1) Now uses 'result.rank' to display the rank number,
+ * MODIFIED: (2) Now uses 'result.rank' to display the rank number,
  * which correctly shows ties.
  */
 async function loadModalData(eventId, rankingListElement) {
@@ -428,10 +422,10 @@ async function loadModalData(eventId, rankingListElement) {
         results.forEach(result => {
             const team = result.teams;
             const rankRow = document.createElement('div');
+            // MODIFIED: (2) Use the real rank for the class
             rankRow.className = `modal-rank-row rank-${result.rank}`;
             
-            // --- THIS IS THE FIX for BUG (1) ---
-            // We now use result.rank instead of the index
+            // MODIFIED: (2) Use the real rank for the text
             rankRow.innerHTML = `
                 <div class="modal-rank-num">${result.rank}</div> 
                 <div class="modal-team-info">
