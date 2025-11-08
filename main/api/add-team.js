@@ -17,7 +17,7 @@ export default async (req, res) => {
 
     try {
         // 1. Parse the multipart form data using formidable
-        const form = Formidable({});
+        const form = new Formidable({}); // <-- ADD 'new' HERE
         const [fields, files] = await form.parse(req);
 
         // Extract text fields
