@@ -73,6 +73,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch all events and store them in our global variable
     await fetchAllEvents();
 
+    const loader = document.getElementById('loader');
+    loader.classList.add('hide');
+    setTimeout(() => { loader.style.display = 'none'; }, 600);
+
     // Attach listener to the logout button
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
