@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBDays2025 Medal Tally - Login</title>
+    <title>UBDays Medal Tally</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" href="img/Login-Logo.png">
+    <link rel="icon" type="img/Login-Logo.png" href="img/Login-Logo.png">
 
     <!-- Client-side Supabase for AUTHENTICATION only -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -15,28 +15,37 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
+
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <img src="img/logoFull.png" alt="Logo" class="login-logo">
-            <h2>Medal Tally Login</h2>
-            <form id="login-form">
-                <div class="input-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
+    <div class="container">
+        <div class="login-section">
+            <img src="img/Login-Logo.png" alt="Logo" class="logo">
+            <h2>Welcome Back</h2>
+
+            <form id="loginForm">
+                <div id="formInput">
+                    <p class="labelOne"> &nbsp&nbspEmail Address </p>
+                    <input type="text" id="username" name="username" required>
                 </div>
-                <div class="input-group">
-                    <label for="password">Password</label>
+                <div id="formInput">
+                    <p class="labelTwo"> &nbsp&nbspPassword </p>
                     <input type="password" id="password" name="password" required>
                 </div>
-                <button type="submit" class="login-button" id="login-button">Login</button>
-                <div id="error-message"></div>
+                <button type="submit" class="login-btn">Login</button>
             </form>
+
+        </div>
+        <div class="image-section">
+            <img src="img/Login-Group.png" alt="Group" class="group-photo">
         </div>
     </div>
-    <div class="background"></div>
+    <!-- <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="api/db_connection.js"></script>
+    <script src="api/login.js"></script>
+    <script src="js/logout.js"></script> -->
 
+    <!-- ADDED: The one and only script this page needs -->
     <script src="js/login-logic.js" defer></script>
 </body>
 </html>
