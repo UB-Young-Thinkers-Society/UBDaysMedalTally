@@ -14,6 +14,11 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
+    
+    <!-- 
+      NEW: We are adding the SortableJS library for drag-and-drop
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 </head>
 <body>
     <div id="loader">
@@ -38,41 +43,44 @@
 
     <div class="main-card">
         <div class="search-row">
-            <!-- 
-              This is the search box. 
-              We'll add a 'position: relative' wrapper 
-              to anchor the dropdown.
-            -->
             <div class="search-events" style="position: relative;">
                 <input type="text" id="eventSearch" placeholder="Search Events">
-                
-                <!-- 
-                  NEW: This is the dynamic dropdown. 
-                  It's hidden by default.
-                -->
                 <div id="event-search-results" class="search-results hidden">
                     <!-- Results will be built by JS here -->
                 </div>
             </div>
             <input class="tie-group" type="text" placeholder="Tie Groups (e.g. 1 - 2)">
         </div>
+        
+        <!-- 
+          The form now contains the list and the add button
+        -->
         <form id="computation-form">
-            <div class="tabulation-list">
-                <div class="tab-row">
-                    <div class="tab-num">1</div>
-                    <select class="event-category" id="rank-1" required>
-                        <option value="" disabled selected>+</option>
-                        <!-- Teams will be loaded here by JS -->
-                    </select>
-                </div>
-                <div class="tab-row">
-                    <div class="tab-num">2</div>
-                    <select class="event-category" id="rank-2" required>
-                        <option value="" disabled selected>+</option>
-                    </select>
-                </div>
-                <!-- Add more rows as needed -->
+            <!-- 
+              This list is now the drag-and-drop container.
+              Rows will be dynamically added here by our JS.
+            -->
+            <div class="tabulation-list" id="tabulation-list">
+                <!-- 
+                  Example of a row (will be built by JS):
+                  <div class="tab-row" data-team-id="null">
+                      <div class="drag-handle">::</div>
+                      <div class="tab-num">1</div>
+                      <div class="custom-select-box">
+                          <span class="placeholder">+ Select Team</span>
+                      </div>
+                      <div class="custom-select-list hidden">
+                           ... options ...
+                      </div>
+                  </div> 
+                -->
             </div>
+
+            <!-- NEW: The "Add Row" button you requested -->
+            <button type="button" id="add-row-btn" class="add-row-btn">
+                <span>+</span>
+            </button>
+            
             <button type="submit" class="submit-btn">Submit</button>
         </form>
     </div>
@@ -81,11 +89,8 @@
         <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
     </footer>
 
-    <!-- 
-      DELETED old/insecure scripts.
-      This is the ONLY script this page needs.
-    -->
     <script src="js/computation-logic.js" defer></script>
-
 </body>
 </html>
+
+    

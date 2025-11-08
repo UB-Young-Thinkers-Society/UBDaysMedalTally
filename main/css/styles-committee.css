@@ -297,4 +297,154 @@ footer {
     margin: 0 4px;
 }
 
+/* =========================================
+   NEW STYLES FOR RANKING LIST
+========================================= */
+
+.tabulation-list {
+    margin-bottom: 24px; /* Make room for add button */
+}
+
+.tab-row {
+    position: relative; /* For anchoring the custom dropdown */
+}
+
+/* This is the drag handle */
+.drag-handle {
+    font-size: 1.5rem;
+    color: #aaa;
+    cursor: grab;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.tab-row:hover .drag-handle {
+    opacity: 1;
+}
+
+/* This is the fake dropdown */
+.custom-select-box {
+    flex: 1; /* Take up the remaining space */
+    height: 50px;
+    padding: 0 10px; /* Reset padding */
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    background: #fff;
+    color: #333;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.custom-select-box:hover {
+    border-color: #aaa;
+}
+
+.custom-select-box .placeholder {
+    color: #999;
+}
+
+/* The list of options */
+.custom-select-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 72px; /* Position it past the num and handle */
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+.custom-select-list.hidden {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* An item in the list (Logo - Acronym - Name) */
+.custom-select-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-select-item:hover {
+    background: #f5f5f5;
+}
+
+.custom-select-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.custom-select-item .acronym {
+    font-weight: 700;
+    color: #333;
+    width: 50px; /* Align names */
+}
+
+.custom-select-item .name {
+    font-weight: 400;
+    color: #666;
+}
+
+/* Style for the selected team inside the box */
+.custom-select-box .selected-team {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* SortableJS drag-and-drop styles */
+.sortable-ghost {
+    background: #f0f5ff;
+    opacity: 0.7;
+    border: 1px dashed #4a90e2;
+}
+
+/* "Add Row" Button */
+.add-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.add-row-btn span {
+    font-size: 2rem;
+    color: #aaa;
+    font-weight: 300;
+    transition: all 0.2s;
+}
+.add-row-btn:hover {
+    background: #f0f0f0;
+    border-color: #aaa;
+}
+.add-row-btn:hover span {
+    color: #333;
+    transform: scale(1.2);
+}
+
 
