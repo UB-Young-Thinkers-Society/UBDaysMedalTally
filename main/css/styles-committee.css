@@ -455,4 +455,51 @@ footer {
     transform: scale(1.2);
 }
 
+/* =========================================
+   NEW STYLES FOR DELETE BTN & DISABLED TEAMS
+========================================= */
+
+/* (1) Styles for the new Delete button */
+.delete-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: #ff6b6b;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+.tab-row:hover .delete-row-btn {
+    opacity: 1; /* Show button on row hover */
+}
+
+.delete-row-btn:hover {
+    background-color: #e74c3c;
+    transform: scale(1.1);
+}
+
+
+/* (2) Styles for a disabled/selected team in the list */
+.custom-select-item.disabled {
+    background: #f0f0f0;
+    color: #aaa;
+    pointer-events: none; /* Makes it unclickable */
+    opacity: 0.6;
+}
+
+.custom-select-item.disabled .acronym,
+.custom-select-item.disabled .name {
+    color: #aaa;
+    text-decoration: line-through;
+}
+
 

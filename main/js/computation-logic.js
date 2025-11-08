@@ -75,8 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         signOut();
     });
 
-    
-
     // Attach listeners for our event search
     const searchInput = document.getElementById('eventSearch');
     const searchResults = document.getElementById('event-search-results');
@@ -88,15 +86,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // NEW: Attach listener for the "Add Row" button
+    // MODIFIED: Attach listener for the "Add Row" button
     document.getElementById('add-row-btn').addEventListener('click', addNewRankRow);
 
-    // NEW: Initialize the drag-and-drop functionality
+    // MODIFIED: Initialize the drag-and-drop functionality
     initSortable();
 
-    // NEW: Add listeners for the dynamic custom dropdowns
-    // We use event delegation on the parent list
+    // MODIFIED: Add listeners for the dynamic custom dropdowns
     const tabulationList = document.getElementById('tabulation-list');
+    // This one click listener handles opening, selecting, AND deleting
     tabulationList.addEventListener('click', handleCustomSelectClick);
 
     // Create the first two rows automatically
@@ -126,10 +124,8 @@ async function fetchAllEvents() {
     }
 }
 
-// NEW: Function to fetch all teams
 async function fetchAllTeams() {
     try {
-        // We use the same API as the config page
         const response = await fetch('/api/get-teams'); 
         if (!response.ok) throw new Error('Failed to fetch teams');
         
@@ -145,7 +141,6 @@ async function fetchAllTeams() {
 
     } catch (error) {
         console.error('Error loading all teams:', error);
-        // You could show an error in the ranking list
     }
 }
 
@@ -196,6 +191,9 @@ function selectEvent(eventId, eventName) {
     selectedEventId = eventId;
     document.getElementById('event-search-results').classList.add('hidden');
     // TODO: You might want to clear the ranking list when a new event is selected
+    // e.g., document.getElementById('tabulation-list').innerHTML = '';
+    // addNewRankRow();
+    // addNewRankRow();
 }
 
 
@@ -203,7 +201,6 @@ function selectEvent(eventId, eventName) {
 
 /**
  * Creates the HTML for a single new ranking row and appends it.
- * This is called by the "Add Row" button.
  */
 function addNewRankRow() {
     const list = document.getElementById('tabulation-list');
@@ -214,6 +211,7 @@ function addNewRankRow() {
 
 /**
  * Helper function that builds the HTML for a new row.
+ * MODIFIED: Now adds a delete button.
  */
 function createRankRow(rankNumber) {
     const row = document.createElement('div');
@@ -223,7 +221,7 @@ function createRankRow(rankNumber) {
     // 1. Drag Handle
     const handle = document.createElement('div');
     handle.className = 'drag-handle';
-    handle.innerHTML = '&#x2630;'; // Simple drag icon
+    handle.innerHTML = '&#x2630;';
     
     // 2. Rank Number
     const num = document.createElement('div');
@@ -242,17 +240,25 @@ function createRankRow(rankNumber) {
     // 5. Fill the list with teams
     populateTeamList(selectList);
 
+    // 6. NEW: Delete Button
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button'; // Prevents form submission
+    deleteBtn.className = 'delete-row-btn';
+    deleteBtn.innerHTML = '&times;'; // "X" icon
+
     // Assemble the row
     row.appendChild(handle);
     row.appendChild(num);
     row.appendChild(selectBox);
-    row.appendChild(selectList);
+    row.appendChild(deleteBtn); // NEW
+    row.appendChild(selectList); // This must be last for CSS selector
     
     return row;
 }
 
 /**
  * Fills a dropdown list element with all loaded teams.
+ * MODIFIED: No longer filters, just builds the list.
  */
 function populateTeamList(listElement) {
     listElement.innerHTML = ''; // Clear it
@@ -279,22 +285,68 @@ function populateTeamList(listElement) {
 }
 
 /**
- * Handles all clicks on the tabulation list (for opening/selecting teams)
+ * NEW: Helper function to get all currently selected team IDs
+ */
+function getCurrentlySelectedTeamIds() {
+    const selectedIds = new Set();
+    document.querySelectorAll('.tab-row').forEach(row => {
+        const id = row.dataset.teamId;
+        if (id && id !== "null") {
+            selectedIds.add(id);
+        }
+    });
+    return selectedIds;
+}
+
+/**
+ * MODIFIED: Handles all clicks on the tabulation list.
+ * Now manages opening dropdowns, selecting teams, AND deleting rows.
  */
 function handleCustomSelectClick(e) {
     const target = e.target;
 
-    // Case 1: User clicked the main box to open/close the list
+    // --- NEW: Case 0: User clicked the Delete Button ---
+    const deleteBtn = target.closest('.delete-row-btn');
+    if (deleteBtn) {
+        const row = deleteBtn.closest('.tab-row');
+        row.remove(); // Remove the row
+        renumberRows(); // Renumber all remaining rows
+        return;
+    }
+
+    // --- Case 1: User clicked the main box to open/close the list ---
     const selectBox = target.closest('.custom-select-box');
     if (selectBox) {
-        const list = selectBox.nextElementSibling;
+        const row = selectBox.closest('.tab-row');
+        const list = row.querySelector('.custom-select-list');
+
+        // NEW: Filter the list *before* showing it
+        const selectedIds = getCurrentlySelectedTeamIds();
+        const currentRowTeamId = row.dataset.teamId;
+
+        Array.from(list.children).forEach(item => {
+            const itemTeamId = item.dataset.teamId;
+            // Check if this team is selected in ANOTHER row
+            if (selectedIds.has(itemTeamId) && itemTeamId !== currentRowTeamId) {
+                item.classList.add('disabled');
+            } else {
+                item.classList.remove('disabled');
+            }
+        });
+
+        // Now, toggle the list
         list.classList.toggle('hidden');
         return;
     }
 
-    // Case 2: User clicked on a team in the list
+    // --- Case 2: User clicked on a team in the list ---
     const selectItem = target.closest('.custom-select-item');
     if (selectItem) {
+        // NEW: Check if this item is disabled
+        if (selectItem.classList.contains('disabled')) {
+            return; // Do nothing if it's disabled
+        }
+        
         const row = selectItem.closest('.tab-row');
         const box = row.querySelector('.custom-select-box');
         const list = row.querySelector('.custom-select-list');
@@ -304,7 +356,7 @@ function handleCustomSelectClick(e) {
         box.innerHTML = `
             <span class="selected-team">
                 <img src="${teamData.teamLogo}" alt="${teamData.teamAcronym} logo">
-                <span class="acronym">${teamData.teamAcronym}</span>
+                <span classs="acronym">${teamData.teamAcronym}</span>
                 <span class="name">${teamData.teamName}</span>
             </span>
         `;
@@ -332,7 +384,7 @@ function initSortable() {
 }
 
 /**
- * Called by SortableJS after a drag.
+ * Called by SortableJS after a drag or after deleting a row.
  * It re-numbers all the rows sequentially.
  */
 function renumberRows() {
