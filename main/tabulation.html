@@ -51,6 +51,31 @@
     </footer>
     <div class="background"></div>
 
+    <!-- 
+      =========================================
+      NEW: APPROVAL MODAL
+      =========================================
+    -->
+    <div class="modal-overlay" id="approval-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Confirm Details</h2>
+                <span class="event-name-display" id="modal-event-name">Loading...</span>
+            </div>
+            <div class="modal-body">
+                <h3>Rankings</h3>
+                <div class="modal-rankings-list" id="modal-rankings-list">
+                    <!-- Rankings will be dynamically inserted here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" id="modal-cancel-btn">Cancel</button>
+                <button class="modal-btn confirm" id="modal-confirm-btn">Confirm</button>
+            </div>
+        </div>
+    </div>
+    <!-- End of Modal -->
+
     <script src="js/tabulation-logic.js" defer></script>
 </body>
 </html>

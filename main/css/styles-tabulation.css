@@ -318,3 +318,179 @@ footer {
 .edit-btn:hover { background: #317e34; }
 .delete-btn { background: #ff6b6b; color: #fff; }
 .delete-btn:hover { background: #e74c3c; }
+
+/* =========================================
+   NEW STYLES FOR TABULATION PAGE
+========================================= */
+
+/* (1) Highlight for active/disabled status buttons */
+.filter:disabled {
+    opacity: 1;
+    cursor: default;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+    transform: translateY(1px);
+}
+
+.filter.review:disabled { background: #5a7bd8; }
+.filter.approved:disabled { background: #4a9e58; }
+.filter.published:disabled { background: #875dae; }
+.filter.locked:disabled { background: #e0c85c; }
+
+
+/* (2) Styles for the new Confirmation Modal */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-content {
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.visible .modal-content {
+    transform: scale(1);
+}
+
+.modal-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #333;
+}
+
+.modal-header .event-name-display {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.modal-body {
+    padding: 0 30px 20px 30px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.modal-rankings-list {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.modal-rank-row {
+    display: flex;
+    align-items: center;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px 15px;
+    gap: 15px;
+}
+
+.modal-rank-num {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    background: #eee;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.modal-rank-row.rank-1 .modal-rank-num { background-color: #ffd700; color: white; }
+.modal-rank-row.rank-2 .modal-rank-num { background-color: #c0c0c0; color: white; }
+.modal-rank-row.rank-3 .modal-rank-num { background-color: #cd7f32; color: white; }
+
+.modal-team-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.modal-team-info img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #ddd;
+}
+
+.modal-team-info .acronym {
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.modal-team-info .name {
+    font-size: 1rem;
+    color: #555;
+}
+
+
+.modal-footer {
+    padding: 20px 30px;
+    border-top: 1px solid #eee;
+    background: #f9f9f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modal-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.modal-btn.confirm {
+    background: #4CAF50;
+    color: white;
+}
+.modal-btn.confirm:hover { background: #388E3C; }
+
+.modal-btn.cancel {
+    background: #f44336;
+    color: white;
+}
+.modal-btn.cancel:hover { background: #d32f2f; }

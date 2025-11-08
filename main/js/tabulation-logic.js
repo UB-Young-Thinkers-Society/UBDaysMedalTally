@@ -2,7 +2,6 @@
 
 /**
  * Securely checks the user's session and role.
- * This is the same logic from the login fix.
  */
 async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -93,12 +92,10 @@ async function loadAllEvents() {
         }
 
         for (const category of categories) {
-            // 1. Create the category header (the accordion button)
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
             categoryDiv.dataset.details = `category-${category.id}-details`;
             
-            // Calculate status counts
             const ongoing = category.events.filter(e => e.status === 'ongoing').length;
             const submitted = category.events.filter(e => e.status === 'for review').length;
             const published = category.events.filter(e => e.status === 'published').length;
@@ -109,7 +106,6 @@ async function loadAllEvents() {
                 <div class="cat-arrow" id="arrow">&#9662;</div>
             `;
             
-            // 2. Create the details div (the collapsible part)
             const detailsDiv = document.createElement('div');
             detailsDiv.className = 'category-details';
             detailsDiv.id = `category-${category.id}-details`;
@@ -121,8 +117,8 @@ async function loadAllEvents() {
                             <th>Event Name</th>
                             <th>Medal Count</th>
                             <th>Status</th>
-                            <th>Actions</th> <!-- Merged Filters/Actions -->
-                            <th></th> <!-- Extra for delete -->
+                            <th>Actions</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -131,7 +127,6 @@ async function loadAllEvents() {
                 </table>
             `;
 
-            // 3. Fill the table with event rows
             const tbody = detailsDiv.querySelector('tbody');
             if (category.events.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No events found in this category.</td></tr>`;
@@ -141,11 +136,9 @@ async function loadAllEvents() {
                 });
             }
 
-            // 4. Append to the page
             container.appendChild(categoryDiv);
             container.appendChild(detailsDiv);
 
-            // 5. Add accordion click listener
             categoryDiv.addEventListener('click', () => {
                 toggleAccordion(categoryDiv, detailsDiv);
             });
@@ -158,17 +151,19 @@ async function loadAllEvents() {
 }
 
 /**
- * This is the single, reusable function that builds an event row.
+ * MODIFIED: This function no longer builds the "Edit" button.
  */
 function createEventRow(event) {
     const tr = document.createElement('tr');
     tr.dataset.eventId = event.id; 
+    tr.dataset.eventName = event.name; // Store event name for the modal
 
     const eventName = event.name || "Unnamed Event";
     const medalCount = event.medal_value ?? "0"; 
     const statusText = event.status || "N/A";
     const statusClass = event.status ? event.status.replace(' ', '-').toLowerCase() : "none";
 
+    // (1) Removed the "Edit" button from this template
     tr.innerHTML = `
         <td>${eventName}</td>
         <td>${medalCount}</td>
@@ -180,14 +175,12 @@ function createEventRow(event) {
           <button class="filter locked" data-status="locked" ${event.status === 'locked' ? 'disabled' : ''}>Locked</button>
         </td>
         <td>
-          <button class="edit-btn" data-id="${event.id}">Edit</button>
           <button class="delete-btn" data-id="${event.id}">Delete</button>
         </td>
     `;
 
-    // Add event listeners for the new buttons
     tr.querySelector('.delete-btn').addEventListener('click', (e) => {
-        e.stopPropagation(); // Stop accordion from toggling
+        e.stopPropagation();
         handleDeleteEvent(event.id, event.name, tr);
     });
 
@@ -195,7 +188,8 @@ function createEventRow(event) {
         button.addEventListener('click', (e) => {
             e.stopPropagation();
             const newStatus = e.target.dataset.status;
-            handleStatusUpdate(event.id, newStatus, tr);
+            // (3) Pass eventName to the handler
+            handleStatusUpdate(event.id, event.name, newStatus, tr);
         });
     });
 
@@ -204,7 +198,6 @@ function createEventRow(event) {
 
 /**
  * Handles the accordion open/close logic.
- * This is from your tabulation-head-script.js.
  */
 function toggleAccordion(catDiv, detailsDiv) {
     var arrow = catDiv.querySelector('#arrow');
@@ -226,8 +219,34 @@ function toggleAccordion(catDiv, detailsDiv) {
     }
 }
 
-// --- 4. API CALL HANDLERS ------------------------
-async function handleStatusUpdate(eventId, newStatus, tableRow) {
+// --- 4. API CALL HANDLERS (MODIFIED) -------------------
+
+/**
+ * MODIFIED: Now checks for "approved" status to show the modal.
+ */
+async function handleStatusUpdate(eventId, eventName, newStatus, tableRow) {
+    // (3) NEW: If "approved" is clicked, show modal instead of calling API
+    if (newStatus === 'approved') {
+        showApprovalModal(eventId, eventName, tableRow);
+        return; // Stop here
+    }
+
+    // (3) If "for review" is clicked, it can only be done if status is 'ongoing'
+    const currentStatus = tableRow.querySelector('.status').textContent.toLowerCase();
+    if (newStatus === 'for review' && currentStatus !== 'ongoing') {
+        alert('You can only set an event to "For Review" from "Ongoing".');
+        return;
+    }
+
+    // For "published" and "locked", proceed directly
+    await updateEventStatusInDB(eventId, newStatus, tableRow);
+}
+
+/**
+ * NEW: This function *only* calls the API.
+ * It's now called by handleStatusUpdate OR the modal's confirm button.
+ */
+async function updateEventStatusInDB(eventId, newStatus, tableRow) {
     try {
         const response = await fetch('/api/update-event-status', {
             method: 'POST',
@@ -245,11 +264,11 @@ async function handleStatusUpdate(eventId, newStatus, tableRow) {
         tableRow.querySelector('.status').textContent = newStatusText;
         tableRow.querySelector('.status').className = `status ${newStatus.replace(' ', '-').toLowerCase()}`;
         
-        // Disable the button that was just clicked
+        // (2) This logic now highlights the active button
         tableRow.querySelectorAll('.filter').forEach(btn => btn.disabled = false);
         tableRow.querySelector(`.filter[data-status="${newStatus}"]`).disabled = true;
 
-        // After updating the row, find the parent and update the header
+        // Update the category header count
         const detailsDiv = tableRow.closest('.category-details');
         if (detailsDiv) {
             updateCategoryHeader(detailsDiv);
@@ -262,26 +281,23 @@ async function handleStatusUpdate(eventId, newStatus, tableRow) {
 }
 
 async function handleDeleteEvent(eventId, eventName, tableRow) {
+    // ... (This function is unchanged) ...
     if (!confirm(`Are you sure you want to delete the event: "${eventName}"?`)) {
         return;
     }
-
     try {
         const response = await fetch('/api/delete-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ eventId })
         });
-
         if (!response.ok) {
             const err = await response.json();
             throw new Error(err.error || 'Failed to delete event');
         }
-
         tableRow.style.opacity = 0;
         tableRow.style.transition = 'opacity 0.3s';
         setTimeout(() => { tableRow.remove(); }, 300);
-
     } catch (error) {
         console.error('Error deleting event:', error);
         alert('Error: ' + error.message);
@@ -289,39 +305,120 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
 }
 
 function updateCategoryHeader(detailsDiv) {
+    // ... (This function is unchanged) ...
     try {
-        // 1. Find the header elements
         const categoryDiv = detailsDiv.previousElementSibling;
         if (!categoryDiv) return;
         const statusDisplay = categoryDiv.querySelector('.cat-status');
-
-        // 2. Find all event rows in this category
         const allRows = detailsDiv.querySelectorAll('tbody tr');
-
-        // 3. Recalculate counts
-        let ongoing = 0;
-        let submitted = 0;
-        let published = 0;
-
+        let ongoing = 0, submitted = 0, published = 0;
         allRows.forEach(row => {
             const statusSpan = row.querySelector('.status');
             if (!statusSpan) return; 
-            
             const status = statusSpan.textContent.toLowerCase();
-            
-            if (status === 'ongoing') {
-                ongoing++;
-            } else if (status === 'for review') {
-                submitted++;
-            } else if (status === 'published') {
-                published++;
-            }
+            if (status === 'ongoing') ongoing++;
+            else if (status === 'for review') submitted++;
+            else if (status === 'published') published++;
         });
-
-        // 4. Update the header text
         statusDisplay.textContent = `${ongoing} ongoing  |  ${submitted} Submitted  |  ${published} Published`;
-
     } catch (error) {
         console.error('Error updating category header:', error);
+    }
+}
+
+
+// --- 5. NEW MODAL LOGIC ------------------------
+
+/**
+ * NEW: Shows the confirmation modal and fetches the event's results.
+ */
+function showApprovalModal(eventId, eventName, tableRow) {
+    const modal = document.getElementById('approval-modal');
+    const modalTitle = document.getElementById('modal-event-name');
+    const rankingList = document.getElementById('modal-rankings-list');
+    const confirmBtn = document.getElementById('modal-confirm-btn');
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+
+    // 1. Set up the modal
+    modalTitle.textContent = eventName;
+    rankingList.innerHTML = '<p>Loading rankings...</p>';
+    modal.classList.add('visible');
+
+    // 2. Fetch the ranking data
+    loadModalData(eventId, rankingList);
+
+    // 3. Create *new* event listeners for the buttons
+    // We clone to remove any old listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+    // 4. Add the click logic
+    newConfirmBtn.addEventListener('click', () => {
+        // On confirm, call the *actual* DB update function
+        updateEventStatusInDB(eventId, 'approved', tableRow);
+        hideApprovalModal();
+    });
+
+    newCancelBtn.addEventListener('click', () => {
+        hideApprovalModal();
+    });
+}
+
+/**
+ * NEW: Hides the modal.
+ */
+function hideApprovalModal() {
+    const modal = document.getElementById('approval-modal');
+    modal.classList.remove('visible');
+}
+
+/**
+ * NEW: Fetches and renders the rankings inside the modal.
+ * This reuses the API from the computation page.
+ */
+async function loadModalData(eventId, rankingListElement) {
+    try {
+        // We need an auth token to call this secure API
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error('Session expired.');
+        const accessToken = sessionData.session.access_token;
+
+        const response = await fetch(`/api/get-event-results?eventId=${eventId}`, {
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch results.');
+        
+        const results = await response.json();
+        rankingListElement.innerHTML = ''; // Clear "Loading..."
+
+        if (results.length === 0) {
+            rankingListElement.innerHTML = '<p>No rankings have been submitted for this event yet.</p>';
+            return;
+        }
+
+        // Build the HTML for each rank
+        results.forEach(result => {
+            const team = result.teams;
+            const rankRow = document.createElement('div');
+            rankRow.className = `modal-rank-row rank-${result.rank}`;
+            
+            rankRow.innerHTML = `
+                <div class="modal-rank-num">${result.rank}</div>
+                <div class="modal-team-info">
+                    <img src="${team.logo_url}" alt="${team.acronym} logo">
+                    <span class="acronym">${team.acronym}</span>
+                    <span class="name">${team.name}</span>
+                </div>
+            `;
+            rankingListElement.appendChild(rankRow);
+        });
+
+    } catch (error) {
+        console.error('Error loading modal data:', error);
+        rankingListElement.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
     }
 }
