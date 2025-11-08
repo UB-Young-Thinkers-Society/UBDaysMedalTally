@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fetch all events AND all teams
     await fetchAllEvents();
-    await fetchAllTeams(); // <-- NEW
+    await fetchAllTeams();
 
     // Attach listener to the logout button
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
@@ -86,16 +86,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // MODIFIED: Attach listener for the "Add Row" button
+    // Attach listener for the "Add Row" button
     document.getElementById('add-row-btn').addEventListener('click', addNewRankRow);
 
-    // MODIFIED: Initialize the drag-and-drop functionality
+    // Initialize the drag-and-drop functionality
     initSortable();
 
-    // MODIFIED: Add listeners for the dynamic custom dropdowns
+    // Add listeners for the dynamic custom dropdowns
     const tabulationList = document.getElementById('tabulation-list');
-    // This one click listener handles opening, selecting, AND deleting
     tabulationList.addEventListener('click', handleCustomSelectClick);
+
+    // --- NEW: TIE GROUP LISTENER ---
+    // Listen for typing in the "Tie Groups" input
+    document.querySelector('.tie-group').addEventListener('input', updateRanksAndVisuals);
+
 
     // Create the first two rows automatically
     addNewRankRow();
@@ -191,13 +195,10 @@ function selectEvent(eventId, eventName) {
     selectedEventId = eventId;
     document.getElementById('event-search-results').classList.add('hidden');
     // TODO: You might want to clear the ranking list when a new event is selected
-    // e.g., document.getElementById('tabulation-list').innerHTML = '';
-    // addNewRankRow();
-    // addNewRankRow();
 }
 
 
-// --- 4. NEW RANKING LIST LOGIC -------------------
+// --- 4. RANKING LIST LOGIC -------------------
 
 /**
  * Creates the HTML for a single new ranking row and appends it.
@@ -207,11 +208,11 @@ function addNewRankRow() {
     const newRank = list.children.length + 1;
     const newRow = createRankRow(newRank);
     list.appendChild(newRow);
+    updateRanksAndVisuals(); // NEW: Update ranks after adding
 }
 
 /**
  * Helper function that builds the HTML for a new row.
- * MODIFIED: Now adds a delete button.
  */
 function createRankRow(rankNumber) {
     const row = document.createElement('div');
@@ -240,7 +241,7 @@ function createRankRow(rankNumber) {
     // 5. Fill the list with teams
     populateTeamList(selectList);
 
-    // 6. NEW: Delete Button
+    // 6. Delete Button
     const deleteBtn = document.createElement('button');
     deleteBtn.type = 'button'; // Prevents form submission
     deleteBtn.className = 'delete-row-btn';
@@ -250,15 +251,14 @@ function createRankRow(rankNumber) {
     row.appendChild(handle);
     row.appendChild(num);
     row.appendChild(selectBox);
-    row.appendChild(deleteBtn); // NEW
-    row.appendChild(selectList); // This must be last for CSS selector
+    row.appendChild(deleteBtn);
+    row.appendChild(selectList);
     
     return row;
 }
 
 /**
  * Fills a dropdown list element with all loaded teams.
- * MODIFIED: No longer filters, just builds the list.
  */
 function populateTeamList(listElement) {
     listElement.innerHTML = ''; // Clear it
@@ -285,7 +285,7 @@ function populateTeamList(listElement) {
 }
 
 /**
- * NEW: Helper function to get all currently selected team IDs
+ * Helper function to get all currently selected team IDs
  */
 function getCurrentlySelectedTeamIds() {
     const selectedIds = new Set();
@@ -299,52 +299,46 @@ function getCurrentlySelectedTeamIds() {
 }
 
 /**
- * MODIFIED: Handles all clicks on the tabulation list.
- * Now manages opening dropdowns, selecting teams, AND deleting rows.
+ * Handles all clicks on the tabulation list.
  */
 function handleCustomSelectClick(e) {
     const target = e.target;
 
-    // --- NEW: Case 0: User clicked the Delete Button ---
+    // Case 0: User clicked the Delete Button
     const deleteBtn = target.closest('.delete-row-btn');
     if (deleteBtn) {
         const row = deleteBtn.closest('.tab-row');
-        row.remove(); // Remove the row
-        renumberRows(); // Renumber all remaining rows
+        row.remove();
+        updateRanksAndVisuals(); // MODIFIED: Update ranks after deleting
         return;
     }
 
-    // --- Case 1: User clicked the main box to open/close the list ---
+    // Case 1: User clicked the main box to open/close the list
     const selectBox = target.closest('.custom-select-box');
     if (selectBox) {
+        // ... (Logic to filter and show/hide list is unchanged) ...
         const row = selectBox.closest('.tab-row');
         const list = row.querySelector('.custom-select-list');
-
-        // NEW: Filter the list *before* showing it
         const selectedIds = getCurrentlySelectedTeamIds();
         const currentRowTeamId = row.dataset.teamId;
 
         Array.from(list.children).forEach(item => {
             const itemTeamId = item.dataset.teamId;
-            // Check if this team is selected in ANOTHER row
             if (selectedIds.has(itemTeamId) && itemTeamId !== currentRowTeamId) {
                 item.classList.add('disabled');
             } else {
                 item.classList.remove('disabled');
             }
         });
-
-        // Now, toggle the list
         list.classList.toggle('hidden');
         return;
     }
 
-    // --- Case 2: User clicked on a team in the list ---
+    // Case 2: User clicked on a team in the list
     const selectItem = target.closest('.custom-select-item');
     if (selectItem) {
-        // NEW: Check if this item is disabled
         if (selectItem.classList.contains('disabled')) {
-            return; // Do nothing if it's disabled
+            return;
         }
         
         const row = selectItem.closest('.tab-row');
@@ -352,19 +346,14 @@ function handleCustomSelectClick(e) {
         const list = row.querySelector('.custom-select-list');
         const teamData = selectItem.dataset;
 
-        // Update the box's HTML to show the selected team
         box.innerHTML = `
             <span class="selected-team">
-                <img src="${teamData.teamLogo}" alt="${teamData.teamAcronym} logo">
-                <span classs="acronym">${teamData.teamAcronym}</span>
+                <img src="${teamData.teamLogo}" alt="${teamData.teamAcronym} logo" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid #eee;">
+                <span class="acronym">${teamData.teamAcronym}</span>
                 <span class="name">${teamData.teamName}</span>
             </span>
         `;
-        
-        // Store the selected ID on the row
         row.dataset.teamId = teamData.teamId;
-        
-        // Close the list
         list.classList.add('hidden');
         return;
     }
@@ -372,25 +361,116 @@ function handleCustomSelectClick(e) {
 
 /**
  * Initializes the SortableJS drag-and-drop functionality
+ * MODIFIED: Now calls the new update function
  */
 function initSortable() {
     const list = document.getElementById('tabulation-list');
     sortableInstance = new Sortable(list, {
         animation: 150,
-        handle: '.drag-handle', // Only allow dragging from the handle
-        ghostClass: 'sortable-ghost', // Class for the placeholder
-        onEnd: renumberRows, // Call this function after a drag
+        handle: '.drag-handle',
+        ghostClass: 'sortable-ghost',
+        onEnd: updateRanksAndVisuals, // MODIFIED: Call new function on drag end
     });
 }
 
 /**
- * Called by SortableJS after a drag or after deleting a row.
- * It re-numbers all the rows sequentially.
+ * NEW: Parses the tie group string " (1-3), (5-6) "
+ * Returns a list of tie groups, e.g., [[1,3], [5,6]]
  */
-function renumberRows() {
+function parseTieGroups() {
+    const input = document.querySelector('.tie-group').value;
+    const groups = [];
+    // Regex to find all "x-y" patterns
+    const matches = input.matchAll(/(\d+)\s*-\s*(\d+)/g);
+    
+    for (const match of matches) {
+        const start = parseInt(match[1]);
+        const end = parseInt(match[2]);
+        if (start < end) {
+            groups.push([start, end]);
+        }
+    }
+    // Example: "1-3, 5-6" -> [[1,3], [5,6]]
+    return groups;
+}
+
+
+/**
+ * NEW: Replaces renumberRows().
+ * This is the master function that calculates all ranks,
+ * applies medal colors, and applies tie-group visuals.
+ * This is called on drag, delete, add, and tie-group typing.
+ */
+function updateRanksAndVisuals() {
     const list = document.getElementById('tabulation-list');
-    list.querySelectorAll('.tab-row').forEach((row, index) => {
+    const rows = Array.from(list.children);
+    const tieGroups = parseTieGroups(); // e.g., [[1,3], [5,6]]
+
+    // --- Step 1: Create a map of [position -> finalRank] ---
+    const positionToRank = {}; // e.g., {1: 1, 2: 1, 3: 1, 4: 2, 5: 3, 6: 3}
+    let currentRank = 1;
+    let position = 1;
+
+    // Process all rows
+    while (position <= rows.length) {
+        // Check if this position is the start of a tie group
+        const tie = tieGroups.find(group => group[0] === position);
+        
+        if (tie) {
+            // This is a tie group
+            const [start, end] = tie;
+            for (let i = start; i <= end; i++) {
+                if (i <= rows.length) {
+                    positionToRank[i] = currentRank;
+                }
+            }
+            position = end + 1; // Skip to the end of the group
+        } else {
+            // This is a single row
+            positionToRank[position] = currentRank;
+            position++;
+        }
+        currentRank++;
+    }
+
+    // --- Step 2: Apply ranks and visuals to all rows ---
+    rows.forEach((row, index) => {
+        const pos = index + 1; // Position (1, 2, 3...)
+        const finalRank = positionToRank[pos];
         const numEl = row.querySelector('.tab-num');
-        numEl.textContent = index + 1; // Update rank (1, 2, 3...)
+
+        // Reset all visual classes
+        numEl.classList.remove('rank-1', 'rank-2', 'rank-3');
+        row.classList.remove('tie-start', 'tie-middle', 'tie-end');
+
+        // A. Set the Rank Number
+        if (finalRank) {
+            numEl.textContent = finalRank;
+
+            // B. Apply Medal Colors
+            if (finalRank <= 3) {
+                numEl.classList.add(`rank-${finalRank}`);
+            }
+        } else {
+            // This row is beyond any defined groups
+            numEl.textContent = pos; 
+        }
+    });
+
+    // --- Step 3: Apply Tie Group "Merged Oval" Visuals ---
+    tieGroups.forEach(group => {
+        const [start, end] = group;
+        for (let i = start; i <= end; i++) {
+            if (i > rows.length) break; // Group is longer than row list
+            
+            const row = rows[i - 1]; // Get row by 0-based index
+            if (i === start) {
+                row.classList.add('tie-start');
+            } else if (i === end) {
+                row.classList.add('tie-end');
+            } else {
+                row.classList.add('tie-middle');
+            }
+        }
     });
 }

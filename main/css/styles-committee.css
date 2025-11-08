@@ -502,4 +502,63 @@ footer {
     text-decoration: line-through;
 }
 
+/* =========================================
+   NEW STYLES FOR MEDAL COLORS & TIE GROUPS
+========================================= */
+
+/* (1) Medal Colors for .tab-num */
+.tab-num.rank-1 {
+    background-color: #ffd700; /* Gold */
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #e6c200;
+}
+.tab-num.rank-2 {
+    background-color: #c0c0c0; /* Silver */
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #ababab;
+}
+.tab-num.rank-3 {
+    background-color: #cd7f32; /* Bronze */
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #b8722d;
+}
+
+/* (2) "Merged Oval" styles for Tie Groups */
+
+/* Make rows in a tie group butt up against each other */
+.tab-row.tie-start,
+.tab-row.tie-middle {
+    margin-bottom: 0;
+}
+
+/* Start of the merged oval (top row) */
+.tab-row.tie-start .custom-select-box {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px dashed #e0e0e0; /* Faint line between */
+}
+
+/* Middle of the merged oval */
+.tab-row.tie-middle .custom-select-box {
+    border-radius: 0;
+    border-bottom: 1px dashed #e0e0e0; /* Faint line between */
+}
+
+/* End of the merged oval (bottom row) */
+.tab-row.tie-end .custom-select-box {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Hide the drag handle and delete button for all but the first row in a tie */
+.tab-row.tie-middle .drag-handle,
+.tab-row.tie-end .drag-handle,
+.tab-row.tie-middle .delete-row-btn,
+.tab-row.tie-end .delete-row-btn {
+    visibility: hidden;
+}
+
 
