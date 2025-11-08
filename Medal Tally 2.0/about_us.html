@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us — UB Days Medal Tally</title>
+    <link rel="stylesheet" href="style-about_us.css">
+    <link rel="icon" href="img/Login-Logo.png">
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="db_connection.js"></script>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="header">
+        <div class="navSection">
+            <div class="accInfo">
+                <img src="img/Login-Logo.png" alt="UB Logo" class="admin-icon">
+                <span>About Us</span>
+            </div>
+            <div class="navButtons">
+                <a href="tabulation.html" class="nav-btn">Events</a>
+                <a href="config.html" class="nav-btn">Config</a>
+                <a href="#" class="nav-btn">Log</a>
+                <a href="about_us.html" class="nav-btn active">About Us</a>
+            </div>
+        </div>
+        <div id="logoutBtn">
+            <a href="#" class="logout">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <section class="about-section intro-hero">
+            <div class="hero-content">
+                <h2 class="section-title">UB Days Medal Tally</h2>
+                <p class="section-text hero-tagline">
+                    Transparent. Real-time. Accurate. A fair and modern tabulation system for University of Bohol Days.
+                </p>
+                <div class="hero-chips">
+                    <span class="chip primary">Real-time updates</span>
+                    <span class="chip accent">Transparent results</span>
+                    <span class="chip success">Fairness for all</span>
+                    <span class="chip neutral">Digital innovation</span>
+                </div>
+            </div>
+            <div class="hero-highlights">
+                <div class="highlight-card">
+                    <div class="highlight-title">Live Tracking</div>
+                    <div class="highlight-desc">Medals update instantly as events conclude.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-title">Unified Workflow</div>
+                    <div class="highlight-desc">From committee input to published standings.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-title">Open Visibility</div>
+                    <div class="highlight-desc">Everyone sees the same verified numbers.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <h2 class="section-title">System Overview</h2>
+            <div class="tech-grid">
+                <div class="tech-card" data-tech="html">
+                    <div class="tech-icon">HTML</div>
+                    <div class="tech-title">Structure</div>
+                    <div class="tech-desc">Clean, accessible layouts align with event workflows and results display.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Semantic elements and consistent sections keep the experience intuitive.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="css">
+                    <div class="tech-icon">CSS</div>
+                    <div class="tech-title">Style</div>
+                    <div class="tech-desc">Responsive design, subtle shadows, and animations for clarity and delight.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Color scheme follows UB branding; components maintain uniform spacing.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="js">
+                    <div class="tech-icon">JS</div>
+                    <div class="tech-title">Interaction</div>
+                    <div class="tech-desc">Snappy interactions power filters, reveals, and smooth transitions.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Lightweight scripts drive real-time feedback and micro-animations.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="supabase">
+                    <div class="tech-icon">SB</div>
+                    <div class="tech-title">Database & Auth</div>
+                    <div class="tech-desc">Secure storage of events, roles, and live medal counts.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Supabase handles data access and session control across roles.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="vercel">
+                    <div class="tech-icon">V</div>
+                    <div class="tech-title">Hosting</div>
+                    <div class="tech-desc">Fast, reliable delivery of pages and assets during UB Days.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Vercel ships updates seamlessly, ensuring high availability.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <h2 class="section-title">Collaborators</h2>
+            <p class="section-text">
+                This project is a collaboration between the University of Bohol and the Student / Personnel Services (SPS) office. Together, we aim to foster fairness, innovation, and community engagement throughout UB Days.
+            </p>
+            <p class="section-text">
+                We extend our gratitude to all stakeholders whose support and mission alignment make this system possible.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h2 class="section-title">Developers</h2>
+            <div class="developers-grid">
+                <div class="developer-card">
+                    <img src="developers-img/norma.jpg" alt="Norma Apao" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Norma Apao</div>
+                    <div class="dev-role">Adviser</div>
+                    <div class="dev-tagline">Guidance and quality oversight.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/cliff.jpg" alt="Cliff Jabines" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Cliff Jabines</div>
+                    <div class="dev-role">Lead Developer</div>
+                    <div class="dev-tagline">Engineering the core experience.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/ceejay.jpg" alt="Ceejay Prontes" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Ceejay Prontes</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Focused on usability and flow.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/hezekiah.jpg" alt="Hezekiah Anne Felisilda" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Hezekiah Anne Felisilda</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Detail-oriented and reliable.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/zalme.jpg" alt="Zalme Tagailo" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Zalme Tagailo</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Crafting thoughtful interfaces.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/jeanalen.jpg" alt="Jeanalen Tabaranza" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Jeanalen Tabaranza</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Driven by clarity and precision.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/joshua.jpg" alt="Joshua Turtoga" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Joshua Turtoga</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Reliable systems and tooling.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/ryan.jpg" alt="Ryan Kaito Beppu" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Ryan Kaito Beppu</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Committed to performance.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/onl.jpg" alt="O’nl Joseph Bigno" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">O’nl Joseph Bigno</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Quality through collaboration.</div>
+                </div>
+                <div class="developer-card">
+                    <img src="developers-img/marvin.jpg" alt="Marvin James Jansol" class="avatar" onerror="this.onerror=null;this.src='img/Login-Logo.png';">
+                    <div class="dev-name">Marvin James Jansol</div>
+                    <div class="dev-role">To be updated</div>
+                    <div class="dev-tagline">Building for reliability.</div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
+    </footer>
+    <div class="background"></div>
+
+    <script src="logout.js"></script>
+    <script src="about_us.js"></script>
+</body>
+</html>
