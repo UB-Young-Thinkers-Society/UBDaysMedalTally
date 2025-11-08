@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Computation</title>
+    <link rel="stylesheet" href="css/styles-committee.css">
+    <link rel="icon" href="img/Login-Logo.png">
+
+    <!-- Client-side Supabase for AUTHENTICATION only -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // The ANON key is safe to expose for client-side auth.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
+    
+    <!-- 
+      NEW: We are adding the SortableJS library for drag-and-drop
+    -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+</head>
+<body>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="header">
+        <div class="navSection">
+            <div class="accInfo">
+                <img src="img/Login-Logo.png" alt="Admin" class="admin-icon">
+                <span>Tabulation Committee</span>
+            </div>
+            <div class="navButtons">
+                <a href="#" class="nav-btn">Log</a>
+                <a href="#" class="nav-btn">About Us</a>
+            </div>
+        </div>
+        <div id="logoutBtn">
+            <a href="#" class="logout">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-card">
+        <div class="search-row">
+            <div class="search-events" style="position: relative;">
+                <input type="text" id="eventSearch" placeholder="Search Events">
+                <div id="event-search-results" class="search-results hidden">
+                    <!-- Results will be built by JS here -->
+                </div>
+            </div>
+            <input class="tie-group" type="text" placeholder="Tie Groups (e.g. 1 - 2)">
+        </div>
+        
+        <!-- 
+          The form now contains the list and the add button
+        -->
+        <form id="computation-form">
+            <!-- 
+              This list is now the drag-and-drop container.
+              Rows will be dynamically added here by our JS.
+            -->
+            <div class="tabulation-list" id="tabulation-list">
+                <!-- 
+                  Example of a row (will be built by JS):
+                  <div class="tab-row" data-team-id="null">
+                      <div class="drag-handle">::</div>
+                      <div class="tab-num">1</div>
+                      <div class="custom-select-box">
+                          <span class="placeholder">+ Select Team</span>
+                      </div>
+                      <div class="custom-select-list hidden">
+                           ... options ...
+                      </div>
+                  </div> 
+                -->
+            </div>
+
+            <!-- NEW: The "Add Row" button you requested -->
+            <button type="button" id="add-row-btn" class="add-row-btn">
+                <span>+</span>
+            </button>
+            
+            <button type="submit" class="submit-btn">Submit</button>
+        </form>
+    </div>
+
+    <footer>
+        <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
+    </footer>
+
+    <script src="js/computation-logic.js" defer></script>
+</body>
+</html>
+
+    

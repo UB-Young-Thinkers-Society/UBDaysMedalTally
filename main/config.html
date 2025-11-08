@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UBDays2025 Medal Tally</title>
-    <link rel="stylesheet" href="styles-config.css">
+    <link rel="stylesheet" href="css/styles-config.css">
     <link rel="icon" href="img/Login-Logo.png">
 
+    <!-- Client-side Supabase for AUTHENTICATION only -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="db_connection.js"></script>
-    <script src="session.js"></script>   
     <script>
-        checkSession("tabHead");
+        // The ANON key is safe to expose for client-side auth.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
 
 </head>
@@ -44,41 +46,35 @@
             <div class="teams-section">
                 <h2>Participating Teams</h2>
                 <div class="department-list">
-                    <div class="department">
-                        
-                    </div>
+                    <!-- This will be filled by js/config-logic.js -->
                 </div>
             </div>
             <!-- Center: Add Participant & Events Config -->
             <div class="config-forms">
-                <div class="add-participant-form">
+                <form class="add-participant-form" id="add-team-form">
                     <div class="participant-fields">
                         <label for="add-logo" class="logo-label">Logo: </label>
-                        <input class="add-logo" type="file" accept="image/*">
+                        <input class="add-logo" id="add-logo" type="file" accept="image/*" required>
                         <div class="participant-names">
-                            <input class="name" type="text" placeholder="Name">
-                            <input class="acronym" type="text" placeholder="Acronym">
+                            <input class="name" id="team-name" type="text" placeholder="Name" required>
+                            <input class="acronym" id="team-acronym" type="text" placeholder="Acronym" required>
                         </div>
                     </div>
-                    <button class="add-btn add_participant_btn">Add Participant</button>
-                </div>
+                    <button type="submit" class="add-btn add_participant_btn">Add Participant</button>
+                </form>
 
-                <div class="events-config-form">
+                <form class="events-config-form" id="add-event-form">
                     <h2>Events Config</h2>
-                    <input class="event-name" type="text" placeholder="Name">
-                    <input class="event-medal" type="text" placeholder="Medal Count">
+                    <input class="event-name" id="event-name" type="text" placeholder="Name" required>
+                    <input class="event-medal" id="event-medal" type="number" placeholder="Medal Count" required>
                     <div class="event-categories-dropdown">
-                        <select class="event-category">
-                            <option value="" disabled selected>Category</option>
-                            <option value="athletics">Athletics</option>
-                            <option value="music">Music</option>
-                            <option value="dances">Dances</option>
-                            <option value="academics">Academics & Journalism</option>
-                            <option value="esports">Esports</option>
+                        <select class="event-category" id="event-category" required>
+                            <option value="" disabled selected>Loading Categories...</option>
+                            <!-- This will be filled by js/config-logic.js -->
                         </select>
                     </div>
-                    <button class="add-btn add_event_btn">Add Event</button>
-                </div>
+                    <button type="submit" class="add-btn add_event_btn">Add Event</button>
+                </form>
             </div>
             <!-- Right: Logo -->
             <div class="logo-section">
@@ -92,23 +88,6 @@
     </footer>
 
     <div class="background"></div>
-
-    <script>
-        document.getElementById('logoutBtn').onclick = function (e) {
-            e.preventDefault();
-            signOut();
-        };
-
-        window.addEventListener('load', function () {
-            document.getElementById('loader').classList.add('hide');
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-            }, 600);
-        });
-    </script>
-    <script src="event_input.js"></script>
-    <script src="participant_input.js"></script>
-    <script src="logout.js"></script>
-    <script src="display_team.js"></script>
+    <script src="js/config-page-logic.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,580 @@
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    background: url('../img/BG.png') no-repeat center center fixed;
+    margin: 0;
+    font-family: "Albert Sans", sans-serif;
+    position: relative;
+    min-height: 100vh;
+    letter-spacing: -.5px;
+}
+
+#loader {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #fff;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.5s;
+}
+#loader .spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #ffc800;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite, spinnerColor 4s linear infinite;
+}
+@keyframes spinnerColor {
+    0%  { border-top-color: #ffc800; }
+    25%  { border-top-color: #2d5be3; }
+    50%  { border-top-color: #af4c4c;}
+    75%  { border-top-color: #af4c4c; }
+    100%  { border-top-color: #ffc800; }
+}
+@keyframes spin {
+    100% { transform: rotate(360deg); }
+}
+#loader.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+    width: calc(100vw - 2in);
+    min-height: calc(100vh - 3in);
+    margin: 1in auto 2in auto;
+    background: rgba(255,255,255,0.95);
+    border-radius: 24px;
+    box-shadow: 0 4px 32px rgba(0,0,0,0.10);
+    padding: 32px 32px 24px 32px;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    width: calc(100vw - 1.3in);
+    height: 80px;
+    margin: 4rem auto 1rem auto;
+    justify-content: space-between;
+    align-items: center;
+    /* padding:  0 32px; */
+}
+
+.navSection {
+    width: 92%;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    background-color: #fff;
+    border: 1px solid #DBDBDB;
+    border-radius: 16px;
+}
+
+#logoutBtn {
+    background: #ff4d4d;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.logout {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.accInfo {
+    display: flex;
+    align-items: center;
+    width: auto;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: #333;
+    padding: 0 32px;
+}
+
+.admin-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eee;
+}
+
+.navButtons {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    font-size: 1.1rem;
+    color: #333;
+    padding: 0 32px;
+}
+
+.navButtons a {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.navButtons a:hover {
+    border-bottom: 1px solid #2d5be3;
+}
+
+.main-card {
+    position: relative;
+    z-index: 1;
+    width: calc(100vw - 2in);
+    min-height: calc(100vh - 3in);
+    margin: 0 auto 2in auto;
+    background: #fff;
+    border: 1px solid #DBDBDB;
+    border-radius: 16px;
+    padding: 32px 32px 24px 32px;
+}
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.search-events {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.search-events input, .search-events select {
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    outline: none;
+}
+.tie-group {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 10px 18px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    color: #666;
+}
+
+.search-results {
+    position: absolute;
+    top: 110%; /* Position it just below the input bar */
+    left: 0;
+    width: 100%;
+    max-height: 300px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 1000;
+    font-size: 1rem;
+}
+
+.search-results.hidden {
+    display: none;
+}
+
+.search-results-item {
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* This is the bold category header */
+.search-results-category {
+    padding: 10px 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #555;
+    background: #f9f9f9;
+    border-bottom: 1px solid #eee;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.search-results-item:hover {
+    background: #f5f5f5;
+}
+
+.search-results-item:last-child {
+    border-bottom: none;
+}
+
+.tabulation-list {
+    margin-bottom: 32px;
+}
+
+.tab-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.tab-num {
+    background: #f5f5f5;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #333;
+    font-size: 1.1rem;
+} 
+
+.event-category {
+    width: 106.2%;
+    height: 50px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    background: #fff;
+    color: #777;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E'); /* Custom arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+    cursor: pointer;
+}
+
+.event-category > option {
+    color: #ffffff;
+}
+
+.submit-btn {
+    background: #4CAF50;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 12px 32px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    position: absolute;
+    right: 40px;
+    bottom: 32px;
+    transition: background 0.2s;
+}
+.submit-btn:hover {
+    background: #388E3C;
+}
+
+footer {
+    position: fixed;
+    bottom: 18px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    font-size: 1.4rem;
+    letter-spacing: -1px;
+    color: #222;
+    background: none;
+}
+
+.ub-logo {
+    vertical-align: middle;
+    width: 22px;
+    height: 22px;
+    margin: 0 4px;
+}
+
+/* =========================================
+   NEW STYLES FOR RANKING LIST
+========================================= */
+
+.tabulation-list {
+    margin-bottom: 24px; /* Make room for add button */
+}
+
+.tab-row {
+    position: relative; /* For anchoring the custom dropdown */
+}
+
+/* This is the drag handle */
+.drag-handle {
+    font-size: 1.5rem;
+    color: #aaa;
+    cursor: grab;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.5;
+    transition: opacity 0.2s;
+}
+
+.tab-row:hover .drag-handle {
+    opacity: 1;
+}
+
+/* This is the fake dropdown */
+.custom-select-box {
+    flex: 1; /* Take up the remaining space */
+    height: 50px;
+    padding: 0 10px; /* Reset padding */
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    background: #fff;
+    color: #333;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.custom-select-box:hover {
+    border-color: #aaa;
+}
+
+.custom-select-box .placeholder {
+    color: #999;
+}
+
+/* The list of options */
+.custom-select-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 72px; /* Position it past the num and handle */
+    right: 0;
+    max-height: 250px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    transition: opacity 0.2s, visibility 0.2s;
+}
+
+.custom-select-list.hidden {
+    display: none;
+    opacity: 0;
+    visibility: hidden;
+}
+
+/* An item in the list (Logo - Acronym - Name) */
+.custom-select-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.custom-select-item:hover {
+    background: #f5f5f5;
+}
+
+.custom-select-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+.custom-select-item .acronym {
+    font-weight: 700;
+    color: #333;
+    width: 50px; /* Align names */
+}
+
+.custom-select-item .name {
+    font-weight: 400;
+    color: #666;
+}
+
+/* Style for the selected team inside the box */
+.custom-select-box .selected-team {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.custom-select-box .selected-team img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
+/* SortableJS drag-and-drop styles */
+.sortable-ghost {
+    background: #f0f5ff;
+    opacity: 0.7;
+    border: 1px dashed #4a90e2;
+}
+
+/* "Add Row" Button */
+.add-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 50px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.add-row-btn span {
+    font-size: 2rem;
+    color: #aaa;
+    font-weight: 300;
+    transition: all 0.2s;
+}
+.add-row-btn:hover {
+    background: #f0f0f0;
+    border-color: #aaa;
+}
+.add-row-btn:hover span {
+    color: #333;
+    transform: scale(1.2);
+}
+
+/* =========================================
+   NEW STYLES FOR DELETE BTN & DISABLED TEAMS
+========================================= */
+
+/* (1) Styles for the new Delete button */
+.delete-row-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: #ff6b6b;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-left: 10px;
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+.tab-row:hover .delete-row-btn {
+    opacity: 1; /* Show button on row hover */
+}
+
+.delete-row-btn:hover {
+    background-color: #e74c3c;
+    transform: scale(1.1);
+}
+
+
+/* (2) Styles for a disabled/selected team in the list */
+.custom-select-item.disabled {
+    background: #f0f0f0;
+    color: #aaa;
+    pointer-events: none; /* Makes it unclickable */
+    opacity: 0.6;
+}
+
+.custom-select-item.disabled .acronym,
+.custom-select-item.disabled .name {
+    color: #aaa;
+    text-decoration: line-through;
+}
+
+/* =========================================
+   NEW STYLES FOR MEDAL COLORS & TIE GROUPS
+========================================= */
+
+/* (1) Medal Colors for .tab-num */
+.tab-num.rank-1 {
+    background-color: #ffd700; /* Gold */
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #e6c200;
+}
+.tab-num.rank-2 {
+    background-color: #c0c0c0; /* Silver */
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #ababab;
+}
+.tab-num.rank-3 {
+    background-color: #cd7f32; /* Bronze */
+    color: #fff;
+    font-weight: 700;
+    border: 2px solid #b8722d;
+}
+
+/* (2) "Merged Oval" styles for Tie Groups */
+
+/* Make rows in a tie group butt up against each other */
+.tab-row.tie-start,
+.tab-row.tie-middle {
+    margin-bottom: 0;
+}
+
+/* Start of the merged oval (top row) */
+.tab-row.tie-start .custom-select-box {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: 1px dashed #e0e0e0; /* Faint line between */
+}
+
+/* Middle of the merged oval */
+.tab-row.tie-middle .custom-select-box {
+    border-radius: 0;
+    border-bottom: 1px dashed #e0e0e0; /* Faint line between */
+}
+
+/* End of the merged oval (bottom row) */
+.tab-row.tie-end .custom-select-box {
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+/* Hide the drag handle and delete button for all but the first row in a tie */
+.tab-row.tie-middle .drag-handle,
+.tab-row.tie-end .drag-handle,
+.tab-row.tie-middle .delete-row-btn,
+.tab-row.tie-end .delete-row-btn {
+    visibility: hidden;
+}
+
+/* =========================================
+   NEW STYLES FOR DISABLED EVENTS
+========================================= */
+
+.search-results-item.disabled {
+    background: #f8f8f8;
+    color: #aaa;
+    pointer-events: none; /* Makes it unclickable */
+    font-style: italic;
+}
+
+/* Optional: remove hover effect */
+.search-results-item.disabled:hover {
+    background: #f8f8f8;
+}
+
+
