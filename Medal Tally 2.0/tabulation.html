@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UBDays2025 Medal Tally</title>
-    <link rel="stylesheet" href="styles-tabulation.css">
+    <link rel="stylesheet" href="css/styles-tabulation.css">
     <link rel="icon" href="img/Login-Logo.png">
 
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="db_connection.js"></script>
-    <script src="session.js"></script>
+    <script src="api/db_connection.js"></script>
+    <script src="js/session.js"></script>
     <script>
         checkSession("tabHead");
     </script>
@@ -224,18 +224,18 @@
         <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
     </footer>
     <div class="background"></div>
-    <script src="logout.js"></script>
-    <script src="tabulation-head-script.js"></script>
+    <script src="api/logout.js"></script>
+    <script src="js/tabulation-head-script.js"></script>
 
-    <script src="music-events-script.js"></script>
-    <script src="athletics-events-script.js"></script>
-    <script src="esports-events-script.js"></script>
-    <script src="dance-events-script.js"></script>
-    <script src="academic-events-script.js"></script>
-    <script src="status_update.js"></script>
+    <script src="js/music-events-script.js"></script>
+    <script src="js/athletics-events-script.js"></script>
+    <script src="js/esports-events-script.js"></script>
+    <script src="js/dance-events-script.js"></script>
+    <script src="js/academic-events-script.js"></script>
+    <script src="api/status_update.js"></script>
 
-    <script src="display_events.js"></script>
-    <script src="delete_event.js"></script>
+    <script src="js/display_events.js"></script>
+    <script src="api/delete_event.js"></script>
     <script>
         window.addEventListener('load', function () {
             document.getElementById('loader').classList.add('hide');

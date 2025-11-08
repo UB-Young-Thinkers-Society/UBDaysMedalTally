@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Tabulation Committee 1</title>
-    <link rel="stylesheet" href="styles-committee.css">
+    <link rel="stylesheet" href="css/styles-committee.css">
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="db_connection.js"></script>
-    <script src="session.js"></script>
+    <script src="api/db_connection.js"></script>
+    <script src="js/session.js"></script>
     <script>
         checkSession("committee");
     </script>
@@ -59,7 +59,7 @@
     <div class="footer">
         Made by <img src="img/UBYTeS New Logo 1.png" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
     </div>
-    <script src="logout.js"></script>
+    <script src="api/logout.js"></script>
     <script>
         document.getElementById('logout-btn').onclick = function(e) {
             e.preventDefault();

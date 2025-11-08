@@ -1,0 +1,9 @@
+{
+  "name": "medal-tally-project",
+  "version": "1.0.0",
+  "description": "Medal tally app for Vercel",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.0.0",
+    "formidable": "^3.5.1"
+  }
+}
