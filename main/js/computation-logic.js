@@ -462,6 +462,17 @@ async function handleSubmit(e) {
         });
 
         // --- 3. CREATE PAYLOAD AND SEND TO API ---
+
+        // --- ADD THIS BLOCK TO FIX THE ERROR ---
+        // Get the session token asynchronously first
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+            // This can happen if the session timed out
+            throw new Error('Your session has expired. Please log in again.');
+        }
+        const accessToken = sessionData.session.access_token;
+        // --- END OF NEW BLOCK ---
+
         const payload = {
             eventId: selectedEvent.id,
             results: resultsToSubmit
@@ -471,8 +482,8 @@ async function handleSubmit(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // We need to send our auth token to prove we are a committee member
-                'Authorization': `Bearer ${supabase.auth.session.accessToken}` 
+                // MODIFIED: Use the 'accessToken' variable we just got
+                'Authorization': `Bearer ${accessToken}` 
             },
             body: JSON.stringify(payload)
         });
