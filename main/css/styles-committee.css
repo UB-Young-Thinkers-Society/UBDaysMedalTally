@@ -412,6 +412,14 @@ footer {
     gap: 12px;
 }
 
+.custom-select-box .selected-team img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+
 /* SortableJS drag-and-drop styles */
 .sortable-ghost {
     background: #f0f5ff;
