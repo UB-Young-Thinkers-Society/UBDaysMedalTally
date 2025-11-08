@@ -10,33 +10,33 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- 2. CHECK IF USER IS ALREADY LOGGED IN --------
-async function checkActiveSession() {
-    // This function replaces your checkIfLoggedIn()
-    // It checks with Supabase if a user session *in the browser* already exists
-    const { data: { user } } = await supabase.auth.getUser();
+// async function checkActiveSession() {
+//     // This function replaces your checkIfLoggedIn()
+//     // It checks with Supabase if a user session *in the browser* already exists
+//     const { data: { user } } = await supabase.auth.getUser();
 
-    if (user) {
-        // User is logged in. We need to get their role from our secure API.
-        // We don't need to send credentials; the session cookie is sent automatically.
-        try {
-            const response = await fetch('/api/login', {
-                method: 'GET', // A GET request to check the session
-            });
+//     if (user) {
+//         // User is logged in. We need to get their role from our secure API.
+//         // We don't need to send credentials; the session cookie is sent automatically.
+//         try {
+//             const response = await fetch('/api/login', {
+//                 method: 'GET', // A GET request to check the session
+//             });
             
-            if (!response.ok) {
-                // If the API fails (e.g., session expired), just stay on the login page
-                console.error('Session check failed, staying on login page.');
-                return;
-            }
+//             if (!response.ok) {
+//                 // If the API fails (e.g., session expired), just stay on the login page
+//                 console.error('Session check failed, staying on login page.');
+//                 return;
+//             }
 
-            const { role } = await response.json();
-            redirectToRole(role);
+//             const { role } = await response.json();
+//             redirectToRole(role);
 
-        } catch (error) {
-            console.error('Error checking active session:', error);
-        }
-    }
-}
+//         } catch (error) {
+//             console.error('Error checking active session:', error);
+//         }
+//     }
+// }
 
 // --- 3. HANDLE THE LOGIN FORM SUBMISSION ----------
 // async function handleLogin(e) {
@@ -80,6 +80,44 @@ async function checkActiveSession() {
 //     }
 // }
 
+async function checkActiveSession() {
+    // This function replaces your checkIfLoggedIn()
+    
+    // 1. Get session from client-side Supabase
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+    if (sessionError || !sessionData.session) {
+        // No one is logged in. Stay on login page.
+        console.log('No active session found.');
+        return;
+    }
+
+    // 2. User has a session. Get their role from our secure API.
+    const accessToken = sessionData.session.access_token;
+
+    try {
+        // 3. We use the 'GET' method and send the token
+        const response = await fetch('/api/login', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+        
+        if (!response.ok) {
+            console.error('Session check failed, staying on login page.');
+            await supabase.auth.signOut(); // Clean up bad session
+            return;
+        }
+
+        const { role } = await response.json();
+        redirectToRole(role);
+
+    } catch (error) {
+        console.error('Error checking active session:', error);
+    }
+}
+
 async function handleLogin(e) {
     e.preventDefault(); // Stop the form from reloading the page
 
@@ -95,22 +133,27 @@ async function handleLogin(e) {
 
     try {
         // --- STEP 1: LOGIN ON THE CLIENT ---
-        // This is the new, correct way.
-        // This will sign the user in AND save the session to the browser.
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: email,
             password: password,
         });
 
         if (authError) {
-            // This error is safe to show (e.g., "Invalid login credentials")
             throw authError;
         }
 
         // --- STEP 2: GET THE ROLE FROM THE SECURE API ---
-        // Now that the session is saved, we securely ask our API
-        // "Who is this user?" The API will get the cookie.
-        const response = await fetch('/api/login', { method: 'GET' });
+        
+        // This is the FIX: We manually get the token
+        const accessToken = authData.session.access_token;
+
+        // And send it in the 'Authorization' header
+        const response = await fetch('/api/login', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
         
         if (!response.ok) {
             const err = await response.json();
@@ -128,6 +171,55 @@ async function handleLogin(e) {
         loginButton.textContent = 'Login';
     }
 }
+
+// async function handleLogin(e) {
+//     e.preventDefault(); // Stop the form from reloading the page
+
+//     const email = document.getElementById('username').value;
+//     const password = document.getElementById('password').value;
+//     const loginButton = document.getElementById('login-button');
+//     const errorMessage = document.getElementById('error-message');
+
+//     // Disable button and show loading
+//     loginButton.disabled = true;
+//     loginButton.textContent = 'Logging in...';
+//     errorMessage.textContent = '';
+
+//     try {
+//         // --- STEP 1: LOGIN ON THE CLIENT ---
+//         // This is the new, correct way.
+//         // This will sign the user in AND save the session to the browser.
+//         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+//             email: email,
+//             password: password,
+//         });
+
+//         if (authError) {
+//             // This error is safe to show (e.g., "Invalid login credentials")
+//             throw authError;
+//         }
+
+//         // --- STEP 2: GET THE ROLE FROM THE SECURE API ---
+//         // Now that the session is saved, we securely ask our API
+//         // "Who is this user?" The API will get the cookie.
+//         const response = await fetch('/api/login', { method: 'GET' });
+        
+//         if (!response.ok) {
+//             const err = await response.json();
+//             throw new Error(err.error || 'Login successful, but failed to get user role.');
+//         }
+        
+//         const { role } = await response.json();
+
+//         // --- STEP 3: REDIRECT ---
+//         redirectToRole(role);
+
+//     } catch (error) {
+//         errorMessage.textContent = error.message;
+//         loginButton.disabled = false;
+//         loginButton.textContent = 'Login';
+//     }
+// }
 
 // --- 4. REDIRECT HELPER FUNCTION ------------------
 // This is your exact redirect logic
