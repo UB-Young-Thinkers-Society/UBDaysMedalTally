@@ -1,77 +1,53 @@
-// This ONE file replaces session.js, logout.js, etc.
-// for computation.html
+// ... (Global variables, checkSession, signOut... all unchanged) ...
+let allEventsData = [];
+let allTeamsData = [];
+let selectedEvent = null;
+let sortableInstance = null;
 
-// --- 0. GLOBAL VARIABLES ---------------------------
-let allEventsData = []; // Caches all events from the API
-let allTeamsData = [];  // Caches all teams from the API
-let selectedEvent = null; // MODIFIED: Stores the entire selected event object
-let sortableInstance = null; // To hold the SortableJS object
-
-// --- 1. AUTHENTICATION & SESSION -------------------
-// ... (checkSession and signOut functions are here, no changes) ...
+// ... (checkSession and signOut are unchanged) ...
 async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
         window.location.replace("index.html");
         return;
     }
-
     const accessToken = sessionData.session.access_token;
-
     try {
         const response = await fetch('/api/login', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-
         if (!response.ok) {
             await supabase.auth.signOut();
             window.location.replace("index.html");
             return;
         }
-
         const { role } = await response.json();
-
         if (role !== authorizedRole && role !== "admin") {
-            console.log("Access Forbidden. Redirecting.");
-            if (role === "tabHead") {
-                window.location.replace("tabulation.html");
-            } else {
-                window.location.replace("index.html"); // Fallback
-            }
+            if (role === "tabHead") window.location.replace("tabulation.html");
+            else window.location.replace("index.html");
         }
-        console.log("Session valid, user authorized: " + role);
-
     } catch (error) {
         console.error('Error checking session:', error);
         window.location.replace("index.html");
     }
 }
-
 async function signOut() {
     const { error } = await supabase.auth.signOut();
-    if (error) {
-        console.error("Error logging out:" + error.message);
-    } else {
-        console.log("Successfully logged out.");
-        window.location.href = 'index.html';
-    }
+    if (error) console.error("Error logging out:" + error.message);
+    else window.location.href = 'index.html';
 }
 
 
-// --- 2. PAGE INITIALIZATION ------------------------
-
+// ... (DOMContentLoaded, fetchAllEvents, fetchAllTeams, renderDropdown... all unchanged) ...
 document.addEventListener('DOMContentLoaded', async () => {
-    // ... (auth, fetch, and other listeners are here) ...
     await checkSession("committee");
     await fetchAllEvents();
     await fetchAllTeams(); 
-
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
         signOut();
     });
-
     const searchInput = document.getElementById('eventSearch');
     const searchResults = document.getElementById('event-search-results');
     searchInput.addEventListener('input', (e) => renderDropdown(e.target.value.toLowerCase()));
@@ -81,90 +57,63 @@ document.addEventListener('DOMContentLoaded', async () => {
             searchResults.classList.add('hidden');
         }
     });
-
     document.getElementById('add-row-btn').addEventListener('click', addNewRankRow);
     initSortable();
-
     const tabulationList = document.getElementById('tabulation-list');
     tabulationList.addEventListener('click', handleCustomSelectClick);
-    
     document.querySelector('.tie-group').addEventListener('input', updateRanksAndVisuals);
-
-    // --- NEW: Attach listener to the form's submit event ---
     const computationForm = document.getElementById('computation-form');
     computationForm.addEventListener('submit', handleSubmit);
-    // --- END NEW ---
-
     addNewRankRow();
     addNewRankRow();
-
     const loader = document.getElementById('loader');
     loader.classList.add('hide');
     setTimeout(() => { loader.style.display = 'none'; }, 600);
 });
-
-// --- 3. DYNAMIC DATA & SEARCH LOGIC --------------
-
 async function fetchAllEvents() {
-    // ... (function is unchanged) ...
     try {
         const response = await fetch('/api/get-all-events');
         if (!response.ok) throw new Error('Failed to fetch events');
         const data = await response.json();
         allEventsData = data;
-        console.log("Events loaded:", allEventsData);
     } catch (error) {
         console.error('Error loading all events:', error);
-        const searchInput = document.getElementById('eventSearch');
-        searchInput.value = 'Error loading events.';
-        searchInput.disabled = true;
+        document.getElementById('eventSearch').value = 'Error loading events.';
+        document.getElementById('eventSearch').disabled = true;
     }
 }
-
 async function fetchAllTeams() {
-    // ... (function is unchanged) ...
     try {
         const response = await fetch('/api/get-teams'); 
         if (!response.ok) throw new Error('Failed to fetch teams');
-        
         const data = await response.json();
         allTeamsData = data; 
-        console.log("Teams loaded:", allTeamsData);
-
         document.querySelectorAll('.tab-row').forEach(row => {
             const list = row.querySelector('.custom-select-list');
             if (list) populateTeamList(list);
         });
-
     } catch (error) {
         console.error('Error loading all teams:', error);
     }
 }
-
 function renderDropdown(query) {
-    // ... (function is mostly unchanged) ...
     const resultsContainer = document.getElementById('event-search-results');
     resultsContainer.innerHTML = '';
     let hasMatches = false;
-
     allEventsData.forEach(category => {
         const matchingEvents = category.events.filter(event => 
             event.name.toLowerCase().includes(query)
         );
-
         if (matchingEvents.length > 0) {
             hasMatches = true;
             const categoryEl = document.createElement('div');
             categoryEl.className = 'search-results-category';
             categoryEl.textContent = category.name;
             resultsContainer.appendChild(categoryEl);
-            
             matchingEvents.forEach(event => {
                 const eventEl = document.createElement('div');
                 eventEl.className = 'search-results-item';
                 eventEl.textContent = event.name;
-
-                // MODIFIED: Pass the whole event object
                 const eventObject = event; 
                 eventEl.addEventListener('click', () => {
                     selectEvent(eventObject);
@@ -173,7 +122,6 @@ function renderDropdown(query) {
             });
         }
     });
-    // ... (rest of function is unchanged) ...
     if (!hasMatches) {
         const noResultsEl = document.createElement('div');
         noResultsEl.className = 'search-results-item';
@@ -183,19 +131,88 @@ function renderDropdown(query) {
     resultsContainer.classList.remove('hidden');
 }
 
+
 /**
- * MODIFIED: Stores the entire event object
+ * MODIFIED: This function now calls loadEventResults
  */
 function selectEvent(event) {
     console.log("Selected event:", event.name, event.id);
     document.getElementById('eventSearch').value = event.name;
     selectedEvent = event; // Store the whole event
     document.getElementById('event-search-results').classList.add('hidden');
+    
+    // --- NEW: Load the results for this event ---
+    loadEventResults(event.id);
+}
+
+/**
+ * NEW: Fetches and populates results for the selected event
+ */
+async function loadEventResults(eventId) {
+    const list = document.getElementById('tabulation-list');
+    list.innerHTML = `<div class="loading-message">Loading results...</div>`; // Show loader
+
+    try {
+        // Get the auth token to make a secure request
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error('Session expired.');
+        const accessToken = sessionData.session.access_token;
+        
+        // Call our new API
+        const response = await fetch(`/api/get-event-results?eventId=${eventId}`, {
+            headers: {
+                'Authorization': `Bearer ${accessToken}`
+            }
+        });
+
+        if (!response.ok) throw new Error('Failed to fetch results.');
+        
+        const results = await response.json();
+        list.innerHTML = ''; // Clear loader
+
+        if (results.length > 0) {
+            // This event HAS saved results. Re-build the list.
+            results.forEach(result => {
+                // 'result' looks like { rank: 1, teams: { id: '...', name: '...' } }
+                const teamData = result.teams;
+                
+                // Create a new row
+                const row = createRankRow(result.rank);
+                
+                // Find the box to populate
+                const box = row.querySelector('.custom-select-box');
+                box.innerHTML = `
+                    <span class="selected-team">
+                        <img src="${teamData.logo_url}" alt="${teamData.acronym} logo" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:1px solid #eee;">
+                        <span class="acronym">${teamData.acronym}</span>
+                        <span class="name">${teamData.name}</span>
+                    </span>
+                `;
+                
+                // Store the selected team ID on the row
+                row.dataset.teamId = teamData.id;
+                
+                // Add the populated row to the list
+                list.appendChild(row);
+            });
+        } else {
+            // This event has NO saved results. Create two blank rows.
+            addNewRankRow();
+            addNewRankRow();
+        }
+
+        // Finally, apply all colors and tie visuals
+        updateRanksAndVisuals();
+
+    } catch (error) {
+        console.error('Error loading event results:', error);
+        list.innerHTML = `<div class="loading-message error">Error: ${error.message}</div>`;
+    }
 }
 
 
 // --- 4. RANKING LIST LOGIC -------------------
-// ... (addNewRankRow, createRankRow, populateTeamList, getCurrentlySelectedTeamIds, handleCustomSelectClick, initSortable, parseTieGroups... all are unchanged) ...
+// ... (addNewRankRow, createRankRow, populateTeamList... all unchanged) ...
 function addNewRankRow() {
     const list = document.getElementById('tabulation-list');
     const newRank = list.children.length + 1;
@@ -203,7 +220,6 @@ function addNewRankRow() {
     list.appendChild(newRow);
     updateRanksAndVisuals();
 }
-
 function createRankRow(rankNumber) {
     const row = document.createElement('div');
     row.className = 'tab-row';
@@ -231,7 +247,6 @@ function createRankRow(rankNumber) {
     row.appendChild(selectList);
     return row;
 }
-
 function populateTeamList(listElement) {
     listElement.innerHTML = ''; 
     if (allTeamsData.length === 0) {
@@ -254,6 +269,8 @@ function populateTeamList(listElement) {
     });
 }
 
+
+// ... (getCurrentlySelectedTeamIds, handleCustomSelectClick, initSortable, parseTieGroups, updateRanksAndVisuals... all unchanged) ...
 function getCurrentlySelectedTeamIds() {
     const selectedIds = new Set();
     document.querySelectorAll('.tab-row').forEach(row => {
@@ -264,7 +281,6 @@ function getCurrentlySelectedTeamIds() {
     });
     return selectedIds;
 }
-
 function handleCustomSelectClick(e) {
     const target = e.target;
     const deleteBtn = target.closest('.delete-row-btn');
@@ -312,7 +328,6 @@ function handleCustomSelectClick(e) {
         return;
     }
 }
-
 function initSortable() {
     const list = document.getElementById('tabulation-list');
     sortableInstance = new Sortable(list, {
@@ -322,7 +337,6 @@ function initSortable() {
         onEnd: updateRanksAndVisuals, 
     });
 }
-
 function parseTieGroups() {
     const input = document.querySelector('.tie-group').value;
     const groups = [];
@@ -336,20 +350,13 @@ function parseTieGroups() {
     }
     return groups;
 }
-
-
-/**
- * MODIFIED: Now returns the positionToRank map
- */
 function updateRanksAndVisuals() {
     const list = document.getElementById('tabulation-list');
     const rows = Array.from(list.children);
     const tieGroups = parseTieGroups(); 
-
     const positionToRank = {}; 
     let currentRank = 1;
     let position = 1;
-
     while (position <= rows.length) {
         const tie = tieGroups.find(group => group[0] === position);
         if (tie) {
@@ -366,15 +373,12 @@ function updateRanksAndVisuals() {
         }
         currentRank++;
     }
-
     rows.forEach((row, index) => {
         const pos = index + 1; 
         const finalRank = positionToRank[pos];
         const numEl = row.querySelector('.tab-num');
-
         numEl.classList.remove('rank-1', 'rank-2', 'rank-3');
         row.classList.remove('tie-start', 'tie-middle', 'tie-end');
-
         if (finalRank) {
             numEl.textContent = finalRank;
             if (finalRank <= 3) {
@@ -384,7 +388,6 @@ function updateRanksAndVisuals() {
             numEl.textContent = pos; 
         }
     });
-
     tieGroups.forEach(group => {
         const [start, end] = group;
         for (let i = start; i <= end; i++) {
@@ -399,50 +402,35 @@ function updateRanksAndVisuals() {
             }
         }
     });
-    
-    // --- NEW: Return the map ---
     return positionToRank;
 }
 
-// --- 5. NEW SUBMIT LOGIC -------------------
 
-/**
- * NEW: Handles the final submission of all ranks
- */
+// ... (handleSubmit is unchanged) ...
 async function handleSubmit(e) {
     e.preventDefault();
     const submitBtn = document.querySelector('.submit-btn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
-
     try {
-        // --- 1. VALIDATION ---
         if (!selectedEvent) {
             throw new Error('Please select an event from the search box.');
         }
-
         const rows = document.querySelectorAll('#tabulation-list .tab-row');
         if (rows.length === 0) {
             throw new Error('Please add at least one team to the ranking.');
         }
-
         const hasUnselected = Array.from(rows).some(row => row.dataset.teamId === "null");
         if (hasUnselected) {
             throw new Error('Please select a team for every ranking row.');
         }
-
-        // --- 2. DATA GATHERING ---
-        // Get the final ranks and the event's medal value
         const rankMap = updateRanksAndVisuals();
         const medalValue = selectedEvent.medal_value;
         const resultsToSubmit = [];
-
         rows.forEach((row, index) => {
-            const position = index + 1; // 1-based position
+            const position = index + 1; 
             const teamId = row.dataset.teamId;
-            const finalRank = rankMap[position] || position; // Use position if not in a tie
-
-            // Calculate awarded medals based on your logic
+            const finalRank = rankMap[position] || position; 
             let gold = 0, silver = 0, bronze = 0;
             if (finalRank === 1) {
                 gold = medalValue;
@@ -451,7 +439,6 @@ async function handleSubmit(e) {
             } else if (finalRank === 3) {
                 bronze = medalValue;
             }
-
             resultsToSubmit.push({
                 team_id: teamId,
                 rank: finalRank,
@@ -460,18 +447,12 @@ async function handleSubmit(e) {
                 bronze_awarded: bronze
             });
         });
-
-        // --- 3. CREATE PAYLOAD AND SEND TO API ---
-
-        // --- ADD THIS BLOCK TO FIX THE ERROR ---
-        // Get the session token asynchronously first
+        
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !sessionData.session) {
-            // This can happen if the session timed out
             throw new Error('Your session has expired. Please log in again.');
         }
         const accessToken = sessionData.session.access_token;
-        // --- END OF NEW BLOCK ---
 
         const payload = {
             eventId: selectedEvent.id,
@@ -482,20 +463,16 @@ async function handleSubmit(e) {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // MODIFIED: Use the 'accessToken' variable we just got
                 'Authorization': `Bearer ${accessToken}` 
             },
             body: JSON.stringify(payload)
         });
-
         if (!response.ok) {
             const err = await response.json();
             throw new Error(err.error || 'Server failed to submit results.');
         }
-
         alert('Results submitted successfully for review!');
         
-        // Reset the form
         document.getElementById('eventSearch').value = '';
         selectedEvent = null;
         document.querySelector('.tie-group').value = '';
@@ -503,7 +480,6 @@ async function handleSubmit(e) {
         addNewRankRow();
         addNewRankRow();
         updateRanksAndVisuals();
-
     } catch (error) {
         alert('Error: ' + error.message);
     } finally {
