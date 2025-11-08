@@ -277,6 +277,14 @@ async function handleStatusUpdate(eventId, newStatus, tableRow) {
         tableRow.querySelectorAll('.filter').forEach(btn => btn.disabled = false);
         tableRow.querySelector(`.filter[data-status="${newStatus}"]`).disabled = true;
 
+        // --- ADD THIS BLOCK ---
+        // After updating the row, find the parent and update the header
+        const detailsDiv = tableRow.closest('.category-details');
+        if (detailsDiv) {
+            updateCategoryHeader(detailsDiv);
+        }
+        // --- END OF NEW BLOCK ---
+
     } catch (error) {
         console.error('Error updating status:', error);
         alert('Error: ' + error.message);
@@ -312,5 +320,46 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
     } catch (error) {
         console.error('Error deleting event:', error);
         alert('Error: ' + error.message);
+    }
+}
+
+/**
+ * Recalculates and updates the status counts in a category's header.
+ */
+function updateCategoryHeader(detailsDiv) {
+    try {
+        // 1. Find the header elements
+        const categoryDiv = detailsDiv.previousElementSibling;
+        if (!categoryDiv) return;
+        const statusDisplay = categoryDiv.querySelector('.cat-status');
+
+        // 2. Find all event rows in this category
+        const allRows = detailsDiv.querySelectorAll('tbody tr');
+
+        // 3. Recalculate counts
+        let ongoing = 0;
+        let submitted = 0;
+        let published = 0;
+
+        allRows.forEach(row => {
+            const statusSpan = row.querySelector('.status');
+            if (!statusSpan) return; // Skip header or "no events" rows
+            
+            const status = statusSpan.textContent.toLowerCase();
+            
+            if (status === 'ongoing') {
+                ongoing++;
+            } else if (status === 'for review') {
+                submitted++;
+            } else if (status === 'published') {
+                published++;
+            }
+        });
+
+        // 4. Update the header text
+        statusDisplay.textContent = `${ongoing} ongoing  |  ${submitted} Submitted  |  ${published} Published`;
+
+    } catch (error) {
+        console.error('Error updating category header:', error);
     }
 }
