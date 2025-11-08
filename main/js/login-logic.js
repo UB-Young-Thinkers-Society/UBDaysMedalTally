@@ -45,7 +45,7 @@ async function handleLogin(e) {
     const email = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const loginButton = document.getElementById('login-button');
-    // const errorMessage = document.getElementById('error-message');
+    const errorMessage = document.getElementById('error-message');
 
     // Disable button and show loading
     loginButton.disabled = true;
