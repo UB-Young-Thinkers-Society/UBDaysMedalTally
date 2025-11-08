@@ -1,10 +1,13 @@
-// ... (Global variables, checkSession, signOut... all unchanged) ...
-let allEventsData = [];
-let allTeamsData = [];
-let selectedEvent = null;
-let sortableInstance = null;
+// This ONE file replaces session.js, logout.js, etc.
+// for computation.html
 
-// ... (checkSession and signOut are unchanged) ...
+// --- 0. GLOBAL VARIABLES ---------------------------
+let allEventsData = []; // Caches all events from the API
+let allTeamsData = [];  // Caches all teams from the API
+let selectedEvent = null; // Stores the entire selected event object
+let sortableInstance = null; // To hold the SortableJS object
+
+// --- 1. AUTHENTICATION & SESSION -------------------
 async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
@@ -39,7 +42,7 @@ async function signOut() {
 }
 
 
-// ... (DOMContentLoaded, fetchAllEvents, fetchAllTeams, renderDropdown... all unchanged) ...
+// --- 2. PAGE INITIALIZATION ------------------------
 document.addEventListener('DOMContentLoaded', async () => {
     await checkSession("committee");
     await fetchAllEvents();
@@ -67,9 +70,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     addNewRankRow();
     addNewRankRow();
     const loader = document.getElementById('loader');
-    loader.classList.add('hide');
-    setTimeout(() => { loader.style.display = 'none'; }, 600);
+    if (loader) {
+        loader.classList.add('hide');
+        setTimeout(() => { loader.style.display = 'none'; }, 600);
+    }
 });
+
+// --- 3. DYNAMIC DATA & SEARCH LOGIC --------------
 async function fetchAllEvents() {
     try {
         const response = await fetch('/api/get-all-events');
@@ -131,55 +138,72 @@ function renderDropdown(query) {
     resultsContainer.classList.remove('hidden');
 }
 
-
-/**
- * MODIFIED: This function now calls loadEventResults
- */
 function selectEvent(event) {
     console.log("Selected event:", event.name, event.id);
     document.getElementById('eventSearch').value = event.name;
     selectedEvent = event; // Store the whole event
     document.getElementById('event-search-results').classList.add('hidden');
-    
-    // --- NEW: Load the results for this event ---
     loadEventResults(event.id);
 }
 
 /**
- * NEW: Fetches and populates results for the selected event
+ * MODIFIED: This function now reconstructs the tie-group string
  */
 async function loadEventResults(eventId) {
     const list = document.getElementById('tabulation-list');
-    list.innerHTML = `<div class="loading-message">Loading results...</div>`; // Show loader
+    const tieInput = document.querySelector('.tie-group');
+    list.innerHTML = `<div class="loading-message">Loading results...</div>`;
+    tieInput.value = ''; // Clear old tie string
 
     try {
-        // Get the auth token to make a secure request
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !sessionData.session) throw new Error('Session expired.');
         const accessToken = sessionData.session.access_token;
         
-        // Call our new API
         const response = await fetch(`/api/get-event-results?eventId=${eventId}`, {
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
+            headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 
         if (!response.ok) throw new Error('Failed to fetch results.');
         
-        const results = await response.json();
-        list.innerHTML = ''; // Clear loader
+        const results = await response.json(); // Data is sorted by rank
+        list.innerHTML = ''; 
+
+        // --- NEW (THE BUG FIX) ---
+        // Analyze the results to find and build the tie string
+        const ranks = {}; // { 1: [pos1, pos2, pos3], 2: [pos4], 3: [pos5, pos6] }
+        results.forEach((result, index) => {
+            const rank = result.rank;
+            const position = index + 1;
+            if (!ranks[rank]) {
+                ranks[rank] = [];
+            }
+            ranks[rank].push(position);
+        });
+
+        const tieStrings = [];
+        for (const rankKey in ranks) {
+            const positions = ranks[rankKey];
+            if (positions.length > 1) {
+                // Find consecutive positions
+                const start = positions[0];
+                const end = positions[positions.length - 1];
+                if (end - start === positions.length - 1) {
+                    tieStrings.push(`${start}-${end}`);
+                }
+            }
+        }
+        
+        // Set the tie input's value
+        tieInput.value = tieStrings.join(', ');
+        // --- END OF NEW BLOCK ---
+
 
         if (results.length > 0) {
             // This event HAS saved results. Re-build the list.
             results.forEach(result => {
-                // 'result' looks like { rank: 1, teams: { id: '...', name: '...' } }
                 const teamData = result.teams;
-                
-                // Create a new row
                 const row = createRankRow(result.rank);
-                
-                // Find the box to populate
                 const box = row.querySelector('.custom-select-box');
                 box.innerHTML = `
                     <span class="selected-team">
@@ -188,11 +212,7 @@ async function loadEventResults(eventId) {
                         <span class="name">${teamData.name}</span>
                     </span>
                 `;
-                
-                // Store the selected team ID on the row
                 row.dataset.teamId = teamData.id;
-                
-                // Add the populated row to the list
                 list.appendChild(row);
             });
         } else {
@@ -202,6 +222,7 @@ async function loadEventResults(eventId) {
         }
 
         // Finally, apply all colors and tie visuals
+        // This will now read the pre-filled tie box and work correctly
         updateRanksAndVisuals();
 
     } catch (error) {
@@ -404,7 +425,6 @@ function updateRanksAndVisuals() {
     });
     return positionToRank;
 }
-
 
 // ... (handleSubmit is unchanged) ...
 async function handleSubmit(e) {
