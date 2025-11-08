@@ -561,4 +561,20 @@ footer {
     visibility: hidden;
 }
 
+/* =========================================
+   NEW STYLES FOR DISABLED EVENTS
+========================================= */
+
+.search-results-item.disabled {
+    background: #f8f8f8;
+    color: #aaa;
+    pointer-events: none; /* Makes it unclickable */
+    font-style: italic;
+}
+
+/* Optional: remove hover effect */
+.search-results-item.disabled:hover {
+    background: #f8f8f8;
+}
+
 

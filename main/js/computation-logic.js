@@ -103,32 +103,55 @@ async function fetchAllTeams() {
         console.error('Error loading all teams:', error);
     }
 }
+
+/**
+ * MODIFIED: This function now disables events based on status.
+ */
 function renderDropdown(query) {
     const resultsContainer = document.getElementById('event-search-results');
     resultsContainer.innerHTML = '';
     let hasMatches = false;
+
     allEventsData.forEach(category => {
         const matchingEvents = category.events.filter(event => 
             event.name.toLowerCase().includes(query)
         );
+
         if (matchingEvents.length > 0) {
             hasMatches = true;
             const categoryEl = document.createElement('div');
             categoryEl.className = 'search-results-category';
             categoryEl.textContent = category.name;
             resultsContainer.appendChild(categoryEl);
+            
             matchingEvents.forEach(event => {
                 const eventEl = document.createElement('div');
                 eventEl.className = 'search-results-item';
                 eventEl.textContent = event.name;
+                
+                // --- NEW LOGIC ---
+                // We only allow submitting to 'ongoing' or 'for review' events
+                const isEditable = event.status === 'ongoing' || event.status === 'for review';
+                
+                if (!isEditable) {
+                    eventEl.classList.add('disabled');
+                    eventEl.title = `This event is ${event.status} and cannot be modified.`;
+                }
+                // --- END NEW LOGIC ---
+
                 const eventObject = event; 
                 eventEl.addEventListener('click', () => {
-                    selectEvent(eventObject);
+                    // MODIFIED: Only select if editable
+                    if (isEditable) {
+                        selectEvent(eventObject);
+                    }
+                    // If not editable, the click does nothing.
                 });
                 resultsContainer.appendChild(eventEl);
             });
         }
     });
+
     if (!hasMatches) {
         const noResultsEl = document.createElement('div');
         noResultsEl.className = 'search-results-item';
@@ -138,11 +161,22 @@ function renderDropdown(query) {
     resultsContainer.classList.remove('hidden');
 }
 
+
+/**
+ * MODIFIED: This function now also enables/disables the form
+ */
 function selectEvent(event) {
     console.log("Selected event:", event.name, event.id);
     document.getElementById('eventSearch').value = event.name;
     selectedEvent = event; // Store the whole event
     document.getElementById('event-search-results').classList.add('hidden');
+    
+    // --- NEW: Enable the form ---
+    // If we selected an event, enable the form fields
+    document.querySelector('.tie-group').disabled = false;
+    document.getElementById('add-row-btn').disabled = false;
+    document.querySelector('.submit-btn').disabled = false;
+
     loadEventResults(event.id);
 }
 
@@ -169,7 +203,6 @@ async function loadEventResults(eventId) {
         const results = await response.json(); // Data is sorted by rank
         list.innerHTML = ''; 
 
-        // --- NEW (THE BUG FIX) ---
         // Analyze the results to find and build the tie string
         const ranks = {}; // { 1: [pos1, pos2, pos3], 2: [pos4], 3: [pos5, pos6] }
         results.forEach((result, index) => {
@@ -196,7 +229,6 @@ async function loadEventResults(eventId) {
         
         // Set the tie input's value
         tieInput.value = tieStrings.join(', ');
-        // --- END OF NEW BLOCK ---
 
 
         if (results.length > 0) {
@@ -222,7 +254,6 @@ async function loadEventResults(eventId) {
         }
 
         // Finally, apply all colors and tie visuals
-        // This will now read the pre-filled tie box and work correctly
         updateRanksAndVisuals();
 
     } catch (error) {
@@ -233,7 +264,6 @@ async function loadEventResults(eventId) {
 
 
 // --- 4. RANKING LIST LOGIC -------------------
-// ... (addNewRankRow, createRankRow, populateTeamList... all unchanged) ...
 function addNewRankRow() {
     const list = document.getElementById('tabulation-list');
     const newRank = list.children.length + 1;
@@ -289,9 +319,6 @@ function populateTeamList(listElement) {
         listElement.appendChild(item);
     });
 }
-
-
-// ... (getCurrentlySelectedTeamIds, handleCustomSelectClick, initSortable, parseTieGroups, updateRanksAndVisuals... all unchanged) ...
 function getCurrentlySelectedTeamIds() {
     const selectedIds = new Set();
     document.querySelectorAll('.tab-row').forEach(row => {
