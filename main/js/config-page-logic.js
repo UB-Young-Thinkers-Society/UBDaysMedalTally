@@ -1,6 +1,3 @@
-// This ONE file replaces session.js, logout.js, participant_input.js, and event_input.js
-// It runs on the CLIENT-SIDE (in the browser)
-
 // --- 1. AUTHENTICATION & SESSION -------------------
 async function checkSession(authorizedRole) {
     const { data: { user } } = await supabase.auth.getUser();
@@ -41,19 +38,15 @@ async function signOut() {
 
 // --- 2. PAGE INITIALIZATION ------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // Run auth check first
     checkSession("tabHead");
 
-    // Get forms
     const addTeamForm = document.getElementById('add-team-form');
     const addEventForm = document.getElementById('add-event-form');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    // Load dynamic data
     loadCategories();
     loadTeams();
 
-    // Attach event listeners
     addTeamForm.addEventListener('submit', handleAddTeam);
     addEventForm.addEventListener('submit', handleAddEvent);
     logoutBtn.addEventListener('click', (e) => {
@@ -61,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
         signOut();
     });
 
-    // Hide loader
     const loader = document.getElementById('loader');
     loader.classList.add('hide');
     setTimeout(() => {
@@ -70,17 +62,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- 3. DYNAMIC DATA LOADING ---------------------
-
 async function loadCategories() {
     const selectEl = document.getElementById('event-category');
     try {
-        // Securely fetch from our new API endpoint
         const response = await fetch('/api/get-categories');
         if (!response.ok) throw new Error('Failed to load categories');
         
         const categories = await response.json();
 
-        selectEl.innerHTML = '<option value="" disabled selected>Category</option>'; // Reset
+        selectEl.innerHTML = '<option value="" disabled selected>Category</option>'; 
         categories.forEach(cat => {
             const option = document.createElement('option');
             option.value = cat.id; // <-- The UUID
@@ -97,7 +87,6 @@ async function loadCategories() {
 async function loadTeams() {
     const departmentList = document.querySelector(".department-list");
     try {
-        // Securely fetch from our new API endpoint
         const response = await fetch('/api/get-teams');
         if (!response.ok) throw new Error('Failed to load teams');
 
@@ -108,7 +97,7 @@ async function loadTeams() {
             return;
         }
 
-        departmentList.innerHTML = ""; // Clear loader
+        departmentList.innerHTML = ""; 
         teams.forEach(team => {
             const departmentDiv = document.createElement("div");
             departmentDiv.classList.add("department");
@@ -124,8 +113,6 @@ async function loadTeams() {
             `;
             departmentList.appendChild(departmentDiv);
             
-            // Add listeners for edit/delete (logic not implemented yet)
-            // departmentDiv.querySelector('.delete-btn').addEventListener('click', handleDeleteTeam);
         });
 
     } catch (error) {
@@ -135,7 +122,6 @@ async function loadTeams() {
 }
 
 // --- 4. FORM HANDLERS (CALLING APIs) ----------------
-
 async function handleAddTeam(e) {
     e.preventDefault(); // Stop form from reloading page
     
@@ -143,36 +129,31 @@ async function handleAddTeam(e) {
     const acronymInput = document.getElementById('team-acronym');
     const logoInput = document.getElementById('add-logo');
     
-    // Create FormData to send file + text
     const formData = new FormData();
     formData.append('name', nameInput.value.trim());
     formData.append('acronym', acronymInput.value.trim());
     formData.append('logoFile', logoInput.files[0]);
 
     try {
-        // Send data to our NEW secure API endpoint
         const response = await fetch('/api/add-team', {
             method: 'POST',
-            body: formData, // FormData handles its own headers
+            body: formData, 
         });
 
         if (!response.ok) {
             let errorText = `Error ${response.status}: `;
-            // Read the body ONCE as text
             const text = await response.text();
             try {
-                // Try to parse the text as JSON
                 const err = JSON.parse(text);
                 errorText += err.error || 'Server error';
             } catch (jsonError) {
-                // If parsing fails, the error is just the raw text
                 errorText += text || 'Unknown server error';
             }
             throw new Error(errorText);
         }
 
         alert('Team added successfully!');
-        location.reload(); // Reload to see the new team
+        location.reload(); 
 
     } catch (error) {
         console.error('Error adding team:', error);
@@ -181,8 +162,7 @@ async function handleAddTeam(e) {
 }
 
 async function handleAddEvent(e) {
-    e.preventDefault(); // Stop form from reloading page
-
+    e.preventDefault(); 
     const eventNameInput = document.getElementById('event-name');
     const eventCategorySelect = document.getElementById('event-category');
     const eventMedalInput = document.getElementById('event-medal');
@@ -194,7 +174,6 @@ async function handleAddEvent(e) {
     };
 
     try {
-        // Send data to our NEW secure API endpoint
         const response = await fetch('/api/add-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -214,7 +193,6 @@ async function handleAddEvent(e) {
         }
 
         alert('Event added successfully!');
-        // Clear fields
         eventNameInput.value = '';
         eventCategorySelect.value = '';
         eventMedalInput.value = '';

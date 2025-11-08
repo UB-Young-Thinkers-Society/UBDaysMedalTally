@@ -1,6 +1,3 @@
-// This script runs on the client-side (in the browser)
-// It handles both auto-redirects and login form submission.
-
 // --- 1. RUNS ON PAGE LOAD ------------------------
 document.addEventListener('DOMContentLoaded', () => {
     checkActiveSession();
@@ -10,22 +7,16 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 async function checkActiveSession() {
-    // This function replaces your checkIfLoggedIn()
-    
-    // 1. Get session from client-side Supabase
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError || !sessionData.session) {
-        // No one is logged in. Stay on login page.
         console.log('No active session found.');
         return;
     }
 
-    // 2. User has a session. Get their role from our secure API.
     const accessToken = sessionData.session.access_token;
 
     try {
-        // 3. We use the 'GET' method and send the token
         const response = await fetch('/api/login', {
             method: 'GET',
             headers: {
@@ -35,7 +26,7 @@ async function checkActiveSession() {
         
         if (!response.ok) {
             console.error('Session check failed, staying on login page.');
-            await supabase.auth.signOut(); // Clean up bad session
+            await supabase.auth.signOut(); 
             return;
         }
 
@@ -48,14 +39,13 @@ async function checkActiveSession() {
 }
 
 async function handleLogin(e) {
-    e.preventDefault(); // Stop the form from reloading the page
+    e.preventDefault(); 
 
     const email = document.getElementById('username').value;
     const password = document.getElementById('password').value;
     const loginButton = document.getElementById('login-button');
     const errorMessage = document.getElementById('error-message');
 
-    // Disable button and show loading
     loginButton.disabled = true;
     loginButton.textContent = 'Logging in...';
     errorMessage.textContent = '';
@@ -72,11 +62,8 @@ async function handleLogin(e) {
         }
 
         // --- STEP 2: GET THE ROLE FROM THE SECURE API ---
-        
-        // This is the FIX: We manually get the token
         const accessToken = authData.session.access_token;
 
-        // And send it in the 'Authorization' header
         const response = await fetch('/api/login', {
             method: 'GET',
             headers: {
@@ -102,14 +89,12 @@ async function handleLogin(e) {
 }
 
 // --- 4. REDIRECT HELPER FUNCTION ------------------
-// This is your exact redirect logic
 function redirectToRole(role) {
     if (role === 'admin' || role === 'tabHead') {
-        window.location.replace('tabulation.html'); // Main page for these roles
+        window.location.replace('tabulation.html'); 
     } else if (role === 'committee') {
         window.location.replace('computation.html');
     } else {
-        // Fallback or for other roles
         console.error('Unknown role, redirecting to login.');
         const errorMessage = document.getElementById('error-message');
         if(errorMessage) errorMessage.textContent = 'Unknown user role assigned.';
@@ -117,7 +102,6 @@ function redirectToRole(role) {
 }
 
 // --- 5. LOGOUT FUNCTION (from your logout.js) ---
-// You can call this from a 'logout' button on your other pages
 async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) {

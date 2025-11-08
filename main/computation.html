@@ -2,69 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tabulation Committee 1</title>
+    <title>Computation</title>
     <link rel="stylesheet" href="css/styles-committee.css">
+    <link rel="icon" href="img/Login-Logo.png">
+
+    <!-- Client-side Supabase for AUTHENTICATION only -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    <script src="api/db_connection.js"></script>
-    <script src="js/session.js"></script>
     <script>
-        checkSession("committee");
+        // The ANON key is safe to expose for client-side auth.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-left">
-                <span class="committee-title">Tabulation Committee 1</span>
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="header">
+        <div class="navSection">
+            <div class="accInfo">
+                <img src="img/Login-Logo.png" alt="Admin" class="admin-icon">
+                <span>Tabulation Committee</span>
             </div>
-            <button class="logout-btn" id="logout-btn">Log Out</button>
+            <div class="navButtons">
+                <a href="#" class="nav-btn">Log</a>
+                <a href="#" class="nav-btn">About Us</a>
+            </div>
         </div>
+        <div id="logoutBtn">
+            <a href="#" class="logout">Log Out</a>
+        </div>
+    </div>
+
+    <div class="main-card">
         <div class="search-row">
-            <div class="search-events">
-                <input type="text" id="eventSearch" placeholder="Search Events" readonly onclick="toggleDropdown()" style="cursor:pointer;">
-                <select>
-                    <option selected disabled>Select Event</option>
-                    <option>Event 1</option>
-                    <option>Event 2</option>
-                </select>
+            <!-- 
+              This is the search box. 
+              We'll add a 'position: relative' wrapper 
+              to anchor the dropdown.
+            -->
+            <div class="search-events" style="position: relative;">
+                <input type="text" id="eventSearch" placeholder="Search Events">
+                
+                <!-- 
+                  NEW: This is the dynamic dropdown. 
+                  It's hidden by default.
+                -->
+                <div id="event-search-results" class="search-results hidden">
+                    <!-- Results will be built by JS here -->
+                </div>
             </div>
             <input class="tie-group" type="text" placeholder="Tie Groups (e.g. 1 - 2)">
         </div>
-        <form>
+        <form id="computation-form">
             <div class="tabulation-list">
                 <div class="tab-row">
                     <div class="tab-num">1</div>
-                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                    <select class="event-category" id="rank-1" required>
+                        <option value="" disabled selected>+</option>
+                        <!-- Teams will be loaded here by JS -->
+                    </select>
                 </div>
                 <div class="tab-row">
                     <div class="tab-num">2</div>
-                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
+                    <select class="event-category" id="rank-2" required>
+                        <option value="" disabled selected>+</option>
+                    </select>
                 </div>
-                <div class="tab-row">
-                    <div class="tab-num">3</div>
-                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
-                </div>
-                <div class="tab-row">
-                    <div class="tab-num">4</div>
-                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
-                </div>
-                <div class="tab-row">
-                    <div class="tab-num" style="visibility:hidden;">5</div>
-                    <input class="tab-input" type="text" placeholder="+" readonly onclick="this.readOnly=false;this.value='';this.focus();">
-                </div>
+                <!-- Add more rows as needed -->
             </div>
             <button type="submit" class="submit-btn">Submit</button>
         </form>
     </div>
-    <div class="footer">
-        Made by <img src="img/UBYTeS New Logo 1.png" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
-    </div>
-    <script src="api/logout.js"></script>
-    <script>
-        document.getElementById('logout-btn').onclick = function(e) {
-            e.preventDefault();
-            signOut();
-        };
-    </script>
+
+    <footer>
+        <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
+    </footer>
+
+    <!-- 
+      DELETED old/insecure scripts.
+      This is the ONLY script this page needs.
+    -->
+    <script src="js/computation-logic.js" defer></script>
+
 </body>
 </html>

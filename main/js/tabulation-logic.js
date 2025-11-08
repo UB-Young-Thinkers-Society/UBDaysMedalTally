@@ -1,14 +1,3 @@
-// This ONE file replaces:
-// - session.js
-// - logout.js
-// - tabulation-head-script.js
-// - display_events.js
-// - academic-events-script.js
-// - athletics-events-script.js
-// - dance-events-script.js
-// - esports-events-script.js
-// - music-events-script.js
-
 // --- 1. AUTHENTICATION & SESSION -------------------
 
 /**
@@ -19,7 +8,6 @@ async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError || !sessionData.session) {
-        // No one is logged in. Redirect to login.
         window.location.replace("index.html");
         return;
     }
@@ -33,14 +21,13 @@ async function checkSession(authorizedRole) {
         });
 
         if (!response.ok) {
-            await supabase.auth.signOut(); // Clean up bad session
+            await supabase.auth.signOut(); 
             window.location.replace("index.html");
             return;
         }
 
         const { role } = await response.json();
 
-        // Check for authorization
         if (role !== authorizedRole && role !== "admin") {
             console.log("Access Forbidden. Redirecting.");
             if (role === "committee") {
@@ -50,7 +37,6 @@ async function checkSession(authorizedRole) {
             }
         }
         
-        // If we are here, user is authorized.
         console.log("Session valid, user authorized.");
 
     } catch (error) {
@@ -59,9 +45,6 @@ async function checkSession(authorizedRole) {
     }
 }
 
-/**
- * Logs the user out and returns to index.html
- */
 async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -75,19 +58,14 @@ async function signOut() {
 // --- 2. PAGE INITIALIZATION ------------------------
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Run auth check first
     await checkSession("tabHead");
-
-    // Load all events from our new secure API
     await loadAllEvents();
 
-    // Attach logout listener
     document.getElementById('logoutBtn').addEventListener('click', (e) => {
         e.preventDefault();
         signOut();
     });
 
-    // Hide loader
     const loader = document.getElementById('loader');
     loader.classList.add('hide');
     setTimeout(() => { loader.style.display = 'none'; }, 600);
@@ -107,14 +85,13 @@ async function loadAllEvents() {
         const categories = await response.json();
         
         const container = document.getElementById('categories-container');
-        container.innerHTML = ''; // Clear loader/template
+        container.innerHTML = ''; 
 
         if (categories.length === 0) {
             container.innerHTML = '<p>No event categories found. Go to the Config page to add some.</p>';
             return;
         }
 
-        // Loop through each category returned from the API
         for (const category of categories) {
             // 1. Create the category header (the accordion button)
             const categoryDiv = document.createElement('div');
@@ -182,14 +159,13 @@ async function loadAllEvents() {
 
 /**
  * This is the single, reusable function that builds an event row.
- * It replaces all 5 of your old `forEach` loops.
  */
 function createEventRow(event) {
     const tr = document.createElement('tr');
-    tr.dataset.eventId = event.id; // Store event ID on the row
+    tr.dataset.eventId = event.id; 
 
     const eventName = event.name || "Unnamed Event";
-    const medalCount = event.medal_value ?? "0"; // Use new `medal_value` column
+    const medalCount = event.medal_value ?? "0"; 
     const statusText = event.status || "N/A";
     const statusClass = event.status ? event.status.replace(' ', '-').toLowerCase() : "none";
 
@@ -251,10 +227,6 @@ function toggleAccordion(catDiv, detailsDiv) {
 }
 
 // --- 4. API CALL HANDLERS ------------------------
-
-/**
- * Securely updates an event's status
- */
 async function handleStatusUpdate(eventId, newStatus, tableRow) {
     try {
         const response = await fetch('/api/update-event-status', {
@@ -277,13 +249,11 @@ async function handleStatusUpdate(eventId, newStatus, tableRow) {
         tableRow.querySelectorAll('.filter').forEach(btn => btn.disabled = false);
         tableRow.querySelector(`.filter[data-status="${newStatus}"]`).disabled = true;
 
-        // --- ADD THIS BLOCK ---
         // After updating the row, find the parent and update the header
         const detailsDiv = tableRow.closest('.category-details');
         if (detailsDiv) {
             updateCategoryHeader(detailsDiv);
         }
-        // --- END OF NEW BLOCK ---
 
     } catch (error) {
         console.error('Error updating status:', error);
@@ -291,11 +261,7 @@ async function handleStatusUpdate(eventId, newStatus, tableRow) {
     }
 }
 
-/**
- * Securely deletes an event
- */
 async function handleDeleteEvent(eventId, eventName, tableRow) {
-    // Use a custom modal in a real app. confirm() is bad but simple.
     if (!confirm(`Are you sure you want to delete the event: "${eventName}"?`)) {
         return;
     }
@@ -312,7 +278,6 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
             throw new Error(err.error || 'Failed to delete event');
         }
 
-        // Remove the row from the table
         tableRow.style.opacity = 0;
         tableRow.style.transition = 'opacity 0.3s';
         setTimeout(() => { tableRow.remove(); }, 300);
@@ -323,9 +288,6 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
     }
 }
 
-/**
- * Recalculates and updates the status counts in a category's header.
- */
 function updateCategoryHeader(detailsDiv) {
     try {
         // 1. Find the header elements
@@ -343,7 +305,7 @@ function updateCategoryHeader(detailsDiv) {
 
         allRows.forEach(row => {
             const statusSpan = row.querySelector('.status');
-            if (!statusSpan) return; // Skip header or "no events" rows
+            if (!statusSpan) return; 
             
             const status = statusSpan.textContent.toLowerCase();
             
