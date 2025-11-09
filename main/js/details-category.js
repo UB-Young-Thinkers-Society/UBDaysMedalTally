@@ -1,15 +1,20 @@
 // --- 1. GLOBAL VARIABLES ---------------------------
+// Cache for all event data to avoid re-fetching
 let allCategoriesAndEvents = [];
-let currentCategoryId = null; // NEW: To remember the last selected category
+// NEW: To remember the last selected category
+let currentCategoryId = null;
 
 // --- 2. PAGE INITIALIZATION ------------------------
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. Load the "static" dropdowns (Categories and Teams)
     loadCategories();
     loadTeams();
-    updateTimestamp();
+    updateTimestamp(); // From your live-feed.js
 
+    // 2. Add event listeners to the dropdowns
     document.getElementById('filter-category').addEventListener('change', handleCategoryChange);
     document.getElementById('filter-event').addEventListener('change', handleEventChange);
+    // (We'll add a listener for the team dropdown later if needed)
 });
 
 function updateTimestamp() {
@@ -22,33 +27,33 @@ function updateTimestamp() {
 
 // --- 3. DROPDOWN POPULATION FUNCTIONS --------------
 
+/**
+ * Fetches all categories AND their events.
+ * Populates the first dropdown.
+ * MODIFIED: This is now a public, non-authenticated call.
+ */
 async function loadCategories() {
     const selectEl = document.getElementById('filter-category');
     const eventSelectEl = document.getElementById('filter-event');
     
     try {
-        // We need auth to get the event list for the dropdowns
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData.session) throw new Error('Session expired.');
-        
-        const response = await fetch('/api/data?type=allEvents', {
-            headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
-        });
+        // Use our merged API to get all categories and events in one go
+        const response = await fetch('/api/data?type=allEvents'); // No auth needed
         if (!response.ok) throw new Error('Failed to load categories');
         
         allCategoriesAndEvents = await response.json();
         
-        selectEl.innerHTML = '<option value="">Enter Event Category</option>';
+        selectEl.innerHTML = '<option value="">Enter Event Category</option>'; // Reset
         
         allCategoriesAndEvents.forEach(cat => {
             const option = document.createElement('option');
-            option.value = cat.id;
+            option.value = cat.id; // The Category UUID
             option.textContent = cat.name;
             selectEl.appendChild(option);
         });
         
         selectEl.disabled = false;
-        eventSelectEl.disabled = true;
+        eventSelectEl.disabled = true; // Disabled until a category is chosen
 
     } catch (error) {
         console.error(error);
@@ -56,28 +61,27 @@ async function loadCategories() {
     }
 }
 
+/**
+ * Fetches all teams and populates the third dropdown.
+ * MODIFIED: This is now a public, non-authenticated call.
+ */
 async function loadTeams() {
     const selectEl = document.getElementById('filter-department');
     
     try {
-        // We need auth to get the team list
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData.session) throw new Error('Session expired.');
-
-        const response = await fetch('/api/data?type=teams', {
-             headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
-        });
+        const response = await fetch('/api/data?type=teams'); // No auth needed
         if (!response.ok) throw new Error('Failed to load teams');
         
         const teams = await response.json();
         
-        selectEl.innerHTML = '<option value="">Enter Department</option>';
+        selectEl.innerHTML = '<option value="">Enter Department</option>'; // Reset
         
+        // Sort teams alphabetically by acronym
         teams.sort((a, b) => a.acronym.localeCompare(b.acronym));
         
         teams.forEach(team => {
             const option = document.createElement('option');
-            option.value = team.id;
+            option.value = team.id; // The Team UUID
             option.textContent = `${team.acronym} - ${team.name}`;
             selectEl.appendChild(option);
         });
@@ -104,6 +108,7 @@ function handleCategoryChange(e) {
     titleEl.textContent = '';
     
     if (!currentCategoryId) {
+        // "Enter Event Category" was selected
         tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">Please select a category to see rankings.</td></tr>';
         return;
     }
@@ -124,7 +129,7 @@ function handleCategoryChange(e) {
             eventSelectEl.innerHTML = '<option value="">No events found</option>';
         }
         
-        // Set title and fetch the CATEGORY TALLY
+        // Set title and fetch the NEW CATEGORY TALLY
         titleEl.textContent = category.name;
         fetchAndDisplayCategoryTally(currentCategoryId); // NEW
     }
@@ -184,7 +189,7 @@ async function fetchAndDisplayCategoryTally(categoryId) {
         // We have results! Render the tally table.
         // This reuses the table but shows medals instead of "1st, 2nd"
         tableBodyEl.innerHTML = ''; // Clear loading
-        let rank = 1;
+        
         tally.forEach(team => {
             const tr = document.createElement('tr');
             
@@ -201,7 +206,6 @@ async function fetchAndDisplayCategoryTally(categoryId) {
                 </td>
             `;
             tableBodyEl.appendChild(tr);
-            rank++;
         });
 
     } catch (error) {
@@ -213,6 +217,7 @@ async function fetchAndDisplayCategoryTally(categoryId) {
 /**
  * Fetches and renders the rankings for a SPECIFIC EVENT.
  * (This is your old 'fetchAndDisplayRankings' function)
+ * MODIFIED: This is now a public, non-authenticated call.
  */
 async function fetchAndDisplayEventRankings(event) {
     const tableBodyEl = document.getElementById('category-rankings-body');
@@ -226,13 +231,7 @@ async function fetchAndDisplayEventRankings(event) {
 
     // 2. Status is 'published', so get results
     try {
-        // We need auth to get event-specific results
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData.session) throw new Error('Session expired.');
-
-        const response = await fetch(`/api/data?type=eventResults&eventId=${event.id}`, {
-            headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
-        });
+        const response = await fetch(`/api/data?type=eventResults&eventId=${event.id}`); // No auth needed
         if (!response.ok) throw new Error('Failed to fetch results.');
 
         const results = await response.json();

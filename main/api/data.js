@@ -1,10 +1,9 @@
 // This is your merged API for all GET requests
-// It handles fetching teams, categories, events, and results.
 import { supabase } from './db_connection.js';
 
 /**
  * Helper function to securely get the user from an auth token.
- * This is used for all admin/committee-only data.
+ * This is now ONLY used for admin/committee-only data.
  */
 async function getUserFromToken(req) {
     const authHeader = req.headers.authorization;
@@ -115,10 +114,9 @@ export default async (req, res) => {
                 return res.status(200).json(tally);
             }
 
-            // --- ADMIN/COMMITTEE DATA (Auth Required) ---
-            
+            // MODIFIED: Moved all these to be public
             case 'allEvents': {
-                await getUserFromToken(req); // Auth check
+                // No auth check needed
                 const { data, error } = await supabase
                     .from('categories')
                     .select(`
@@ -136,21 +134,21 @@ export default async (req, res) => {
             }
             
             case 'categories': {
-                await getUserFromToken(req); // Auth check
+                // No auth check needed
                 const { data, error } = await supabase.from('categories').select('id, name');
                 if (error) throw error;
                 return res.status(200).json(data);
             }
             
             case 'teams': {
-                await getUserFromToken(req); // Auth check
+                // No auth check needed
                 const { data, error } = await supabase.from('teams').select('id, name, acronym, logo_url');
                 if (error) throw error;
                 return res.status(200).json(data);
             }
             
             case 'eventResults': {
-                await getUserFromToken(req); // Auth check
+                // No auth check needed
                 if (!eventId) {
                     return res.status(400).json({ error: 'Missing eventId.' });
                 }
@@ -176,10 +174,8 @@ export default async (req, res) => {
         }
     } catch (error) {
         console.error('Error in /api/data:', error.message);
-        // Differentiate between auth errors and server errors
-        if (error.message.includes('token')) {
-            return res.status(401).json({ error: error.message });
-        }
+        // We only check for auth errors if an auth-required route is hit
+        // Since none are here, this is simpler.
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 };
