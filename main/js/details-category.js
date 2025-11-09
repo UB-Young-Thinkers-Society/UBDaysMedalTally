@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close dropdown if clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select-wrapper')) {
-            document.getElementById('department-list').classList.add('hidden');
+            const listEl = document.getElementById('department-list');
+            if (listEl) listEl.classList.add('hidden');
         }
     });
 });
@@ -58,41 +59,29 @@ async function loadCategories() {
     }
 }
 
-/**
- * MODIFIED: (Request #1) Fetches all teams and populates the NEW
- * custom dropdown list.
- */
 async function loadTeams() {
+    // ... (This function is unchanged)
     const listEl = document.getElementById('department-list');
     const boxEl = document.getElementById('filter-department');
-    
     try {
         const response = await fetch('/api/data?type=teams'); 
         if (!response.ok) throw new Error('Failed to load teams');
-        
-        allTeamsData = await response.json(); // Save to cache
-        
-        listEl.innerHTML = ''; // Clear "Loading..."
-        
+        allTeamsData = await response.json(); 
+        listEl.innerHTML = ''; 
         allTeamsData.sort((a, b) => a.name.localeCompare(b.name));
-        
         allTeamsData.forEach(team => {
             const item = document.createElement('div');
             item.className = 'custom-select-item';
             item.dataset.teamId = team.id;
-            // Store all data on the element
             item.dataset.teamName = team.name;
             item.dataset.teamLogo = team.logo_url;
-            
-            // (Request #1) Show logo and full name
             item.innerHTML = `
                 <img src="${team.logo_url}" alt="${team.name} Logo" onerror="this.src='img/Login-Logo.png';">
                 <span class="name">${team.name}</span>
             `;
             listEl.appendChild(item);
         });
-        boxEl.disabled = false;
-
+        if (boxEl) boxEl.disabled = false;
     } catch (error) {
         console.error(error);
         listEl.innerHTML = '<div class="custom-select-item">Error loading</div>';
@@ -100,12 +89,17 @@ async function loadTeams() {
 }
 
 function handleCategoryChange(e) {
-    // ... (This function is unchanged)
     currentCategory = null;
     const categoryId = e.target.value;
     const eventSelectEl = document.getElementById('filter-event');
     const titleEl = document.getElementById('details-title');
     const tableBodyEl = document.getElementById('category-rankings-body');
+
+    // --- (FIX #2) ---
+    // Reset department dropdown and show category view
+    resetDeptDropdown();
+    showView('category');
+    // --- END FIX ---
 
     eventSelectEl.innerHTML = '<option value="">Enter Event</option>';
     eventSelectEl.disabled = true;
@@ -114,7 +108,6 @@ function handleCategoryChange(e) {
     if (!categoryId) {
         tableBodyEl.innerHTML = '<tr><td colspan="5" class="details-message empty">Please select a category to see rankings.</td></tr>';
         toggleTableHeaders('tally'); 
-        showView('category'); // NEW: Show category view
         return;
     }
 
@@ -137,7 +130,7 @@ function handleCategoryChange(e) {
     }
 }
 
-// --- 4. NEW: CUSTOM DROPDOWN LOGIC ---------------
+// --- 4. CUSTOM DROPDOWN LOGIC ---------------
 
 function toggleDeptDropdown() {
     document.getElementById('department-list').classList.toggle('hidden');
@@ -151,7 +144,6 @@ function handleDeptSelect(e) {
     const listEl = document.getElementById('department-list');
     const { teamId, teamName, teamLogo } = item.dataset;
 
-    // Update the selected box
     boxEl.dataset.teamId = teamId;
     boxEl.innerHTML = `
         <span class="selected-team">
@@ -159,35 +151,46 @@ function handleDeptSelect(e) {
             <span class="name">${teamName}</span>
         </span>
     `;
-    listEl.classList.add('hidden'); // Close dropdown
+    listEl.classList.add('hidden'); 
 
-    // --- (Request #2) ---
-    // A team was selected, fetch and display its results
     fetchAndDisplayDepartmentTally(teamId);
+}
+
+/**
+ * NEW: (FIX #2) Helper function to reset the department dropdown
+ */
+function resetDeptDropdown() {
+    const boxEl = document.getElementById('filter-department');
+    if (boxEl) {
+        boxEl.dataset.teamId = "null";
+        boxEl.innerHTML = `<span class="placeholder">Enter Department</span>`;
+    }
 }
 
 // --- 5. RANKING DISPLAY LOGIC ----------------------
 
-// NEW: Helper to switch between the two views
 function showView(viewType) {
+    // ... (This function is unchanged)
     const categoryView = document.getElementById('category-details-view');
     const deptView = document.getElementById('department-details-view');
-
     if (viewType === 'department') {
         categoryView.style.display = 'none';
         deptView.style.display = 'block';
-    } else { // 'category'
+    } else { 
         categoryView.style.display = 'block';
         deptView.style.display = 'none';
     }
 }
 
 function handleEventChange(e) {
-    // ... (This function is unchanged, but we add one line)
     const eventId = e.target.value;
     const titleEl = document.getElementById('details-title');
 
-    showView('category'); // NEW: Ensure category view is visible
+    // --- (FIX #2) ---
+    // Reset department dropdown and show category view
+    resetDeptDropdown();
+    showView('category');
+    // --- END FIX ---
 
     if (!eventId) {
         if (currentCategory) {
@@ -221,7 +224,7 @@ function toggleTableHeaders(mode) {
 
 async function fetchAndDisplayCategoryTally(categoryId) {
     // ... (This function is unchanged)
-    showView('category'); // NEW: Ensure category view is visible
+    showView('category'); 
     toggleTableHeaders('tally'); 
     const tableBodyEl = document.getElementById('category-rankings-body');
     tableBodyEl.innerHTML = `<tr><td colspan="5" class="details-message loading">Loading category tally...</td></tr>`; 
@@ -256,7 +259,7 @@ async function fetchAndDisplayCategoryTally(categoryId) {
 
 async function fetchAndDisplayEventRankings(event) {
     // ... (This function is unchanged)
-    showView('category'); // NEW: Ensure category view is visible
+    showView('category');
     toggleTableHeaders('rank'); 
     const tableBodyEl = document.getElementById('category-rankings-body');
     tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message loading">Loading event rankings...</td></tr>`; 
@@ -301,30 +304,22 @@ function renderRankingsTable(results, tableBodyEl) {
     });
 }
 
-// --- 6. NEW: DEPARTMENT TALLY LOGIC (Request #2 & #3) ---
+// --- 6. DEPARTMENT TALLY LOGIC (Request #2 & #3) ---
 
-/**
- * NEW: Fetches and renders the results for a single department.
- */
 async function fetchAndDisplayDepartmentTally(teamId) {
-    showView('department'); // Show the department view
+    // ... (This function is unchanged)
+    showView('department'); 
     const view = document.getElementById('department-details-view');
     view.innerHTML = `<div class="details-message loading">Loading results for department...</div>`;
-
     try {
         const response = await fetch(`/api/data?type=departmentResults&teamId=${teamId}`);
         if (!response.ok) throw new Error('Failed to fetch department results.');
-
         const data = await response.json();
-        
-        // (Request #3) Build the medal tally icons
         const medalTallyHTML = `
             <span class="gold"><span class="medal-icon gold"></span> ${data.totals.totalGold}</span>
             <span class="silver"><span class="medal-icon silver"></span> ${data.totals.totalSilver}</span>
             <span class="bronze"><span class="medal-icon bronze"></span> ${data.totals.totalBronze}</span>
         `;
-        
-        // Build the main table HTML
         let tableHTML = `
             <div class="department-header">
                 <div class="department-title">
@@ -335,7 +330,6 @@ async function fetchAndDisplayDepartmentTally(teamId) {
                     ${medalTallyHTML}
                 </div>
             </div>
-            
             <table class="department-events-table">
                 <thead>
                     <tr>
@@ -347,22 +341,16 @@ async function fetchAndDisplayDepartmentTally(teamId) {
                 </thead>
                 <tbody>
         `;
-        
-        // Loop over the categories and events
         const categoryNames = Object.keys(data.categories).sort();
         if (categoryNames.length === 0) {
             tableHTML += `<tr><td colspan="4" class="details-message empty" style="padding-top: 30px;">This department has no published results.</td></tr>`;
         }
-        
         for (const categoryName of categoryNames) {
-            // Add a bold category header row
             tableHTML += `
                 <tr class="category-header-row">
                     <td colspan="4" class="event-name" style="padding-top: 20px;"><strong>${categoryName}</strong></td>
                 </tr>
             `;
-            
-            // Add a row for each event in that category
             data.categories[categoryName].forEach(event => {
                 tableHTML += `
                     <tr>
@@ -374,10 +362,8 @@ async function fetchAndDisplayDepartmentTally(teamId) {
                 `;
             });
         }
-        
         tableHTML += `</tbody></table>`;
         view.innerHTML = tableHTML;
-
     } catch (error) {
         console.error('Error fetching department tally:', error);
         view.innerHTML = `<div class="details-message error">${error.message}</div>`;

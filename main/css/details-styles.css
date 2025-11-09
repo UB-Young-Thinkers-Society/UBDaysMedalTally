@@ -150,21 +150,20 @@
    NEW STYLES FOR BUG FIXES
 ========================================= */
 
-/* (Bug #2) Fix for centering ranks 4th, 5th, etc. */
+/* (Bug #1) Fix for centering ranks 4th, 5th, etc. */
+/* ... (This rule from the previous step is still needed) ... */
 .details-rank-list .rank-display {
-    text-align: center; /* This centers ALL ranks */
+    text-align: center; 
     font-size: 1.1rem;
     font-weight: 700;
     color: #333;
 }
-/* Keep the color for 1st, 2nd, 3rd */
 .rank-display.gold { color: #FFD700; }
 .rank-display.silver { color: #B0B0B0; }
 .rank-display.bronze { color: #C9894B; }
 
-
 /* (Bug #1) Styles for the new tally columns (G, S, B, Total) */
-/* These are copied from your live-feed.css */
+/* ... (These rules from the previous step are still needed) ... */
 .details-rank-list th.gold,
 .details-rank-list td.gold {
     color: #FFD700;
@@ -200,6 +199,8 @@
     position: relative;
     flex-basis: 33.3%;
 }
+/* (FIX #1) Align logo and text in department dropdown
+*/
 .custom-select-box {
     background: #fff;
     border: 1px solid #ddd;
@@ -208,7 +209,7 @@
     font-size: 1rem;
     cursor: pointer;
     display: flex;
-    align-items: center;
+    align-items: center; /* THIS IS THE FIX */
     gap: 12px;
 }
 .custom-select-box .placeholder {
@@ -287,7 +288,7 @@
     border: 2px solid #eee;
 }
 .department-title h2 {
-    font-size: 1.8rem;
+    font-size: 2rem; /* Was 1.8rem */
     font-weight: 600;
     color: #333;
     margin: 0;
@@ -334,10 +335,12 @@
 .department-events-table .event-name {
     font-weight: 600;
     color: #333;
+    font-size: 1.15rem; /* NEW */
 }
 .department-events-table .sub-event {
     padding-left: 20px;
     color: #555;
+    font-size: 1.1rem; /* NEW */
 }
 .department-events-table .gold { text-align: center; color: #FFD700; font-weight: 700; }
 .department-events-table .silver { text-align: center; color: #B0B0B0; font-weight: 700; }
