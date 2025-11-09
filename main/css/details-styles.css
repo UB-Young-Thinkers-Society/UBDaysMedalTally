@@ -1,126 +1,73 @@
-/* 1. Import the base styles from your live feed.
-     This assumes 'live-feed.css' is in the same 'css' folder.
+/* 1. IMPORTS
+     Import the main live-feed styles first
 */
 @import url('live-feed.css');
 
-/* 2. New styles for the filter bar */
+/* 2. NEW STYLES FOR DETAILS PAGE
+*/
+
 .details-filter-bar {
     display: flex;
-    gap: 12px;
+    gap: 16px;
     margin-bottom: 24px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid #eee;
 }
 
 .details-filter-bar select {
-    flex: 1; /* Make all three dropdowns share the space */
+    flex-basis: 33.3%;
     padding: 10px 16px;
     border-radius: 8px;
     border: 1px solid #ddd;
     font-size: 1rem;
-    font-family: "Albert Sans", sans-serif;
-    font-weight: 500;
-    color: #444;
+    outline: none;
     background-color: #fff;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 10px;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 10px;
     cursor: pointer;
 }
 
-/* 3. New styles for the "Overall Category" page */
-.details-title {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #333;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
+.details-filter-bar select:disabled {
+    background-color: #f8f8f8;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.details-title-bar {
     border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
 }
 
-/* Styles for the rank number (1st, 2nd, 3rd) */
-.rank-display {
-    font-weight: 700;
-    font-size: 1.1rem;
-    text-align: right;
-    width: 60px;
-}
-.rank-display.gold { color: #d4a017; } /* A darker gold for text */
-.rank-display.silver { color: #aaa; }
-.rank-display.bronze { color: #C9894B; }
-
-
-/* 4. New styles for the "By Department" page */
-.department-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #eee;
-}
-
-.department-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.department-info .dept-logo {
-    width: 40px; /* Slightly larger logo */
-    height: 40px;
-}
-.department-info .dept-name {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: #333;
-}
-
-.medal-summary {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-.medal-summary span {
-    font-size: 1rem;
+.details-title-bar h2 {
+    margin: 0;
+    font-size: 1.8rem;
     font-weight: 600;
-    color: #555;
-}
-/* Little dots matching the medal colors */
-.medal-summary span::before {
-    content: '●';
-    margin-right: 6px;
-    font-size: 1.2rem;
-}
-.medal-summary .gold::before { color: #FFD700; }
-.medal-summary .silver::before { color: #B0B0B0; }
-.medal-summary .bronze::before { color: #C9894B; }
-
-/* Styles for the event table (main vs sub-row) */
-.event-main-row td {
-    font-weight: 700;
     color: #333;
+}
+
+/* Base styles for all ranking tables */
+.details-rank-list {
+    margin-top: 0;
+    border: none;
+}
+.details-rank-list th {
     padding-top: 16px;
-    padding-bottom: 8px;
-    /* This row has no border */
-    border-bottom: none !important; 
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #222;
+    background: none;
 }
-
-.event-sub-row td:first-child {
-    padding-left: 30px; /* Indent the sub-events */
+.details-rank-list tr {
+    border-bottom: 1px solid #f3f3f3;
 }
-
-/* Remove bottom border from last sub-row in a group */
-.event-sub-row:last-of-type {
-    border-bottom: none !important;
+.details-rank-list td {
+    padding-top: 16px;
+    padding-bottom: 16px;
 }
-
-/* =========================================
-   NEW STYLES FOR DYNAMIC CONTENT
-========================================= */
 
 /* Styles for loading/empty/error messages in the table */
 .details-message {
@@ -129,29 +76,12 @@
     font-size: 1.1rem;
     font-weight: 600;
 }
-.details-message.loading {
-    color: #555;
-}
-.details-message.empty {
-    color: #777;
-}
-.details-message.error {
-    color: #e74c3c;
-}
+.details-message.loading { color: #555; }
+.details-message.empty { color: #777; }
+.details-message.error { color: #e74c3c; }
 
-/* Style for a disabled dropdown */
-.details-filter-bar select:disabled {
-    background-color: #f8f8f8;
-    color: #aaa;
-    cursor: not-allowed;
-}
 
-/* =========================================
-   NEW STYLES FOR BUG FIXES
-========================================= */
-
-/* (Bug #1) Fix for centering ranks 4th, 5th, etc. */
-/* ... (This rule from the previous step is still needed) ... */
+/* (Bug #2) Fix for centering ranks 4th, 5th, etc. */
 .details-rank-list .rank-display {
     text-align: center; 
     font-size: 1.1rem;
@@ -162,8 +92,8 @@
 .rank-display.silver { color: #B0B0B0; }
 .rank-display.bronze { color: #C9894B; }
 
+
 /* (Bug #1) Styles for the new tally columns (G, S, B, Total) */
-/* ... (These rules from the previous step are still needed) ... */
 .details-rank-list th.gold,
 .details-rank-list td.gold {
     color: #FFD700;
@@ -189,18 +119,16 @@
     text-align: center;
 }
 
+
 /* =========================================
-   NEW STYLES FOR DEPARTMENT DROPDOWN & VIEW
+   STYLES FOR DEPARTMENT DROPDOWN & VIEW
 ========================================= */
 
-/* (1) Custom Dropdown for Departments (Request #1) */
-/* Wrapper to position the list */
+/* (FIX #1) Align logo and text in department dropdown */
 .custom-select-wrapper {
     position: relative;
     flex-basis: 33.3%;
 }
-/* (FIX #1) Align logo and text in department dropdown
-*/
 .custom-select-box {
     background: #fff;
     border: 1px solid #ddd;
@@ -267,7 +195,7 @@
 }
 
 
-/* (2) Department-Specific View (Request #2) */
+/* (2) Department-Specific View */
 .department-header {
     display: flex;
     justify-content: space-between;
@@ -287,6 +215,7 @@
     border-radius: 50%;
     border: 2px solid #eee;
 }
+/* (FIX #3) Increase font size */
 .department-title h2 {
     font-size: 2rem; /* Was 1.8rem */
     font-weight: 600;
@@ -305,7 +234,6 @@
     align-items: center;
     gap: 6px;
 }
-/* (3) Medal Icons (Request #3) */
 .medal-icon {
     width: 16px;
     height: 16px;
@@ -323,7 +251,7 @@
 }
 .department-events-table th, 
 .department-events-table td {
-    padding: 12px 0; /* No horizontal padding */
+    padding: 12px 0;
     text-align: left;
     border-bottom: 1px solid #f0f0f0;
 }
@@ -332,11 +260,13 @@
     font-weight: 700;
     color: #222;
 }
+/* (FIX #3) Increase font size */
 .department-events-table .event-name {
     font-weight: 600;
     color: #333;
     font-size: 1.15rem; /* NEW */
 }
+/* (FIX #3) Increase font size */
 .department-events-table .sub-event {
     padding-left: 20px;
     color: #555;
@@ -346,7 +276,6 @@
 .department-events-table .silver { text-align: center; color: #B0B0B0; font-weight: 700; }
 .department-events-table .bronze { text-align: center; color: #C9894B; font-weight: 700; }
 
-/* Headers for the specific event results */
 .department-events-table th.gold { color: #FFD700; text-align: center; }
 .department-events-table th.silver { color: #B0B0B0; text-align: center; }
 .department-events-table th.bronze { color: #C9894B; text-align: center; }
