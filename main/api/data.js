@@ -3,17 +3,15 @@ import { supabase } from './db_connection.js';
 
 /**
  * Helper function to securely get the user from an auth token.
- * This is now ONLY used for admin/committee-only data.
  */
 async function getUserFromToken(req) {
+    // ... (This function is unchanged)
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         throw new Error('Authorization header missing or invalid.');
     }
     const token = authHeader.split(' ')[1];
-    
     const { data: { user }, error } = await supabase.auth.getUser(token);
-    
     if (error || !user) {
         throw new Error('Invalid or expired token.');
     }
@@ -22,16 +20,13 @@ async function getUserFromToken(req) {
 
 /**
  * Helper function to build the medal tally.
- * Reused by 'medalTally' and 'categoryTally'.
  */
 async function getMedalTally(categoryId = null) {
-    // 1. Get all teams
+    // ... (This function is unchanged) ...
     const { data: allTeams, error: allTeamsError } = await supabase
         .from('teams')
         .select('id, name, acronym, logo_url');
     if (allTeamsError) throw allTeamsError;
-
-    // 2. Get all published results, with an optional category filter
     let query = supabase
         .from('results')
         .select(`
@@ -42,27 +37,15 @@ async function getMedalTally(categoryId = null) {
             events!inner( status, category_id )
         `)
         .eq('events.status', 'published');
-    
     if (categoryId) {
         query = query.eq('events.category_id', categoryId);
     }
-
     const { data: publishedResults, error: resultsError } = await query;
     if (resultsError) throw resultsError;
-
-    // 3. Create a map of all teams to initialize their counts
     const tallyMap = new Map();
     allTeams.forEach(team => {
-        tallyMap.set(team.id, {
-            ...team,
-            gold: 0,
-            silver: 0,
-            bronze: 0,
-            total: 0
-        });
+        tallyMap.set(team.id, { ...team, gold: 0, silver: 0, bronze: 0, total: 0 });
     });
-
-    // 4. Sum the medals from the published results
     publishedResults.forEach(result => {
         if (tallyMap.has(result.team_id)) {
             const team = tallyMap.get(result.team_id);
@@ -71,25 +54,17 @@ async function getMedalTally(categoryId = null) {
             team.bronze += result.bronze_awarded;
         }
     });
-
-    // 5. Convert map back to an array
     const medalTally = Array.from(tallyMap.values()).map(team => ({
         ...team,
         total: team.gold + team.silver + team.bronze
     }));
-    
-    // 6. Filter out teams with 0 total medals (for category tally)
-    // For the main medal tally, we want all teams.
     const filteredTally = categoryId ? medalTally.filter(team => team.total > 0) : medalTally;
-
-    // 7. Sort the final list
     filteredTally.sort((a, b) => {
         if (a.gold !== b.gold) return b.gold - a.gold;
         if (a.silver !== b.silver) return b.silver - a.silver;
         if (a.bronze !== b.bronze) return b.bronze - a.bronze;
         return a.name.localeCompare(b.name);
     });
-    
     return filteredTally;
 }
 
@@ -97,7 +72,7 @@ async function getMedalTally(categoryId = null) {
 // --- Main API Handler ---
 export default async (req, res) => {
     try {
-        const { type, eventId, categoryId } = req.query;
+        const { type, eventId, categoryId, teamId } = req.query; // Added teamId
 
         switch (type) {
             
@@ -107,75 +82,105 @@ export default async (req, res) => {
                 const tally = await getMedalTally(null);
                 return res.status(200).json(tally);
             }
-
             case 'categoryTally': {
                 if (!categoryId) return res.status(400).json({ error: 'Missing categoryId.' });
                 const tally = await getMedalTally(categoryId);
                 return res.status(200).json(tally);
             }
-
-            // MODIFIED: Moved all these to be public
             case 'allEvents': {
-                // No auth check needed
                 const { data, error } = await supabase
                     .from('categories')
-                    .select(`
-                        id,
-                        name,
-                        events (
-                            id,
-                            name,
-                            status,
-                            medal_value
-                        )
-                    `);
+                    .select(`id, name, events (id, name, status, medal_value)`);
                 if (error) throw error;
                 return res.status(200).json(data);
             }
-            
             case 'categories': {
-                // No auth check needed
                 const { data, error } = await supabase.from('categories').select('id, name');
                 if (error) throw error;
                 return res.status(200).json(data);
             }
-            
             case 'teams': {
-                // No auth check needed
                 const { data, error } = await supabase.from('teams').select('id, name, acronym, logo_url');
                 if (error) throw error;
                 return res.status(200).json(data);
             }
-            
             case 'eventResults': {
-                // No auth check needed
-                if (!eventId) {
-                    return res.status(400).json({ error: 'Missing eventId.' });
-                }
+                if (!eventId) return res.status(400).json({ error: 'Missing eventId.' });
                 const { data, error } = await supabase
                     .from('results')
-                    .select(`
-                        rank,
-                        teams (
-                            id,
-                            name,
-                            acronym,
-                            logo_url
-                        )
-                    `)
+                    .select('rank, teams (id, name, acronym, logo_url)')
                     .eq('event_id', eventId)
                     .order('rank', { ascending: true });
                 if (error) throw error;
                 return res.status(200).json(data);
             }
-            
+
+            // --- NEW CASE FOR REQUEST #2 ---
+            case 'departmentResults': {
+                if (!teamId) {
+                    return res.status(400).json({ error: 'Missing teamId.' });
+                }
+
+                // Get all results for this team from published events
+                const { data, error } = await supabase
+                    .from('results')
+                    .select(`
+                        gold_awarded,
+                        silver_awarded,
+                        bronze_awarded,
+                        events!inner (
+                            name,
+                            categories ( name )
+                        )
+                    `)
+                    .eq('team_id', teamId)
+                    .eq('events.status', 'published');
+                
+                if (error) throw error;
+                
+                // We have the results, now let's get the team's info
+                const { data: teamInfo, error: teamError } = await supabase
+                    .from('teams')
+                    .select('name, logo_url, acronym')
+                    .eq('id', teamId)
+                    .single(); // Get just one team
+
+                if (teamError) throw teamError;
+
+                // Group the results by category
+                const categories = {};
+                data.forEach(r => {
+                    const categoryName = r.events.categories.name;
+                    if (!categories[categoryName]) {
+                        categories[categoryName] = [];
+                    }
+                    categories[categoryName].push({
+                        event_name: r.events.name,
+                        gold: r.gold_awarded,
+                        silver: r.silver_awarded,
+                        bronze: r.bronze_awarded
+                    });
+                });
+                
+                // Calculate totals
+                const totalGold = data.reduce((sum, r) => sum + r.gold_awarded, 0);
+                const totalSilver = data.reduce((sum, r) => sum + r.silver_awarded, 0);
+                const totalBronze = data.reduce((sum, r) => sum + r.bronze_awarded, 0);
+
+                // Send the final payload
+                res.status(200).json({
+                    teamInfo,
+                    totals: { totalGold, totalSilver, totalBronze },
+                    categories
+                });
+                break;
+            }
+
             default:
                 return res.status(400).json({ error: 'Invalid data type requested.' });
         }
     } catch (error) {
         console.error('Error in /api/data:', error.message);
-        // We only check for auth errors if an auth-required route is hit
-        // Since none are here, this is simpler.
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 };

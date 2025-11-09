@@ -189,3 +189,161 @@
     color: #222;
     text-align: center;
 }
+
+/* =========================================
+   NEW STYLES FOR DEPARTMENT DROPDOWN & VIEW
+========================================= */
+
+/* (1) Custom Dropdown for Departments (Request #1) */
+/* Wrapper to position the list */
+.custom-select-wrapper {
+    position: relative;
+    flex-basis: 33.3%;
+}
+.custom-select-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.custom-select-box .placeholder {
+    color: #777;
+}
+.custom-select-box .selected-team img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+.custom-select-box .selected-team .name {
+    font-weight: 500;
+    color: #333;
+}
+.custom-select-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    z-index: 10;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.custom-select-list.hidden {
+    display: none;
+}
+.custom-select-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.custom-select-item:hover {
+    background-color: #f5f5f5;
+}
+.custom-select-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+.custom-select-item .name {
+    font-weight: 500;
+    color: #333;
+}
+
+
+/* (2) Department-Specific View (Request #2) */
+.department-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 16px;
+    margin-top: 16px;
+}
+.department-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.department-title img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #eee;
+}
+.department-title h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+.department-medal-tally {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.department-medal-tally span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+/* (3) Medal Icons (Request #3) */
+.medal-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.medal-icon.gold { background: #FFD700; }
+.medal-icon.silver { background: #B0B0B0; }
+.medal-icon.bronze { background: #C9894B; }
+
+.department-events-table {
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: collapse;
+}
+.department-events-table th, 
+.department-events-table td {
+    padding: 12px 0; /* No horizontal padding */
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+.department-events-table th {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #222;
+}
+.department-events-table .event-name {
+    font-weight: 600;
+    color: #333;
+}
+.department-events-table .sub-event {
+    padding-left: 20px;
+    color: #555;
+}
+.department-events-table .gold { text-align: center; color: #FFD700; font-weight: 700; }
+.department-events-table .silver { text-align: center; color: #B0B0B0; font-weight: 700; }
+.department-events-table .bronze { text-align: center; color: #C9894B; font-weight: 700; }
+
+/* Headers for the specific event results */
+.department-events-table th.gold { color: #FFD700; text-align: center; }
+.department-events-table th.silver { color: #B0B0B0; text-align: center; }
+.department-events-table th.bronze { color: #C9894B; text-align: center; }
