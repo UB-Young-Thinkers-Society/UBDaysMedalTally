@@ -2,7 +2,7 @@
 async function checkSession(authorizedRole) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-        window.location.replace("index.html");
+        window.location.replace("login.html");
         console.log("Invalid session. Redirecting to login.");
     } else {
         const { data: userData, error: userError } = await supabase
@@ -32,7 +32,7 @@ async function signOut() {
         console.error("Error logging out:" + error.message);
     } else {
         console.log("Successfully logged out.");
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 }
 

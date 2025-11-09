@@ -9,7 +9,7 @@ async function checkSession() {
 
     if (sessionError || !sessionData.session) {
         // No one is logged in, redirect to login
-        window.location.replace("index.html");
+        window.location.replace("login.html");
         return;
     }
 
@@ -25,7 +25,7 @@ async function checkSession() {
         if (!response.ok) {
             // If the token is bad, sign out and redirect
             await supabase.auth.signOut(); 
-            window.location.replace("index.html");
+            window.location.replace("login.html");
             return;
         }
 
@@ -38,7 +38,7 @@ async function checkSession() {
 
     } catch (error) {
         console.error('Error checking session:', error);
-        window.location.replace("index.html");
+        window.location.replace("login.html");
     }
 }
 
@@ -92,7 +92,7 @@ async function signOut() {
         console.error("Error logging out:" + error.message);
     } else {
         console.log("Successfully logged out.");
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 }
 

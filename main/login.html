@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBDays Medal Tally</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="icon" type="img/Login-Logo.png" href="img/Login-Logo.png">
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // The ANON key is safe to expose for client-side auth.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="login-section">
+            <img src="img/Login-Logo.png" alt="Logo" class="logo">
+            <h2>Welcome Back</h2>
+
+            <form id="loginForm">
+                <div id="formInput">
+                    <p class="labelOne"> &nbsp&nbspEmail Address </p>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div id="formInput">
+                    <p class="labelTwo"> &nbsp&nbspPassword </p>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="login-btn" id="login-button">Login</button>
+
+                <!-- NEW: Element to show error messages -->
+                <div id="error-message" style="color: red; margin-top: 15px; text-align: center; font-weight: 500;"></div>
+            </form>
+
+        </div>
+        <div class="image-section">
+            <img src="img/Login-Group.png" alt="Group" class="group-photo">
+        </div>
+    </div>
+    
+    <script src="js/login-logic.js" defer></script>
+</body>
+</html>

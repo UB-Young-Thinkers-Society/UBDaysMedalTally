@@ -108,6 +108,6 @@ async function signOut() {
         console.error("Error logging out:" + error.message);
     } else {
         console.log("Successfully logged out.");
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 }

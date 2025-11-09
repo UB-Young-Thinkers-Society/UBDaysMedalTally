@@ -3,7 +3,7 @@
 body {
     margin: 0;
     font-family: "Albert Sans", sans-serif;
-    background: url('img/BG.png') no-repeat center center fixed;
+    background: url('../img/BG.png') no-repeat center center fixed;
     position: relative;
     min-height: 100vh;
     letter-spacing: -.5px;
@@ -24,6 +24,7 @@ body {
     font-family: "Albert Sans", sans-serif;
     font-size: 5rem;
     font-weight: 800;
+    letter-spacing: -3px;
     color: #444;
     margin-bottom: 0;
 }

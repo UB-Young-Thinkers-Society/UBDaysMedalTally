@@ -11,7 +11,7 @@ let sortableInstance = null; // To hold the SortableJS object
 async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
-        window.location.replace("index.html");
+        window.location.replace("login.html");
         return;
     }
     const accessToken = sessionData.session.access_token;
@@ -22,23 +22,23 @@ async function checkSession(authorizedRole) {
         });
         if (!response.ok) {
             await supabase.auth.signOut();
-            window.location.replace("index.html");
+            window.location.replace("login.html");
             return;
         }
         const { role } = await response.json();
         if (role !== authorizedRole && role !== "admin") {
             if (role === "tabHead") window.location.replace("tabulation.html");
-            else window.location.replace("index.html");
+            else window.location.replace("login.html");
         }
     } catch (error) {
         console.error('Error checking session:', error);
-        window.location.replace("index.html");
+        window.location.replace("login.html");
     }
 }
 async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) console.error("Error logging out:" + error.message);
-    else window.location.href = 'index.html';
+    else window.location.href = 'login.html';
 }
 
 

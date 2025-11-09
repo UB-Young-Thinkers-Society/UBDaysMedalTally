@@ -7,7 +7,7 @@ async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError || !sessionData.session) {
-        window.location.replace("index.html");
+        window.location.replace("login.html");
         return;
     }
 
@@ -21,7 +21,7 @@ async function checkSession(authorizedRole) {
 
         if (!response.ok) {
             await supabase.auth.signOut(); 
-            window.location.replace("index.html");
+            window.location.replace("login.html");
             return;
         }
 
@@ -32,7 +32,7 @@ async function checkSession(authorizedRole) {
             if (role === "committee") {
                 window.location.replace("computation.html");
             } else {
-                window.location.replace("index.html"); // Fallback
+                window.location.replace("login.html"); // Fallback
             }
         }
         
@@ -40,7 +40,7 @@ async function checkSession(authorizedRole) {
 
     } catch (error) {
         console.error('Error checking session:', error);
-        window.location.replace("index.html");
+        window.location.replace("login.html");
     }
 }
 
@@ -50,7 +50,7 @@ async function signOut() {
         console.error("Error logging out:" + error.message);
     } else {
         console.log("Successfully logged out.");
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 }
 
