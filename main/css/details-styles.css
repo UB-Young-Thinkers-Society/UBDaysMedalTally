@@ -144,8 +144,8 @@
     color: #777;
 }
 .custom-select-box .selected-team img {
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #eee;
