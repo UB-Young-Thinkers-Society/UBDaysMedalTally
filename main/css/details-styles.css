@@ -1,0 +1,287 @@
+/* 1. IMPORTS
+     Import the main live-feed styles first
+*/
+@import url('live-feed.css');
+
+/* 2. NEW STYLES FOR DETAILS PAGE
+*/
+
+.details-filter-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.details-filter-bar select {
+    flex-basis: 33.3%;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+    outline: none;
+    background-color: #fff;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 10px;
+    cursor: pointer;
+}
+
+.details-filter-bar select:disabled {
+    background-color: #f8f8f8;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+.details-title-bar {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+}
+
+.details-title-bar h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Base styles for all ranking tables */
+.details-rank-list {
+    margin-top: 0;
+    border: none;
+}
+.details-rank-list th {
+    padding-top: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #222;
+    background: none;
+}
+.details-rank-list tr {
+    border-bottom: 1px solid #f3f3f3;
+}
+.details-rank-list td {
+    padding-top: 16px;
+    padding-bottom: 16px;
+}
+
+/* Styles for loading/empty/error messages in the table */
+.details-message {
+    text-align: center;
+    padding: 40px 20px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+.details-message.loading { color: #555; }
+.details-message.empty { color: #777; }
+.details-message.error { color: #e74c3c; }
+
+
+/* (Bug #2) Fix for centering ranks 4th, 5th, etc. */
+.details-rank-list .rank-display {
+    text-align: center; 
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+}
+.rank-display.gold { color: #FFD700; }
+.rank-display.silver { color: #B0B0B0; }
+.rank-display.bronze { color: #C9894B; }
+
+
+/* (Bug #1) Styles for the new tally columns (G, S, B, Total) */
+.details-rank-list th.gold,
+.details-rank-list td.gold {
+    color: #FFD700;
+    font-weight: 700;
+    text-align: center;
+}
+.details-rank-list th.silver,
+.details-rank-list td.silver {
+    color: #B0B0B0;
+    font-weight: 700;
+    text-align: center;
+}
+.details-rank-list th.bronze,
+.details-rank-list td.bronze {
+    color: #C9894B;
+    font-weight: 700;
+    text-align: center;
+}
+.details-rank-list th.total,
+.details-rank-list td.total {
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+}
+
+
+/* =========================================
+   STYLES FOR DEPARTMENT DROPDOWN & VIEW
+========================================= */
+
+/* (FIX #1) Align logo and text in department dropdown */
+.custom-select-wrapper {
+    position: relative;
+    flex-basis: 33.3%;
+}
+.custom-select-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center; /* THIS IS THE FIX */
+    gap: 12px;
+}
+.custom-select-box .placeholder {
+    color: #777;
+}
+.custom-select-box .selected-team {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.custom-select-box .selected-team img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+.custom-select-box .selected-team .name {
+    font-weight: 500;
+    color: #333;
+}
+.custom-select-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    z-index: 10;
+    max-height: 300px;
+    overflow-y: auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.custom-select-list.hidden {
+    display: none;
+}
+.custom-select-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.custom-select-item:hover {
+    background-color: #f5f5f5;
+}
+.custom-select-item img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+}
+.custom-select-item .name {
+    font-weight: 500;
+    color: #333;
+}
+
+
+/* (2) Department-Specific View */
+.department-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 16px;
+    margin-top: 16px;
+}
+.department-title {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.department-title img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid #eee;
+}
+/* (FIX #3) Increase font size */
+.department-title h2 {
+    font-size: 2rem; /* Was 1.8rem */
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+.department-medal-tally {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.department-medal-tally span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.medal-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.medal-icon.gold { background: #FFD700; }
+.medal-icon.silver { background: #B0B0B0; }
+.medal-icon.bronze { background: #C9894B; }
+
+.department-events-table {
+    width: 100%;
+    margin-top: 16px;
+    border-collapse: collapse;
+}
+.department-events-table th, 
+.department-events-table td {
+    padding: 12px 0;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+}
+.department-events-table th {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #222;
+}
+/* (FIX #3) Increase font size */
+.department-events-table .event-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 1.15rem; /* NEW */
+}
+/* (FIX #3) Increase font size */
+.department-events-table .sub-event {
+    padding-left: 20px;
+    color: #555;
+    font-size: 1.1rem; /* NEW */
+}
+.department-events-table .gold { text-align: center; color: #FFD700; font-weight: 700; }
+.department-events-table .silver { text-align: center; color: #B0B0B0; font-weight: 700; }
+.department-events-table .bronze { text-align: center; color: #C9894B; font-weight: 700; }
+
+.department-events-table th.gold { color: #FFD700; text-align: center; }
+.department-events-table th.silver { color: #B0B0B0; text-align: center; }
+.department-events-table th.bronze { color: #C9894B; text-align: center; }

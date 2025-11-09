@@ -17,7 +17,7 @@ async function checkActiveSession() {
     const accessToken = sessionData.session.access_token;
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/auth', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
@@ -64,7 +64,7 @@ async function handleLogin(e) {
         // --- STEP 2: GET THE ROLE FROM THE SECURE API ---
         const accessToken = authData.session.access_token;
 
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/auth', {
             method: 'GET',
             headers: {
                 'Authorization': `Bearer ${accessToken}`
@@ -108,6 +108,6 @@ async function signOut() {
         console.error("Error logging out:" + error.message);
     } else {
         console.log("Successfully logged out.");
-        window.location.href = 'index.html';
+        window.location.href = 'login.html';
     }
 }
