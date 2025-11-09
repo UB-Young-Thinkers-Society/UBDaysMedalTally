@@ -1,18 +1,15 @@
 // --- 1. GLOBAL VARIABLES ---------------------------
-// Cache for all event data to avoid re-fetching
 let allCategoriesAndEvents = [];
+let currentCategoryId = null; // NEW: To remember the last selected category
 
 // --- 2. PAGE INITIALIZATION ------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Load the "static" dropdowns (Categories and Teams)
     loadCategories();
     loadTeams();
     updateTimestamp();
 
-    // 2. Add event listeners to the dropdowns
     document.getElementById('filter-category').addEventListener('change', handleCategoryChange);
     document.getElementById('filter-event').addEventListener('change', handleEventChange);
-    // (We'll add a listener for the team dropdown later)
 });
 
 function updateTimestamp() {
@@ -25,32 +22,33 @@ function updateTimestamp() {
 
 // --- 3. DROPDOWN POPULATION FUNCTIONS --------------
 
-/**
- * Fetches all categories AND their events.
- * Populates the first dropdown.
- */
 async function loadCategories() {
     const selectEl = document.getElementById('filter-category');
     const eventSelectEl = document.getElementById('filter-event');
     
     try {
-        // Use our merged API to get all categories and events in one go
-        const response = await fetch('/api/data?type=allEvents');
+        // We need auth to get the event list for the dropdowns
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error('Session expired.');
+        
+        const response = await fetch('/api/data?type=allEvents', {
+            headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
+        });
         if (!response.ok) throw new Error('Failed to load categories');
         
         allCategoriesAndEvents = await response.json();
         
-        selectEl.innerHTML = '<option value="">Enter Event Category</option>'; // Reset
+        selectEl.innerHTML = '<option value="">Enter Event Category</option>';
         
         allCategoriesAndEvents.forEach(cat => {
             const option = document.createElement('option');
-            option.value = cat.id; // The Category UUID
+            option.value = cat.id;
             option.textContent = cat.name;
             selectEl.appendChild(option);
         });
         
         selectEl.disabled = false;
-        eventSelectEl.disabled = true; // Disabled until a category is chosen
+        eventSelectEl.disabled = true;
 
     } catch (error) {
         console.error(error);
@@ -58,25 +56,28 @@ async function loadCategories() {
     }
 }
 
-/**
- * Fetches all teams and populates the third dropdown.
- */
 async function loadTeams() {
     const selectEl = document.getElementById('filter-department');
     
     try {
-        const response = await fetch('/api/data?type=teams');
+        // We need auth to get the team list
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error('Session expired.');
+
+        const response = await fetch('/api/data?type=teams', {
+             headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
+        });
         if (!response.ok) throw new Error('Failed to load teams');
         
         const teams = await response.json();
         
-        selectEl.innerHTML = '<option value="">Enter Department</option>'; // Reset
+        selectEl.innerHTML = '<option value="">Enter Department</option>';
         
-        teams.sort((a, b) => a.acronym.localeCompare(b.acronym)); // Sort by acronym
+        teams.sort((a, b) => a.acronym.localeCompare(b.acronym));
         
         teams.forEach(team => {
             const option = document.createElement('option');
-            option.value = team.id; // The Team UUID
+            option.value = team.id;
             option.textContent = `${team.acronym} - ${team.name}`;
             selectEl.appendChild(option);
         });
@@ -89,55 +90,64 @@ async function loadTeams() {
 }
 
 /**
- * Populates the 'Events' dropdown based on the selected category.
+ * MODIFIED: Populates events AND shows the category tally.
  */
 function handleCategoryChange(e) {
-    const categoryId = e.target.value;
+    currentCategoryId = e.target.value; // NEW
     const eventSelectEl = document.getElementById('filter-event');
     const titleEl = document.getElementById('details-title');
     const tableBodyEl = document.getElementById('category-rankings-body');
 
-    // Reset everything
+    // Reset
     eventSelectEl.innerHTML = '<option value="">Enter Event</option>';
     eventSelectEl.disabled = true;
     titleEl.textContent = '';
-    tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">Please select an event to see rankings.</td></tr>';
-
-    if (!categoryId) return; // "Enter Event Category" was selected
-
-    // Find the category in our cached data
-    const category = allCategoriesAndEvents.find(cat => cat.id === categoryId);
     
-    if (category && category.events.length > 0) {
+    if (!currentCategoryId) {
+        tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">Please select a category to see rankings.</td></tr>';
+        return;
+    }
+
+    const category = allCategoriesAndEvents.find(cat => cat.id === currentCategoryId);
+    
+    if (category) {
         // Populate the events dropdown
-        category.events.forEach(event => {
-            const option = document.createElement('option');
-            option.value = event.id;
-            option.textContent = event.name;
-            eventSelectEl.appendChild(option);
-        });
-        eventSelectEl.disabled = false;
-        titleEl.textContent = category.name; // Set the main title
-    } else if (category) {
-        eventSelectEl.innerHTML = '<option value="">No events found</option>';
+        if (category.events.length > 0) {
+            category.events.forEach(event => {
+                const option = document.createElement('option');
+                option.value = event.id;
+                option.textContent = event.name;
+                eventSelectEl.appendChild(option);
+            });
+            eventSelectEl.disabled = false;
+        } else {
+            eventSelectEl.innerHTML = '<option value="">No events found</option>';
+        }
+        
+        // Set title and fetch the CATEGORY TALLY
         titleEl.textContent = category.name;
+        fetchAndDisplayCategoryTally(currentCategoryId); // NEW
     }
 }
 
 // --- 4. RANKING DISPLAY LOGIC ----------------------
 
 /**
- * Called when an event is selected from the second dropdown.
+ * MODIFIED: Now checks if an event is selected.
+ * If not, it reverts to the CATEGORY tally.
  */
 function handleEventChange(e) {
     const eventId = e.target.value;
+    
     if (!eventId) {
-        // "Enter Event" was selected, so clear the table
-        document.getElementById('category-rankings-body').innerHTML = '<tr><td colspan="2" class="details-message empty">Please select an event to see rankings.</td></tr>';
+        // "Enter Event" was selected, so revert to category tally
+        if (currentCategoryId) {
+            fetchAndDisplayCategoryTally(currentCategoryId);
+        }
         return;
     }
 
-    // Find the full event object from our cache
+    // Find the full event object
     let selectedEvent = null;
     for (const category of allCategoriesAndEvents) {
         const event = category.events.find(ev => ev.id === eventId);
@@ -146,36 +156,84 @@ function handleEventChange(e) {
             break;
         }
     }
+    if (!selectedEvent) return;
 
-    if (!selectedEvent) {
-        console.error('Could not find event data for ID:', eventId);
-        return;
-    }
-
-    // Now, fetch and display the rankings for this event
-    fetchAndDisplayRankings(selectedEvent);
+    // An event was selected, so show event-specific rankings
+    fetchAndDisplayEventRankings(selectedEvent);
 }
 
 /**
- * Fetches and renders the rankings for a specific event.
+ * NEW: Fetches and renders the OVERALL TALLY for a category.
  */
-async function fetchAndDisplayRankings(event) {
+async function fetchAndDisplayCategoryTally(categoryId) {
     const tableBodyEl = document.getElementById('category-rankings-body');
-    tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message loading">Loading rankings...</td></tr>';
+    tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message loading">Loading category tally...</td></tr>';
     
-    // 1. Check the event status FIRST
+    try {
+        // This is a public API endpoint, no auth needed
+        const response = await fetch(`/api/data?type=categoryTally&categoryId=${categoryId}`);
+        if (!response.ok) throw new Error('Failed to fetch category tally.');
+
+        const tally = await response.json();
+        
+        if (tally.length === 0) {
+            tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">No published results for this category yet.</td></tr>';
+            return;
+        }
+
+        // We have results! Render the tally table.
+        // This reuses the table but shows medals instead of "1st, 2nd"
+        tableBodyEl.innerHTML = ''; // Clear loading
+        let rank = 1;
+        tally.forEach(team => {
+            const tr = document.createElement('tr');
+            
+            // This table shows medal counts, not ranks
+            tr.innerHTML = `
+                <td>
+                    <img src="${team.logo_url}" class="dept-logo" alt="${team.acronym} Logo" onerror="this.src='img/Login-Logo.png';">
+                    <span class="dept-name">${team.name}</span>
+                </td>
+                <td class="rank-display">
+                    <span class="gold">${team.gold} G</span> | 
+                    <span class="silver">${team.silver} S</span> | 
+                    <span class="bronze">${team.bronze} B</span>
+                </td>
+            `;
+            tableBodyEl.appendChild(tr);
+            rank++;
+        });
+
+    } catch (error) {
+        console.error('Error fetching category tally:', error);
+        tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message error">${error.message}</td></tr>`;
+    }
+}
+
+/**
+ * Fetches and renders the rankings for a SPECIFIC EVENT.
+ * (This is your old 'fetchAndDisplayRankings' function)
+ */
+async function fetchAndDisplayEventRankings(event) {
+    const tableBodyEl = document.getElementById('category-rankings-body');
+    tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message loading">Loading event rankings...</td></tr>';
+    
+    // 1. Check status
     if (event.status !== 'published') {
         tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message empty">Results for this event are not yet published. The status is: ${event.status}</td></tr>`;
         return;
     }
 
-    // 2. Status is 'published', so get the results
+    // 2. Status is 'published', so get results
     try {
-        // We use the 'eventResults' type for our merged API
-        const response = await fetch(`/api/data?type=eventResults&eventId=${event.id}`);
-        if (!response.ok) {
-            throw new Error('Failed to fetch results.');
-        }
+        // We need auth to get event-specific results
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) throw new Error('Session expired.');
+
+        const response = await fetch(`/api/data?type=eventResults&eventId=${event.id}`, {
+            headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
+        });
+        if (!response.ok) throw new Error('Failed to fetch results.');
 
         const results = await response.json();
         
@@ -194,7 +252,7 @@ async function fetchAndDisplayRankings(event) {
 }
 
 /**
- * Helper function to build the HTML for the rankings table.
+ * Helper function to build the HTML for the EVENT rankings table.
  */
 function renderRankingsTable(results, tableBodyEl) {
     tableBodyEl.innerHTML = ''; // Clear loading message

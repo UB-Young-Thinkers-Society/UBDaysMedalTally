@@ -78,30 +78,145 @@ export default async (req, res) => {
                 if (error) throw error;
 
                 const { data: allTeams, error: allTeamsError } = await supabase
-                    .from('teams').select('id, name, acronym, logo_url');
+                    .from('teams')
+                    .select('id, name, acronym, logo_url');
                 if (allTeamsError) throw allTeamsError;
 
-                const medalTallyMap = new Map();
-                allTeams.forEach(team => medalTallyMap.set(team.id, { ...team, gold: 0, silver: 0, bronze: 0, total: 0 }));
+                const { data: publishedResults, error: resultsError } = await supabase
+                    .from('results')
+                    .select(`
+                        team_id,
+                        gold_awarded,
+                        silver_awarded,
+                        bronze_awarded,
+                        events!inner( status )
+                    `)
+                    .eq('events.status', 'published');
+                if (resultsError) throw resultsError;
 
-                teams.forEach(team => {
-                    const tally = medalTallyMap.get(team.id);
-                    if (tally) {
-                        tally.gold = team.results.reduce((sum, r) => sum + r.gold_awarded, 0);
-                        tally.silver = team.results.reduce((sum, r) => sum + r.silver_awarded, 0);
-                        tally.bronze = team.results.reduce((sum, r) => sum + r.bronze_awarded, 0);
-                        tally.total = tally.gold + tally.silver + tally.bronze;
+                const tallyMap = new Map();
+                allTeams.forEach(team => {
+                    tallyMap.set(team.id, { ...team, gold: 0, silver: 0, bronze: 0, total: 0 });
+                });
+
+                publishedResults.forEach(result => {
+                    if (tallyMap.has(result.team_id)) {
+                        const team = tallyMap.get(result.team_id);
+                        team.gold += result.gold_awarded;
+                        team.silver += result.silver_awarded;
+                        team.bronze += result.bronze_awarded;
                     }
                 });
 
-                const medalTally = Array.from(medalTallyMap.values());
+                const medalTally = Array.from(tallyMap.values()).map(team => ({
+                    ...team,
+                    total: team.gold + team.silver + team.bronze
+                }));
+
                 medalTally.sort((a, b) => {
                     if (a.gold !== b.gold) return b.gold - a.gold;
                     if (a.silver !== b.silver) return b.silver - a.silver;
                     if (a.bronze !== b.bronze) return b.bronze - a.bronze;
                     return a.name.localeCompare(b.name);
                 });
+                
                 return res.status(200).json(medalTally);
+            }
+
+            // --- NEW CASE FOR CATEGORY TALLY (Public) ---
+            case 'categoryTally': {
+                if (!categoryId) {
+                    return res.status(400).json({ error: 'Missing categoryId.' });
+                }
+
+                // This is the same logic as 'medalTally', but filtered by category.
+                const { data: allTeams, error: allTeamsError } = await supabase
+                    .from('teams')
+                    .select('id, name, acronym, logo_url');
+                if (allTeamsError) throw allTeamsError;
+
+                // 1. Get all published results...
+                // 2. ...where the event's category_id matches.
+                const { data: publishedResults, error: resultsError } = await supabase
+                    .from('results')
+                    .select(`
+                        team_id,
+                        gold_awarded,
+                        silver_awarded,
+                        bronze_awarded,
+                        events!inner( status, category_id )
+                    `)
+                    .eq('events.status', 'published')
+                    .eq('events.category_id', categoryId); // <-- The new filter
+                
+                if (resultsError) throw resultsError;
+
+                // --- Calculate Tally (same as before) ---
+                const tallyMap = new Map();
+                allTeams.forEach(team => {
+                    tallyMap.set(team.id, { ...team, gold: 0, silver: 0, bronze: 0, total: 0 });
+                });
+
+                publishedResults.forEach(result => {
+                    if (tallyMap.has(result.team_id)) {
+                        const team = tallyMap.get(result.team_id);
+                        team.gold += result.gold_awarded;
+                        team.silver += result.silver_awarded;
+                        team.bronze += result.bronze_awarded;
+                    }
+                });
+
+                const medalTally = Array.from(tallyMap.values()).map(team => ({
+                    ...team,
+                    total: team.gold + team.silver + team.bronze
+                }));
+
+                // Filter out teams with 0 total medals *for this category*
+                const filteredTally = medalTally.filter(team => team.total > 0);
+
+                filteredTally.sort((a, b) => {
+                    if (a.gold !== b.gold) return b.gold - a.gold;
+                    if (a.silver !== b.silver) return b.silver - a.silver;
+                    if (a.bronze !== b.bronze) return b.bronze - a.bronze;
+                    return a.name.localeCompare(b.name);
+                });
+                
+                return res.status(200).json(filteredTally);
+            }
+
+            // --- ADMIN/COMMITTEE DATA (Auth Required) ---
+            case 'allEvents': {
+                await getUserFromToken(req); // Auth check
+                const { data, error } = await supabase
+                    .from('categories')
+                    .select('id, name, events ( id, name, status, medal_value )');
+                if (error) throw error;
+                return res.status(200).json(data);
+            }
+            case 'categories': {
+                await getUserFromToken(req); // Auth check
+                const { data, error } = await supabase.from('categories').select('id, name');
+                if (error) throw error;
+                return res.status(200).json(data);
+            }
+            case 'teams': {
+                await getUserFromToken(req); // Auth check
+                const { data, error } = await supabase.from('teams').select('id, name, acronym, logo_url');
+                if (error) throw error;
+                return res.status(200).json(data);
+            }
+            case 'eventResults': {
+                await getUserFromToken(req); // Auth check
+                if (!eventId) {
+                    return res.status(400).json({ error: 'Missing eventId.' });
+                }
+                const { data, error } = await supabase
+                    .from('results')
+                    .select('rank, teams ( id, name, acronym, logo_url )')
+                    .eq('event_id', eventId)
+                    .order('rank', { ascending: true });
+                if (error) throw error;
+                return res.status(200).json(data);
             }
 
             default:
