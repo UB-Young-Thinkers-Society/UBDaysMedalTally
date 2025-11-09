@@ -143,9 +143,15 @@
 .custom-select-box .placeholder {
     color: #777;
 }
+.custom-select-box .selected-team {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
 .custom-select-box .selected-team img {
-    width: 20px;
-    height: 20px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     object-fit: cover;
     border: 1px solid #eee;
