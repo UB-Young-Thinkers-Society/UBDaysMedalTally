@@ -6,18 +6,28 @@
     <link rel="stylesheet" href="css/live-feed.css">
     <link rel="icon" href="img/Login-Logo.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Client-side Supabase for public data -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // The ANON key is safe to expose for client-side public data.
+        // We need this for the API to work, even though the logic is on the server.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
 </head>
 <body>
     <div class="main-header">
         <img src="img/Login-Logo.png" alt="Logo">
         <div>
             <div class="main-title">Official Medal Tally</div>
-            <div class="subtitle">As of November 20, 2024 | 12:00 PM</div>
+            <div class="subtitle" id="last-updated">Loading...</div>
         </div>
     </div>
     <div class="top-buttons">
         <button class="top-btn active">Live Count</button>
-        <button class="top-btn">Details</button>
+        <button class="top-btn" onclick="window.location.href='details.html'">Details</button> <!-- Assuming you'll have a details page -->
     </div>
     <div class="tally-card">
         <table class="tally-table">
@@ -30,118 +40,17 @@
                     <th class="total">Total</th>
                 </tr>
             </thead>
-            <tbody>
+            <!-- 
+              The table body is now empty.
+              The new 'js/live-feed.js' script will fill this 
+              with dynamic data from the API.
+            -->
+            <tbody id="tally-body">
+                <!-- Loader Row -->
                 <tr>
-                    <td><img src="img/dept-logos/CAS 1.png" class="dept-logo"> <span class="dept-name">College of Arts and Sciences</span></td>
-                    <td class="gold">56</td>
-                    <td class="silver">45</td>
-                    <td class="bronze">34</td>
-                    <td class="total">135</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/CBA 1.png" class="dept-logo"> <span class="dept-name">College of Business and Accountancy</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/CCJ 1.png" class="dept-logo"> <span class="dept-name">College of Criminal Justice</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/CETAFA 1.png" class="dept-logo"> <span class="dept-name">College of Engineering, Technology, Architecture, and Fine Arts</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/CHMTN 1.png" class="dept-logo"> <span class="dept-name">College of Hospitality Management, Tourism, and Nutrition</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/COL 1.png" class="dept-logo"> <span class="dept-name">College of Law</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/COM 1.png" class="dept-logo"> <span class="dept-name">College of Midwifery</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/CON 1.png" class="dept-logo"> <span class="dept-name">College of Nursing</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/COP 1.png" class="dept-logo"> <span class="dept-name">College of Pharmacy</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/CPTOT 1.png" class="dept-logo"> <span class="dept-name">College of Physical Therapy and Occupational Therapy</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/GSPS 1.png" class="dept-logo"> <span class="dept-name">UB Graduate School</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/TC 1.png" class="dept-logo"> <span class="dept-name">Teachers College</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/UBGS 1.png" class="dept-logo"> <span class="dept-name">UB Grade School</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/UBJHS 1.png" class="dept-logo"> <span class="dept-name">UB Junior High School</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/UBSHS 1.png" class="dept-logo"> <span class="dept-name">UB VDTALC Senior High School</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
-                </tr>
-                <tr>
-                    <td><img src="img/dept-logos/VDT 1.png" class="dept-logo"> <span class="dept-name">UB VDTALC</span></td>
-                    <td class="gold">32</td>
-                    <td class="silver">34</td>
-                    <td class="bronze">23</td>
-                    <td class="total">89</td>
+                    <td colspan="5" style="text-align: center; padding: 40px; font-weight: 600;">
+                        Loading live medal tally...
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -149,5 +58,8 @@
     <footer class="footer">
         Made by <img src="img/UBYTeS New Logo 1.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
     </footer>
+
+    <!-- This new script will run and populate the table -->
+    <script src="js/live-feed.js" defer></script>
 </body>
 </html>
