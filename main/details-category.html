@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Details - Category Rankings</title>
+    <!-- 
+      This ONE CSS file imports your 'live-feed.css' 
+      and adds the new styles for this page.
+    -->
+    <link rel="stylesheet" href="css/details-styles.css">
+    <link rel="icon" href="img/Login-Logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Client-side Supabase for public data -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // The ANON key is safe to expose for client-side public data.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co"; // Replace with your URL
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto"; // Replace with your ANON key
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
+</head>
+<body>
+    <div class="main-header">
+        <img src="img/Login-Logo.png" alt="Logo">
+        <div>
+            <div class="main-title">Official Medal Tally</div>
+            <div class="subtitle" id="last-updated">Loading...</div>
+        </div>
+    </div>
+    
+    <div class="top-buttons">
+        <button class="top-btn" onclick="window.location.href='index.html'">Live Count</button>
+        <button class="top-btn active">Details</button>
+    </div>
+
+    <div class="tally-card">
+        <!-- New Filter Bar -->
+        <div class="details-filter-bar">
+            <select id="filter-category" disabled>
+                <option value="">Loading Categories...</option>
+            </select>
+            <select id="filter-event" disabled>
+                <option value="">Select a Category</option>
+            </select>
+            <select id="filter-department" disabled>
+                <option value="">Loading Teams...</option>
+            </select>
+        </div>
+
+        <!-- Title will be added here by JS -->
+        <h2 class="details-title" id="details-title"></h2>
+
+        <!-- Re-using the .tally-table style from live-feed.css -->
+        <table class="tally-table">
+            <tbody id="category-rankings-body">
+                <!-- 
+                  This will be filled by JS.
+                  Default "empty" state.
+                -->
+                <tr>
+                    <td colspan="2" class="details-message empty">Please select a category and event to see rankings.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <footer class="footer">
+        Made by <img src="img/UBYTeS New Logo 1.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
+    </footer>
+    
+    <!-- Link the new JS file -->
+    <script src="js/details-category.js" defer></script>
+</body>
+</html>
