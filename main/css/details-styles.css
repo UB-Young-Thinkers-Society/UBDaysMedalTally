@@ -145,3 +145,47 @@
     color: #aaa;
     cursor: not-allowed;
 }
+
+/* =========================================
+   NEW STYLES FOR BUG FIXES
+========================================= */
+
+/* (Bug #2) Fix for centering ranks 4th, 5th, etc. */
+.details-rank-list .rank-display {
+    text-align: center; /* This centers ALL ranks */
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #333;
+}
+/* Keep the color for 1st, 2nd, 3rd */
+.rank-display.gold { color: #FFD700; }
+.rank-display.silver { color: #B0B0B0; }
+.rank-display.bronze { color: #C9894B; }
+
+
+/* (Bug #1) Styles for the new tally columns (G, S, B, Total) */
+/* These are copied from your live-feed.css */
+.details-rank-list th.gold,
+.details-rank-list td.gold {
+    color: #FFD700;
+    font-weight: 700;
+    text-align: center;
+}
+.details-rank-list th.silver,
+.details-rank-list td.silver {
+    color: #B0B0B0;
+    font-weight: 700;
+    text-align: center;
+}
+.details-rank-list th.bronze,
+.details-rank-list td.bronze {
+    color: #C9894B;
+    font-weight: 700;
+    text-align: center;
+}
+.details-rank-list th.total,
+.details-rank-list td.total {
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+}

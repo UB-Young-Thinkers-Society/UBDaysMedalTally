@@ -1,20 +1,15 @@
 // --- 1. GLOBAL VARIABLES ---------------------------
-// Cache for all event data to avoid re-fetching
 let allCategoriesAndEvents = [];
-// NEW: To remember the last selected category
-let currentCategoryId = null;
+let currentCategory = null; // MODIFIED: Store the whole category object
 
 // --- 2. PAGE INITIALIZATION ------------------------
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Load the "static" dropdowns (Categories and Teams)
     loadCategories();
     loadTeams();
-    updateTimestamp(); // From your live-feed.js
+    updateTimestamp();
 
-    // 2. Add event listeners to the dropdowns
     document.getElementById('filter-category').addEventListener('change', handleCategoryChange);
     document.getElementById('filter-event').addEventListener('change', handleEventChange);
-    // (We'll add a listener for the team dropdown later if needed)
 });
 
 function updateTimestamp() {
@@ -27,33 +22,27 @@ function updateTimestamp() {
 
 // --- 3. DROPDOWN POPULATION FUNCTIONS --------------
 
-/**
- * Fetches all categories AND their events.
- * Populates the first dropdown.
- * MODIFIED: This is now a public, non-authenticated call.
- */
 async function loadCategories() {
     const selectEl = document.getElementById('filter-category');
     const eventSelectEl = document.getElementById('filter-event');
     
     try {
-        // Use our merged API to get all categories and events in one go
-        const response = await fetch('/api/data?type=allEvents'); // No auth needed
+        const response = await fetch('/api/data?type=allEvents'); 
         if (!response.ok) throw new Error('Failed to load categories');
         
         allCategoriesAndEvents = await response.json();
         
-        selectEl.innerHTML = '<option value="">Enter Event Category</option>'; // Reset
+        selectEl.innerHTML = '<option value="">Enter Event Category</option>'; 
         
         allCategoriesAndEvents.forEach(cat => {
             const option = document.createElement('option');
-            option.value = cat.id; // The Category UUID
+            option.value = cat.id; 
             option.textContent = cat.name;
             selectEl.appendChild(option);
         });
         
         selectEl.disabled = false;
-        eventSelectEl.disabled = true; // Disabled until a category is chosen
+        eventSelectEl.disabled = true;
 
     } catch (error) {
         console.error(error);
@@ -61,27 +50,22 @@ async function loadCategories() {
     }
 }
 
-/**
- * Fetches all teams and populates the third dropdown.
- * MODIFIED: This is now a public, non-authenticated call.
- */
 async function loadTeams() {
     const selectEl = document.getElementById('filter-department');
     
     try {
-        const response = await fetch('/api/data?type=teams'); // No auth needed
+        const response = await fetch('/api/data?type=teams'); 
         if (!response.ok) throw new Error('Failed to load teams');
         
         const teams = await response.json();
         
-        selectEl.innerHTML = '<option value="">Enter Department</option>'; // Reset
+        selectEl.innerHTML = '<option value="">Enter Department</option>';
         
-        // Sort teams alphabetically by acronym
         teams.sort((a, b) => a.acronym.localeCompare(b.acronym));
         
         teams.forEach(team => {
             const option = document.createElement('option');
-            option.value = team.id; // The Team UUID
+            option.value = team.id;
             option.textContent = `${team.acronym} - ${team.name}`;
             selectEl.appendChild(option);
         });
@@ -93,11 +77,8 @@ async function loadTeams() {
     }
 }
 
-/**
- * MODIFIED: Populates events AND shows the category tally.
- */
 function handleCategoryChange(e) {
-    currentCategoryId = e.target.value; // NEW
+    const categoryId = e.target.value;
     const eventSelectEl = document.getElementById('filter-event');
     const titleEl = document.getElementById('details-title');
     const tableBodyEl = document.getElementById('category-rankings-body');
@@ -106,19 +87,19 @@ function handleCategoryChange(e) {
     eventSelectEl.innerHTML = '<option value="">Enter Event</option>';
     eventSelectEl.disabled = true;
     titleEl.textContent = '';
+    currentCategory = null; // MODIFIED
     
-    if (!currentCategoryId) {
-        // "Enter Event Category" was selected
-        tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">Please select a category to see rankings.</td></tr>';
+    if (!categoryId) {
+        tableBodyEl.innerHTML = '<tr><td colspan="5" class="details-message empty">Please select a category to see rankings.</td></tr>'; // MODIFIED: colspan="5"
+        toggleTableHeaders('tally'); // Show tally headers by default
         return;
     }
 
-    const category = allCategoriesAndEvents.find(cat => cat.id === currentCategoryId);
+    currentCategory = allCategoriesAndEvents.find(cat => cat.id === categoryId); // MODIFIED
     
-    if (category) {
-        // Populate the events dropdown
-        if (category.events.length > 0) {
-            category.events.forEach(event => {
+    if (currentCategory) {
+        if (currentCategory.events.length > 0) {
+            currentCategory.events.forEach(event => {
                 const option = document.createElement('option');
                 option.value = event.id;
                 option.textContent = event.name;
@@ -129,124 +110,128 @@ function handleCategoryChange(e) {
             eventSelectEl.innerHTML = '<option value="">No events found</option>';
         }
         
-        // Set title and fetch the NEW CATEGORY TALLY
-        titleEl.textContent = category.name;
-        fetchAndDisplayCategoryTally(currentCategoryId); // NEW
+        titleEl.textContent = currentCategory.name;
+        fetchAndDisplayCategoryTally(currentCategory.id);
     }
 }
 
 // --- 4. RANKING DISPLAY LOGIC ----------------------
 
-/**
- * MODIFIED: Now checks if an event is selected.
- * If not, it reverts to the CATEGORY tally.
- */
 function handleEventChange(e) {
     const eventId = e.target.value;
-    
+    const titleEl = document.getElementById('details-title');
+
     if (!eventId) {
-        // "Enter Event" was selected, so revert to category tally
-        if (currentCategoryId) {
-            fetchAndDisplayCategoryTally(currentCategoryId);
+        // "Enter Event" was selected, revert to category tally
+        if (currentCategory) {
+            titleEl.textContent = currentCategory.name; // (Bug #3) Revert title
+            fetchAndDisplayCategoryTally(currentCategory.id);
         }
         return;
     }
 
-    // Find the full event object
     let selectedEvent = null;
-    for (const category of allCategoriesAndEvents) {
-        const event = category.events.find(ev => ev.id === eventId);
-        if (event) {
-            selectedEvent = event;
-            break;
-        }
+    if (currentCategory) {
+        selectedEvent = currentCategory.events.find(ev => ev.id === eventId);
     }
-    if (!selectedEvent) return;
-
-    // An event was selected, so show event-specific rankings
-    fetchAndDisplayEventRankings(selectedEvent);
+    
+    if (selectedEvent) {
+        // (Bug #3) Update title to "Category - Event"
+        titleEl.textContent = `${currentCategory.name} - ${selectedEvent.name}`;
+        fetchAndDisplayEventRankings(selectedEvent);
+    }
 }
 
 /**
- * NEW: Fetches and renders the OVERALL TALLY for a category.
+ * NEW: Helper function to show/hide the correct table headers
+ */
+function toggleTableHeaders(mode) {
+    const tallyHeaders = document.getElementById('tally-headers');
+    const rankHeader = document.getElementById('rank-header');
+    
+    if (mode === 'tally') {
+        tallyHeaders.style.display = 'table-row';
+        rankHeader.style.display = 'none';
+    } else { // mode === 'rank'
+        tallyHeaders.style.display = 'none';
+        rankHeader.style.display = 'table-row';
+    }
+}
+
+/**
+ * MODIFIED: (Bug #1) Fetches and renders the OVERALL TALLY for a category
+ * in the 4-column format.
  */
 async function fetchAndDisplayCategoryTally(categoryId) {
+    toggleTableHeaders('tally'); // MODIFIED: Show tally headers
     const tableBodyEl = document.getElementById('category-rankings-body');
-    tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message loading">Loading category tally...</td></tr>';
+    tableBodyEl.innerHTML = `<tr><td colspan="5" class="details-message loading">Loading category tally...</td></tr>`; // MODIFIED: colspan="5"
     
     try {
-        // This is a public API endpoint, no auth needed
         const response = await fetch(`/api/data?type=categoryTally&categoryId=${categoryId}`);
         if (!response.ok) throw new Error('Failed to fetch category tally.');
 
         const tally = await response.json();
         
         if (tally.length === 0) {
-            tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">No published results for this category yet.</td></tr>';
+            tableBodyEl.innerHTML = `<tr><td colspan="5" class="details-message empty">No published results for this category yet.</td></tr>`; // MODIFIED: colspan="5"
             return;
         }
 
-        // We have results! Render the tally table.
-        // This reuses the table but shows medals instead of "1st, 2nd"
-        tableBodyEl.innerHTML = ''; // Clear loading
+        tableBodyEl.innerHTML = ''; 
         
         tally.forEach(team => {
             const tr = document.createElement('tr');
             
-            // This table shows medal counts, not ranks
+            // MODIFIED: (Bug #1) Render 4 medal columns
             tr.innerHTML = `
                 <td>
                     <img src="${team.logo_url}" class="dept-logo" alt="${team.acronym} Logo" onerror="this.src='img/Login-Logo.png';">
                     <span class="dept-name">${team.name}</span>
                 </td>
-                <td class="rank-display">
-                    <span class="gold">${team.gold} G</span> | 
-                    <span class="silver">${team.silver} S</span> | 
-                    <span class="bronze">${team.bronze} B</span>
-                </td>
+                <td class="gold">${team.gold}</td>
+                <td class="silver">${team.silver}</td>
+                <td class="bronze">${team.bronze}</td>
+                <td class="total">${team.total}</td>
             `;
             tableBodyEl.appendChild(tr);
         });
 
     } catch (error) {
         console.error('Error fetching category tally:', error);
-        tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message error">${error.message}</td></tr>`;
+        tableBodyEl.innerHTML = `<tr><td colspan="5" class="details-message error">${error.message}</td></tr>`; // MODIFIED: colspan="5"
     }
 }
 
 /**
  * Fetches and renders the rankings for a SPECIFIC EVENT.
- * (This is your old 'fetchAndDisplayRankings' function)
- * MODIFIED: This is now a public, non-authenticated call.
  */
 async function fetchAndDisplayEventRankings(event) {
+    toggleTableHeaders('rank'); // MODIFIED: Show rank header
     const tableBodyEl = document.getElementById('category-rankings-body');
-    tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message loading">Loading event rankings...</td></tr>';
+    tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message loading">Loading event rankings...</td></tr>`; // MODIFIED: colspan="2"
     
-    // 1. Check status
     if (event.status !== 'published') {
-        tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message empty">Results for this event are not yet published. The status is: ${event.status}</td></tr>`;
+        tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message empty">Results for this event are not yet published. The status is: ${event.status}</td></tr>`; // MODIFIED: colspan="2"
         return;
     }
 
-    // 2. Status is 'published', so get results
     try {
-        const response = await fetch(`/api/data?type=eventResults&eventId=${event.id}`); // No auth needed
+        const response = await fetch(`/api/data?type=eventResults&eventId=${event.id}`);
         if (!response.ok) throw new Error('Failed to fetch results.');
 
         const results = await response.json();
         
         if (results.length === 0) {
-            tableBodyEl.innerHTML = '<tr><td colspan="2" class="details-message empty">This event is published, but no rankings were submitted.</td></tr>';
+            tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message empty">This event is published, but no rankings were submitted.</td></tr>`; // MODIFIED: colspan="2"
             return;
         }
 
-        // 3. We have results! Render the table.
         renderRankingsTable(results, tableBodyEl);
 
     } catch (error) {
         console.error('Error fetching rankings:', error);
-        tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message error">${error.message}</td></tr>`;
+        tableBodyEl.innerHTML = `<tr><td colspan="2" class="details-message error">${error.message}</td></tr>`; // MODIFIED: colspan="2"
     }
 }
 
@@ -254,7 +239,7 @@ async function fetchAndDisplayEventRankings(event) {
  * Helper function to build the HTML for the EVENT rankings table.
  */
 function renderRankingsTable(results, tableBodyEl) {
-    tableBodyEl.innerHTML = ''; // Clear loading message
+    tableBodyEl.innerHTML = ''; 
     
     results.forEach(result => {
         const team = result.teams;
@@ -266,6 +251,7 @@ function renderRankingsTable(results, tableBodyEl) {
         if (result.rank === 2) { rankDisplay = '2nd'; rankClass = 'silver'; }
         if (result.rank === 3) { rankDisplay = '3rd'; rankClass = 'bronze'; }
 
+        // MODIFIED: This now only renders 2 columns
         tr.innerHTML = `
             <td>
                 <img src="${team.logo_url}" class="dept-logo" alt="${team.acronym} Logo" onerror="this.src='img/Login-Logo.png';">
