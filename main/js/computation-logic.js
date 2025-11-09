@@ -16,7 +16,7 @@ async function checkSession(authorizedRole) {
     }
     const accessToken = sessionData.session.access_token;
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/auth', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
@@ -79,7 +79,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 // --- 3. DYNAMIC DATA & SEARCH LOGIC --------------
 async function fetchAllEvents() {
     try {
-        const response = await fetch('/api/get-all-events');
+        const response = await fetch('/api/data?type=allEvents');
         if (!response.ok) throw new Error('Failed to fetch events');
         const data = await response.json();
         allEventsData = data;
@@ -91,7 +91,7 @@ async function fetchAllEvents() {
 }
 async function fetchAllTeams() {
     try {
-        const response = await fetch('/api/get-teams'); 
+        const response = await fetch('/api/data?type=teams');
         if (!response.ok) throw new Error('Failed to fetch teams');
         const data = await response.json();
         allTeamsData = data; 
@@ -194,7 +194,7 @@ async function loadEventResults(eventId) {
         if (sessionError || !sessionData.session) throw new Error('Session expired.');
         const accessToken = sessionData.session.access_token;
         
-        const response = await fetch(`/api/get-event-results?eventId=${eventId}`, {
+        const response = await fetch(`/api/data?type=eventResults&eventId=${eventId}`, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 
@@ -502,11 +502,12 @@ async function handleSubmit(e) {
         const accessToken = sessionData.session.access_token;
 
         const payload = {
+            action: "submitResults", // <-- ADD THIS
             eventId: selectedEvent.id,
             results: resultsToSubmit
         };
         
-        const response = await fetch('/api/submit-results', {
+        const response = await fetch('/api/actions', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

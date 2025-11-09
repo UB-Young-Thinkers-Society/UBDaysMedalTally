@@ -31,7 +31,7 @@ async function fetchAndRenderTally() {
     const tbody = document.getElementById('tally-body');
     
     try {
-        const response = await fetch('/api/get-medal-tally');
+        const response = await fetch('/api/data?type=medalTally');
         if (!response.ok) {
             throw new Error('Failed to load data from the server.');
         }

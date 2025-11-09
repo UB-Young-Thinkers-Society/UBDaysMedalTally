@@ -14,7 +14,7 @@ async function checkSession(authorizedRole) {
     const accessToken = sessionData.session.access_token;
 
     try {
-        const response = await fetch('/api/login', { // Use the same secure API
+        const response = await fetch('/api/auth', { // Use the same secure API
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
  */
 async function loadAllEvents() {
     try {
-        const response = await fetch('/api/get-all-events');
+        const response = await fetch('/api/data?type=allEvents');
         if (!response.ok) throw new Error('Failed to fetch events');
         
         const categories = await response.json();
@@ -262,13 +262,17 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
         if (sessionError || !sessionData.session) throw new Error('Session expired.');
         const accessToken = sessionData.session.access_token;
 
-        const response = await fetch('/api/update-event-status', {
+        const response = await fetch('/api/actions', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`
             },
-            body: JSON.stringify({ eventId, newStatus })
+            body: JSON.stringify({ 
+                action: "updateEventStatus", // <-- ADD THIS
+                eventId, 
+                newStatus 
+            })
         });
 
         if (!response.ok) {
@@ -303,13 +307,16 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
         if (sessionError || !sessionData.session) throw new Error('Session expired.');
         const accessToken = sessionData.session.access_token;
 
-        const response = await fetch('/api/delete-event', {
+        const response = await fetch('/api/actions', {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`
             },
-            body: JSON.stringify({ eventId })
+            body: JSON.stringify({ 
+                action: "deleteEvent", // <-- ADD THIS
+                eventId 
+            })
         });
         if (!response.ok) {
             const err = await response.json();
@@ -400,7 +407,7 @@ async function loadModalData(eventId, rankingListElement) {
         if (sessionError || !sessionData.session) throw new Error('Session expired.');
         const accessToken = sessionData.session.access_token;
 
-        const response = await fetch(`/api/get-event-results?eventId=${eventId}`, {
+        const response = await fetch(`/api/data?type=eventResults&eventId=${eventId}`, {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 

@@ -17,7 +17,7 @@ async function checkSession() {
 
     try {
         // 2. Securely get the user's role from our API
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/auth', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });

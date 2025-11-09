@@ -1,28 +1,31 @@
 // --- 1. AUTHENTICATION & SESSION -------------------
 async function checkSession(authorizedRole) {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
         window.location.replace("login.html");
-        console.log("Invalid session. Redirecting to login.");
-    } else {
-        const { data: userData, error: userError } = await supabase
-            .from('user-roles')
-            .select('roles')
-            .eq('user_id', user.id)
-            .single();
-        
-        if (userError) {
-            console.error("Error fetching user role:", userError);
+        return;
+    }
+    const accessToken = sessionData.session.access_token;
+    try {
+        // MODIFIED: Call new API endpoint
+        const response = await fetch('/api/auth', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (!response.ok) {
+            await supabase.auth.signOut();
+            window.location.replace("login.html");
             return;
         }
-
-        if (userData.roles !== authorizedRole && userData.roles !== "admin") {
-            console.log("Access Forbidden. Redirecting.");
-            if (userData.roles === "tabHead")
-              window.location.replace("tabulation.html");
-            else if (userData.roles === "committee")
-              window.location.replace("computation.html");
+        const { role } = await response.json();
+        if (role !== authorizedRole && role !== "admin") {
+            if (role === "committee") window.location.replace("computation.html");
+            else if (role === "tabHead") window.location.replace("tabulation.html");
+            else window.location.replace("login.html");
         }
+    } catch (error) {
+        console.error('Error checking session:', error);
+        window.location.replace("login.html");
     }
 }
 
@@ -65,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadCategories() {
     const selectEl = document.getElementById('event-category');
     try {
-        const response = await fetch('/api/get-categories');
+        const response = await fetch('/api/data?type=categories');
         if (!response.ok) throw new Error('Failed to load categories');
         
         const categories = await response.json();
@@ -87,7 +90,7 @@ async function loadCategories() {
 async function loadTeams() {
     const departmentList = document.querySelector(".department-list");
     try {
-        const response = await fetch('/api/get-teams');
+        const response = await fetch('/api/data?type=teams');
         if (!response.ok) throw new Error('Failed to load teams');
 
         const teams = await response.json();
@@ -168,15 +171,25 @@ async function handleAddEvent(e) {
     const eventMedalInput = document.getElementById('event-medal');
 
     const eventData = {
+        action: "addEvent", // <-- ADD THIS
         name: eventNameInput.value.trim(),
         category_id: eventCategorySelect.value,
         medal_value: parseInt(eventMedalInput.value),
     };
 
     try {
-        const response = await fetch('/api/add-event', {
+        // Get the session token
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
+
+        const response = await fetch('/api/actions', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}` // <-- ADD THIS
+            },
             body: JSON.stringify(eventData),
         });
 

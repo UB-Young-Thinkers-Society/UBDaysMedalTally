@@ -1,5 +1,5 @@
-// This is a secure serverless function (Node.js)
-// Its ONLY job is to check the user's session token and return their role.
+// This new file replaces api/login.js
+// It handles checking a user's session token and returning their role.
 import { supabase } from './db_connection.js'; 
 
 export default async (req, res) => {
@@ -8,25 +8,20 @@ export default async (req, res) => {
             return res.status(405).json({ error: 'Method Not Allowed' });
         }
 
-        // --- 1. GET TOKEN FROM AUTHORIZATION HEADER ---
+        // 1. GET TOKEN FROM AUTHORIZATION HEADER
         const authHeader = req.headers.authorization;
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return res.status(401).json({ error: 'Authorization header missing or invalid.' });
         }
-        
         const token = authHeader.split(' ')[1];
 
-        // --- 2. VALIDATE TOKEN AND GET USER ---
-        // We use the token (JWT) to get the user
+        // 2. VALIDATE TOKEN AND GET USER
         const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
         if (userError || !user) {
-            // This is the 401 error, but now it only happens if the token is *actually* bad
             return res.status(401).json({ error: 'Invalid or expired session token.' });
         }
 
-        // --- 3. GET ROLE ---
-        // If we have a valid user, get their role from our 'user-roles' table
+        // 3. GET ROLE
         const { data: roleData, error: roleError } = await supabase
             .from('user-roles') 
             .select('roles')
@@ -42,7 +37,7 @@ export default async (req, res) => {
         return res.status(200).json({ role: roleData.roles });
 
     } catch (error) {
-        console.error('Error in /api/login:', error);
+        console.error('Error in /api/auth:', error);
         return res.status(500).json({ error: 'Internal Server Error: ' + error.message });
     }
 };
