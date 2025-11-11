@@ -11,60 +11,68 @@ body {
 .main-header {
     display: flex;
     align-items: center;
-    gap: 18px;
-    margin-top: 32px;
-    margin-left: 55px;
-    margin-bottom: 15px;
+    gap: clamp(12px, 2.5vw, 18px);
+    margin-top: clamp(12px, 4vw, 32px);
+    margin-left: clamp(8px, 4vw, 55px);
+    margin-bottom: clamp(10px, 2.5vw, 15px);
 }
 .main-header img {
-    width: 100px;
-    height: 100px;
+    width: clamp(48px, 9vw, 100px);
+    height: clamp(48px, 9vw, 100px);
+    object-fit: contain;
 }
 .main-title {
     font-family: "Albert Sans", sans-serif;
-    font-size: 5rem;
+    font-size: clamp(1.8rem, 5.5vw, 5rem);
+    line-height: 1.1;
     font-weight: 800;
-    letter-spacing: -3px;
+    letter-spacing: clamp(-1px, -0.5vw, -3px);
     color: #444;
     margin-bottom: 0;
+    transition: font-size 0.2s ease, line-height 0.2s ease;
 }
 .subtitle {
-    font-size: 1rem;
+    font-size: clamp(0.85rem, 2.4vw, 1rem);
     color: #444;
-    margin-top: -15px;
-    margin-left: 4px;
+    margin-top: clamp(-6px, -0.8vw, -15px);
+    margin-left: clamp(2px, 0.6vw, 4px);
     font-weight: 600;
+    line-height: 1.3;
+    transition: font-size 0.2s ease, line-height 0.2s ease;
 }
 .top-buttons {
+    position: absolute;
+    top: clamp(8px, 2vw, 16px);
+    right: clamp(8px, 2vw, 16px);
     display: flex;
-    gap: 5px;
+    gap: clamp(4px, 1.2vw, 8px);
     background: #fff;
     border-radius: 8px;
     box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
-    padding: 0 8px;
+    padding: clamp(4px, 1.2vw, 8px) clamp(6px, 1.5vw, 12px);
     border: 1px solid #e0e0e0;
-    height: 50px;
+    height: auto;
     align-items: center;
-    width: fit-content;
-    margin-top: -3%;
-    margin-left: 83.5%;
-    margin-bottom: 1%;
+    width: auto;
+    max-width: clamp(220px, 35vw, 420px);
+    z-index: 5;
 }
 .top-btn {
     background: none;
     border: none;
     border-radius: 8px;
-    padding: 0 15px;
-    font-size: 1.3rem;
+    padding: 0 clamp(10px, 2vw, 15px);
+    font-size: clamp(0.9rem, 1.6vw, 1.3rem);
     font-weight: 900;
     color: #222;
     cursor: pointer;
-    height: 40px;
-    transition: background 0.2s, color 0.2s;
+    height: clamp(32px, 6vw, 40px);
+    transition: background 0.2s, color 0.2s, font-size 0.2s ease;
     margin: 0;
     outline: none;
     box-shadow: none;
     font-family: "Albert Sans", sans-serif;
+    white-space: nowrap;
 }
 .top-btn.active {
     background: #e0e0e0;
@@ -77,27 +85,29 @@ body {
 .tally-card {
     position: relative;
     z-index: 1;
-    width: calc(100vw - 2in);
-    min-height: calc(100vh - 3in);
-    margin: 0 auto 2in auto;
-    background-color: rgba(255, 255, 255, 0.95); /* White background with 70% opacity */
+    width: clamp(300px, 95vw, 1400px);
+    min-height: clamp(480px, 80vh, 1000px);
+    margin: 0 auto clamp(48px, 6vw, 96px) auto;
+    background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid #DBDBDB;
     border-radius: 16px;
-    padding: 32px 32px 24px 32px;
+    padding: clamp(72px, 10vw, 96px) clamp(16px, 4vw, 32px) clamp(24px, 5vw, 32px);
     box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
+    overflow: hidden; /* prevent content from overlapping edges */
 }
 .tally-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 1.6vw, 1.1rem);
 }
 .tally-table th, .tally-table td {
-    padding: 12px 8px;
+    padding: clamp(8px, 1.2vw, 12px) clamp(6px, 1vw, 8px);
     text-align: left;
+    word-break: break-word;
 }
 .tally-table th {
     font-family: 'Montserrat', sans-serif;
-    font-size: 1.1rem;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
     font-weight: 700;
     color: #222;
     background: none;
@@ -139,6 +149,17 @@ body {
 .tally-table th:last-child, .tally-table td:last-child {
     border-right: none;
 }
+
+/* Horizontal scroll wrapper for wide tables */
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.table-scroll .tally-table,
+.table-scroll .department-events-table {
+    min-width: 650px; /* allow scroll when viewport is narrow */
+}
 footer,
 .footer {
     position: fixed;
@@ -167,4 +188,15 @@ footer,
     .main-header { margin-left: 8px; }
     .tally-card { max-width: 99vw; }
     .top-buttons { right: 8px; }
+}
+
+/* Small devices: tighten spacing and adjust title line-height */
+@media (max-width: 768px) {
+    .main-title { line-height: 1.1; }
+    .subtitle { line-height: 1.25; }
+}
+
+@media (max-width: 480px) {
+    .main-title { font-size: clamp(1.6rem, 8vw, 2.2rem); line-height: 1.15; }
+    .main-header img { width: clamp(40px, 12vw, 60px); height: clamp(40px, 12vw, 60px); }
 }

@@ -330,6 +330,7 @@ async function fetchAndDisplayDepartmentTally(teamId) {
                     ${medalTallyHTML}
                 </div>
             </div>
+            <div class="table-scroll">
             <table class="department-events-table">
                 <thead>
                     <tr>
@@ -362,7 +363,7 @@ async function fetchAndDisplayDepartmentTally(teamId) {
                 `;
             });
         }
-        tableHTML += `</tbody></table>`;
+        tableHTML += `</tbody></table></div>`;
         view.innerHTML = tableHTML;
     } catch (error) {
         console.error('Error fetching department tally:', error);
