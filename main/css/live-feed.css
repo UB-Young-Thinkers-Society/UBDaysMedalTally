@@ -48,7 +48,7 @@ body {
     gap: clamp(4px, 1.2vw, 8px);
     background: #fff;
     border-radius: 8px;
-    box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 1px 10px 1px rgba(0, 0, 0, 0.3);
     padding: clamp(4px, 1.2vw, 8px) clamp(6px, 1.5vw, 12px);
     border: 1px solid #e0e0e0;
     height: auto;
@@ -91,7 +91,10 @@ body {
     background-color: rgba(255, 255, 255, 0.95);
     border: 1px solid #DBDBDB;
     border-radius: 16px;
+    box-sizing: border-box; /* include padding in width to avoid side cut-off */
     padding: clamp(72px, 10vw, 96px) clamp(16px, 4vw, 32px) clamp(24px, 5vw, 32px);
+    /* Ensure a bit more breathing room on very small screens */
+    padding-inline: clamp(16px, 6vw, 32px);
     box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
     overflow: hidden; /* prevent content from overlapping edges */
 }
