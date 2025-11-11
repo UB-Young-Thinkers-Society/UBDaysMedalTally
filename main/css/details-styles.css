@@ -7,17 +7,15 @@
 */
 
 .details-filter-bar {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
     gap: clamp(8px, 2vw, 16px);
     margin-bottom: 24px;
     align-items: stretch;
 }
 
 .details-filter-bar select {
-    flex: 1 1 clamp(180px, 30vw, 320px);
-    min-width: clamp(160px, 28vw, 300px);
-    max-width: 100%;
+    width: 100%;
     box-sizing: border-box;
     padding: clamp(8px, 1.2vw, 10px) clamp(12px, 2vw, 16px);
     border-radius: 8px;
@@ -297,6 +295,38 @@
 .department-events-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
 .department-events-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
 
+/* Responsive grid adjustments for filters */
+@media (max-width: 900px) {
+    .details-filter-bar { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+}
+@media (max-width: 480px) {
+    .details-filter-bar { grid-template-columns: 1fr; }
+}
+
+/* Prevent wrapping under images for department cells across tables */
+.tally-table td:first-child,
+.department-events-table td:first-child {
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 2vw, 10px);
+    min-width: 0;
+}
+.tally-table td:first-child .dept-logo,
+.department-events-table td:first-child .dept-logo {
+    flex: 0 0 auto;
+    margin-right: 0;
+}
+.tally-table td:first-child .dept-name,
+.department-events-table td:first-child .dept-name {
+    flex: 1 1 auto;
+}
+
+/* Dynamic font sizing for Rank header to keep single line */
+.details-rank-list #rank-header th:nth-child(2) {
+    font-size: clamp(0.95rem, 2.0vw, 1.2rem);
+    white-space: nowrap;
+}
+
 /* Stack filters full-width on very small screens */
 @media (max-width: 480px) {
     .details-filter-bar select { flex-basis: 100%; min-width: 100%; }
@@ -305,4 +335,10 @@
 /* Small device refinements */
 @media (max-width: 768px) {
     .department-title h2 { line-height: 1.25; }
+}
+
+/* Ensure custom department select fills the grid cell equally */
+.details-filter-bar .custom-select-box {
+    width: 100%;
+    box-sizing: border-box;
 }
