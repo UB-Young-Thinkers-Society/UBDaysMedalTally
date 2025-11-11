@@ -8,16 +8,21 @@
 
 .details-filter-bar {
     display: flex;
-    gap: 16px;
+    flex-wrap: wrap;
+    gap: clamp(8px, 2vw, 16px);
     margin-bottom: 24px;
+    align-items: stretch;
 }
 
 .details-filter-bar select {
-    flex-basis: 33.3%;
-    padding: 10px 16px;
+    flex: 1 1 clamp(180px, 30vw, 320px);
+    min-width: clamp(160px, 28vw, 300px);
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: clamp(8px, 1.2vw, 10px) clamp(12px, 2vw, 16px);
     border-radius: 8px;
     border: 1px solid #ddd;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
     outline: none;
     background-color: #fff;
     -webkit-appearance: none;
@@ -25,7 +30,7 @@
     appearance: none;
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
     background-repeat: no-repeat;
-    background-position: right 16px center;
+    background-position: right clamp(10px, 2vw, 16px) center;
     background-size: 10px;
     cursor: pointer;
 }
@@ -288,9 +293,14 @@
 .department-events-table .silver { text-align: center; color: #B0B0B0; font-weight: 700; }
 .department-events-table .bronze { text-align: center; color: #C9894B; font-weight: 700; }
 
-.department-events-table th.gold { color: #FFD700; text-align: center; }
-.department-events-table th.silver { color: #B0B0B0; text-align: center; }
-.department-events-table th.bronze { color: #C9894B; text-align: center; }
+.department-events-table th.gold { color: #FFD700; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.department-events-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.department-events-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+
+/* Stack filters full-width on very small screens */
+@media (max-width: 480px) {
+    .details-filter-bar select { flex-basis: 100%; min-width: 100%; }
+}
 
 /* Small device refinements */
 @media (max-width: 768px) {

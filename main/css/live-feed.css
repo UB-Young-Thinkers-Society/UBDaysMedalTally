@@ -113,9 +113,9 @@ body {
     background: none;
     border-bottom: 2px solid #eee;
 }
-.tally-table th.gold { color: #FFD700; text-align: center;}
-.tally-table th.silver { color: #B0B0B0; text-align: center;}
-.tally-table th.bronze { color: #C9894B; text-align: center;}
+.tally-table th.gold { color: #FFD700; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
 .tally-table td.gold { color: #FFD700; font-weight: 700; text-align: center;}
 .tally-table td.silver { color: #B0B0B0; font-weight: 700; text-align: center;}
 .tally-table td.bronze { color: #C9894B; font-weight: 700; text-align: center;}
@@ -142,6 +142,7 @@ body {
     font-weight: 700;
     color: #222;
     text-align: center;
+    white-space: nowrap;
 }
 .tally-table th, .tally-table td {
     border-right: 1px solid #eee;
