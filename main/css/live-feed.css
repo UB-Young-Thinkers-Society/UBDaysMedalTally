@@ -7,14 +7,16 @@ body {
     position: relative;
     min-height: 100vh;
     letter-spacing: -.5px;
+    /* Reserve space for fixed footer to avoid overlap with content */
+    padding-bottom: clamp(56px, 8vw, 96px);
 }
 .main-header {
     display: flex;
     align-items: center;
     gap: clamp(12px, 2.5vw, 18px);
-    margin-top: clamp(12px, 4vw, 32px);
-    margin-left: clamp(8px, 4vw, 55px);
-    margin-bottom: clamp(10px, 2.5vw, 15px);
+    box-sizing: border-box;
+    width: clamp(300px, 95vw, 1400px);
+    margin: clamp(12px, 4vw, 32px) auto clamp(10px, 2.5vw, 15px) auto;
 }
 .main-header img {
     width: clamp(48px, 9vw, 100px);
@@ -167,11 +169,11 @@ body {
 footer,
 .footer {
     position: fixed;
-    bottom: 18px;
+    bottom: 0;
     left: 0;
     width: 100%;
     text-align: center;
-    z-index: 2;
+    z-index: 10;
     font-size: 1.4rem;
     letter-spacing: -1px;
     color: #222;
@@ -189,7 +191,7 @@ footer,
     margin-right: 8px;
 }
 @media (max-width: 900px) {
-    .main-header { margin-left: 8px; }
+    .main-header { margin-left: auto; margin-right: auto; }
     .tally-card { max-width: 99vw; }
     .top-buttons { right: 8px; }
 }
