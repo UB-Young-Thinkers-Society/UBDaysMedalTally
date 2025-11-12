@@ -25,11 +25,12 @@
             <div class="subtitle" id="last-updated">Loading...</div>
         </div>
     </div>
-    <div class="top-buttons">
-        <button class="top-btn active">Live Count</button>
-        <button class="top-btn" onclick="window.location.href='details-category.html'">Details</button> <!-- Assuming you'll have a details page -->
-    </div>
     <div class="tally-card">
+        <div class="top-buttons" role="group" aria-label="Page navigation">
+            <button class="top-btn active">Live Count</button>
+            <button class="top-btn" onclick="window.location.href='details-category.html'">Details</button>
+        </div>
+        <div class="table-scroll">
         <table class="tally-table">
             <thead>
                 <tr>
@@ -54,6 +55,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
     </div>
     <footer class="footer">
         Made by <img src="img/UBYTeS New Logo 1.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society

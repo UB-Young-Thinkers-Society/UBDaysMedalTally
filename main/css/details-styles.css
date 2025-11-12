@@ -7,17 +7,20 @@
 */
 
 .details-filter-bar {
-    display: flex;
-    gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: clamp(8px, 2vw, 16px);
     margin-bottom: 24px;
+    align-items: stretch;
 }
 
 .details-filter-bar select {
-    flex-basis: 33.3%;
-    padding: 10px 16px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: clamp(8px, 1.2vw, 10px) clamp(12px, 2vw, 16px);
     border-radius: 8px;
     border: 1px solid #ddd;
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
     outline: none;
     background-color: #fff;
     -webkit-appearance: none;
@@ -25,7 +28,7 @@
     appearance: none;
     background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
     background-repeat: no-repeat;
-    background-position: right 16px center;
+    background-position: right clamp(10px, 2vw, 16px) center;
     background-size: 10px;
     cursor: pointer;
 }
@@ -210,29 +213,34 @@
     padding-bottom: 16px;
     margin-top: 16px;
 }
+.department-header .department-info,
 .department-title {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: clamp(10px, 2vw, 16px);
+    min-width: 0; /* allow text to wrap without overflow */
 }
 .department-title img {
-    width: 48px;
-    height: 48px;
+    width: clamp(32px, 6vw, 48px);
+    height: clamp(32px, 6vw, 48px);
     border-radius: 50%;
     border: 2px solid #eee;
 }
 /* (FIX #3) Increase font size */
 .department-title h2 {
-    font-size: 2rem; /* Was 1.8rem */
+    font-size: clamp(1.1rem, 3.5vw, 2rem); /* fluid */
     font-weight: 600;
     color: #333;
     margin: 0;
+    line-height: 1.2;
+    white-space: normal;
+    word-break: break-word;
 }
 .department-medal-tally {
     display: flex;
     align-items: center;
-    gap: 16px;
-    font-size: 1.2rem;
+    gap: clamp(8px, 2vw, 16px);
+    font-size: clamp(1rem, 2.2vw, 1.2rem);
     font-weight: 700;
 }
 .department-medal-tally span {
@@ -257,12 +265,13 @@
 }
 .department-events-table th, 
 .department-events-table td {
-    padding: 12px 0;
+    padding: clamp(8px, 1.2vw, 12px) 0;
     text-align: left;
     border-bottom: 1px solid #f0f0f0;
+    word-break: break-word;
 }
 .department-events-table th {
-    font-size: 1.1rem;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
     font-weight: 700;
     color: #222;
 }
@@ -270,18 +279,66 @@
 .department-events-table .event-name {
     font-weight: 600;
     color: #333;
-    font-size: 1.15rem; /* NEW */
+    font-size: clamp(1rem, 2vw, 1.15rem); /* NEW + fluid */
 }
 /* (FIX #3) Increase font size */
 .department-events-table .sub-event {
     padding-left: 20px;
     color: #555;
-    font-size: 1.1rem; /* NEW */
+    font-size: clamp(0.95rem, 1.8vw, 1.1rem); /* NEW + fluid */
 }
 .department-events-table .gold { text-align: center; color: #FFD700; font-weight: 700; }
 .department-events-table .silver { text-align: center; color: #B0B0B0; font-weight: 700; }
 .department-events-table .bronze { text-align: center; color: #C9894B; font-weight: 700; }
 
-.department-events-table th.gold { color: #FFD700; text-align: center; }
-.department-events-table th.silver { color: #B0B0B0; text-align: center; }
-.department-events-table th.bronze { color: #C9894B; text-align: center; }
+.department-events-table th.gold { color: #FFD700; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.department-events-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.department-events-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+
+/* Responsive grid adjustments for filters */
+@media (max-width: 900px) {
+    .details-filter-bar { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+}
+@media (max-width: 480px) {
+    .details-filter-bar { grid-template-columns: 1fr; }
+}
+
+/* Prevent wrapping under images for department cells across tables */
+.tally-table td:first-child,
+.department-events-table td:first-child {
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 2vw, 10px);
+    min-width: 0;
+}
+.tally-table td:first-child .dept-logo,
+.department-events-table td:first-child .dept-logo {
+    flex: 0 0 auto;
+    margin-right: 0;
+}
+.tally-table td:first-child .dept-name,
+.department-events-table td:first-child .dept-name {
+    flex: 1 1 auto;
+}
+
+/* Dynamic font sizing for Rank header to keep single line */
+.details-rank-list #rank-header th:nth-child(2) {
+    font-size: clamp(0.95rem, 2.0vw, 1.2rem);
+    white-space: nowrap;
+}
+
+/* Stack filters full-width on very small screens */
+@media (max-width: 480px) {
+    .details-filter-bar select { flex-basis: 100%; min-width: 100%; }
+}
+
+/* Small device refinements */
+@media (max-width: 768px) {
+    .department-title h2 { line-height: 1.25; }
+}
+
+/* Ensure custom department select fills the grid cell equally */
+.details-filter-bar .custom-select-box {
+    width: 100%;
+    box-sizing: border-box;
+}

@@ -29,12 +29,11 @@
         </div>
     </div>
     
-    <div class="top-buttons">
-        <button class="top-btn" onclick="window.location.href='index.html'">Live Count</button>
-        <button class="top-btn active">Details</button>
-    </div>
-
     <div class="tally-card">
+        <div class="top-buttons" role="group" aria-label="Page navigation">
+            <button class="top-btn" onclick="window.location.href='index.html'">Live Count</button>
+            <button class="top-btn active">Details</button>
+        </div>
         <!-- New Filter Bar -->
         <div class="details-filter-bar">
             <select id="filter-category">
@@ -68,6 +67,7 @@
         </div>
 
         <!-- Re-using the .tally-table style -->
+        <div class="table-scroll">
         <table class="tally-table">
             <thead>
                 <tr>
@@ -150,6 +150,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
     </div>
 
     <footer class="footer">
