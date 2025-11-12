@@ -9,6 +9,9 @@ body {
     letter-spacing: -.5px;
     /* Footer is static; no extra bottom padding needed */
     padding-bottom: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 .main-header {
     display: flex;
@@ -190,9 +193,21 @@ footer,
     margin-right: 8px;
 }
 @media (max-width: 900px) {
-    .main-header { margin-left: auto; margin-right: auto; }
-    .tally-card { max-width: 99vw; }
-    .top-buttons { right: 8px; }
+    .main-header,
+    .tally-card,
+    footer,
+    .footer {
+        max-width: 99vw;
+    }
+}
+@media (max-width: 480px) {
+    .main-header,
+    .tally-card,
+    footer,
+    .footer {
+        width: 99vw;
+        min-width: 320px;
+    }
 }
 
 /* Small devices: tighten spacing and adjust title line-height */
