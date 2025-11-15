@@ -382,6 +382,32 @@ footer {
 .filter.locked:disabled { background: #e0c85c; }
 
 
+/* *** (3) Styles for Event Search Bar (MODIFIED) *** */
+.table-search-wrapper {
+    margin-bottom: 12px; /* Adds space between search and table */
+    margin-top: 4px; /* Adds a little space above it */
+}
+
+.event-search-input {
+    width: 100%;
+    padding: 12px 18px; /* MODIFIED: Increased padding */
+    font-size: 1.1rem; /* Matches category font */
+    font-family: "Albert Sans", sans-serif; /* Matches card font */
+    border: 1px solid #DBDBDB; /* Matches card border */
+    border-radius: 16px; /* MODIFIED: Matches card border-radius */
+    box-sizing: border-box; /* Ensures padding doesn't break width */
+    color: #333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.event-search-input:focus {
+    outline: none;
+    border-color: #2d5be3;
+    box-shadow: 0 0 0 2px rgba(45, 91, 227, 0.2);
+}
+/* *** END OF SEARCH STYLES *** */
+
+
 /* (2) Styles for the new Confirmation Modal */
 .modal-overlay {
     position: fixed;

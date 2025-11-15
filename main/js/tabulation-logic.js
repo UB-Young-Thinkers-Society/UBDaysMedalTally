@@ -111,8 +111,6 @@ async function loadAllEvents() {
             detailsDiv.id = `category-${category.id}-details`;
             detailsDiv.style.display = 'none';
             
-            // MODIFIED: (1) Re-added the 5th <th> for the delete button
-            // MODIFIED: (2) Added a search bar wrapper DIV
             detailsDiv.innerHTML = `
                 <div class="table-search-wrapper">
                     <input type="search" class="event-search-input" placeholder="Search event name, medal count, or status...">
@@ -131,39 +129,28 @@ async function loadAllEvents() {
                 </table>
             `;
 
-            // *** NEW: ADD EVENT LISTENER FOR THE SEARCH BAR ***
             const searchInput = detailsDiv.querySelector('.event-search-input');
             searchInput.addEventListener('input', (e) => {
                 const searchTerm = e.target.value.toLowerCase().trim();
-                // Find the table *within this specific detailsDiv*
                 const table = detailsDiv.querySelector('.events-table');
                 const rows = table.querySelectorAll('tbody tr');
                 
                 rows.forEach(row => {
-                    // Skip the 'No events' row
                     if (row.querySelector('td[colspan="5"]')) {
                         return;
                     }
-
-                    // Get text content from the cells you want to search
                     const eventName = row.cells[0].textContent.toLowerCase();
                     const medalCount = row.cells[1].textContent.toLowerCase();
                     const status = row.cells[2].textContent.toLowerCase();
-
-                    // Check if any cell content includes the search term
                     const isVisible = eventName.includes(searchTerm) ||
                                       medalCount.includes(searchTerm) ||
                                       status.includes(searchTerm);
-                    
-                    // Show or hide the row
                     row.style.display = isVisible ? '' : 'none';
                 });
             });
-            // *** END OF NEW CODE ***
 
             const tbody = detailsDiv.querySelector('tbody');
             if (category.events.length === 0) {
-                // MODIFIED: (1) Set colspan back to 5
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">No events found in this category.</td></tr>`;
             } else {
                 category.events.forEach(event => {
@@ -186,7 +173,7 @@ async function loadAllEvents() {
 }
 
 /**
- * MODIFIED: (1) Puts the Delete button back in its own <td>
+ * MODIFIED: (2) Applies conditional disabling to action buttons
  */
 function createEventRow(event) {
     const tr = document.createElement('tr');
@@ -198,27 +185,40 @@ function createEventRow(event) {
     const statusText = event.status || "N/A";
     const statusClass = event.status ? event.status.replace(' ', '-').toLowerCase() : "none";
 
-    // (1) Changed innerHTML to have 5 <td> cells again
+    // --- NEW: Conditional Logic for Action Buttons ---
+    const currentStatus = event.status || 'ongoing'; // Default to 'ongoing' if null
+
+    // 'For Review' button is disabled if 'ongoing' (per user) or 'self'
+    const disableForReview = (currentStatus === 'ongoing') || (currentStatus === 'for review');
+
+    // 'Approved' button is disabled if 'ongoing' (per user) or 'self'
+    const disableApproved = (currentStatus === 'ongoing') || (currentStatus === 'approved');
+
+    // 'Published' button is disabled if 'ongoing', 'for review' (must be approved first), or 'self'
+    const disablePublished = (currentStatus === 'ongoing') || (currentStatus === 'for review') || (currentStatus === 'published');
+
+    // 'Locked' button is disabled if it's NOT 'published' (it's the only forward path) or 'self'
+    const disableLocked = (currentStatus !== 'published');
+    // --- END: NEW LOGIC ---
+
+    // (2) Changed innerHTML to include disabled attributes
     tr.innerHTML = `
         <td>${eventName}</td>
         <td>${medalCount}</td>
         <td><span class="status ${statusClass}">${statusText}</span></td>
         <td>
-          <button class="filter review" data-status="for review">For Review</button>
-          <button class="filter approved" data-status="approved">Approved</button>
-          <button class="filter published" data-status="published">Published</button>
-          <button class="filter locked" data-status="locked">Locked</button>
+          <button class="filter review" data-status="for review" ${disableForReview ? 'disabled' : ''}>For Review</button>
+          <button class="filter approved" data-status="approved" ${disableApproved ? 'disabled' : ''}>Approved</button>
+          <button class="filter published" data-status="published" ${disablePublished ? 'disabled' : ''}>Published</button>
+          <button class="filter locked" data-status="locked" ${disableLocked ? 'disabled' : ''}>Locked</button>
         </td>
         <td>
           <button class="delete-btn" data-id="${event.id}">Delete</button>
         </td>
     `;
     
-    // Highlight the active button
-    const activeButton = tr.querySelector(`.filter[data-status="${event.status}"]`);
-    if (activeButton) {
-        activeButton.disabled = true;
-    }
+    // (2) REMOVED old logic block that just disabled the active button.
+    // The new logic handles this automatically.
 
     // Add event listeners for the new buttons
     tr.querySelector('.delete-btn').addEventListener('click', (e) => {
@@ -227,6 +227,8 @@ function createEventRow(event) {
     });
 
     tr.querySelectorAll('.filter').forEach(button => {
+        // The listener is still added, but if the button is disabled,
+        // it won't fire anyway.
         button.addEventListener('click', (e) => {
             e.stopPropagation();
             const newStatus = e.target.dataset.status;
@@ -312,12 +314,25 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
             throw new Error(err.error || 'Failed to update status');
         }
 
+        // --- NEW: (2) Update button states after successful change ---
         const newStatusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
         tableRow.querySelector('.status').textContent = newStatusText;
         tableRow.querySelector('.status').className = `status ${newStatus.replace(' ', '-').toLowerCase()}`;
         
-        tableRow.querySelectorAll('.filter').forEach(btn => btn.disabled = false);
-        tableRow.querySelector(`.filter[data-status="${newStatus}"]`).disabled = true;
+        // Get all buttons in this row
+        const reviewBtn = tableRow.querySelector('.filter.review');
+        const approvedBtn = tableRow.querySelector('.filter.approved');
+        const publishedBtn = tableRow.querySelector('.filter.published');
+        const lockedBtn = tableRow.querySelector('.filter.locked');
+
+        // Apply the same logic as in createEventRow
+        const currentStatus = newStatus; // The new status is now the current one
+
+        reviewBtn.disabled = (currentStatus === 'ongoing') || (currentStatus === 'for review');
+        approvedBtn.disabled = (currentStatus === 'ongoing') || (currentStatus === 'approved');
+        publishedBtn.disabled = (currentStatus === 'ongoing') || (currentStatus === 'for review') || (currentStatus === 'published');
+        lockedBtn.disabled = (currentStatus !== 'published');
+        // --- END: (2) ---
 
         const detailsDiv = tableRow.closest('.category-details');
         if (detailsDiv) {
@@ -326,7 +341,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
 
     } catch (error) {
         console.error('Error updating status:', error);
-        alert('Error: ' + error.message);
+        alert('Error: 'D + error.message);
     }
 }
 
