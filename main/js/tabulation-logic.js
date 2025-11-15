@@ -341,7 +341,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
 
     } catch (error) {
         console.error('Error updating status:', error);
-        alert('Error: 'D + error.message);
+        alert('Error: ' + error.message);
     }
 }
 
