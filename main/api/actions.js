@@ -1,4 +1,6 @@
 import { supabase } from './db_connection.js';
+import { Formidable } from 'formidable'; // <-- ADD THIS IMPORT
+import fs from 'fs'; // <-- ADD THIS IMPORT
 
 // Helper function to get the user from a token
 async function getUser(req) {
@@ -64,15 +66,20 @@ async function getTeamName(teamId) {
 }
 
 // --- NEW: Helper to upload image and return URL ---
+// --- (MODIFIED to read file content from formidable) ---
 async function uploadLogo(file, bucketPath) {
     if (!file) return null;
 
-    const fileName = `${Date.now()}-${file.name.replace(/\s/g, '_')}`; // Unique filename
+    // Read the file from its temporary path
+    const fileContent = fs.readFileSync(file.filepath);
+    const fileName = `${Date.now()}-${file.originalFilename.replace(/\s/g, '_')}`; // Use originalFilename
+
     const { data, error } = await supabase.storage
         .from('logos') // Make sure you have a 'logos' bucket in Supabase
-        .upload(`${bucketPath}/${fileName}`, file, {
+        .upload(`${bucketPath}/${fileName}`, fileContent, { // Pass fileContent
             cacheControl: '3600',
-            upsert: false // Don't overwrite if file exists with same name
+            upsert: false, // Don't overwrite if file exists with same name
+            contentType: file.mimetype // Pass correct content type
         });
 
     if (error) {
@@ -92,6 +99,13 @@ async function uploadLogo(file, bucketPath) {
     return publicUrlData.publicUrl;
 }
 
+// --- ADD THIS CONFIG TO DISABLE VERCEL'S DEFAULT BODY PARSER ---
+export const config = {
+    api: {
+        bodyParser: false,
+    },
+};
+// --- END OF CONFIG ---
 
 export default async (req, res) => {
     if (req.method !== 'POST') {
@@ -99,22 +113,49 @@ export default async (req, res) => {
     }
 
     let user; 
+    let fields; // To hold parsed form fields
+    let files;  // To hold parsed form files
+    let reqBody; // To hold JSON body
 
     try {
+        // --- 1. AUTHENTICATE FIRST ---
         user = await getUser(req);
         if (!user) {
             return res.status(401).json({ error: 'Invalid token.' });
         }
         
-        // --- IMPORTANT: When handling FormData, Vercel automatically parses it.
-        // req.body will directly contain the fields and files.
-        const { action, name, acronym, teamId, existing_logo_url } = req.body;
-        const logoFile = req.files && req.files.logoFile ? req.files.logoFile : null; // Access uploaded file
+        // --- 2. PARSE BASED ON CONTENT-TYPE ---
+        const contentType = req.headers['content-type'] || '';
+        
+        if (contentType.includes('multipart/form-data')) {
+            // It's a FormData request (addTeam, editTeam)
+            const form = new Formidable({});
+            [fields, files] = await form.parse(req);
+        } else {
+            // It's a JSON request (addEvent, deleteEvent, etc.)
+            // Manually parse the raw body
+            const chunks = [];
+            for await (const chunk of req) {
+                chunks.push(chunk);
+            }
+            const buffer = Buffer.concat(chunks);
+            reqBody = buffer.length ? JSON.parse(buffer.toString()) : {};
+            fields = reqBody; // For simplicity, we'll use 'fields' to get the action
+        }
 
+        // --- 3. GET THE ACTION ---
+        // For FormData, action is in fields.action[0]
+        // For JSON, action is in fields.action
+        const action = fields.action ? (Array.isArray(fields.action) ? fields.action[0] : fields.action) : null;
 
+        // --- 4. SWITCH ON THE ACTION ---
         switch (action) {
-            // --- Case: Add a new Team ---
+            // --- Case: Add a new Team (FROM FORMDATA) ---
             case 'addTeam': {
+                const name = fields.name?.[0];
+                const acronym = fields.acronym?.[0];
+                const logoFile = files.logoFile?.[0];
+
                 if (!name || !acronym || !logoFile) { // Logo is required for new team
                     return res.status(400).json({ error: 'Missing name, acronym, or logo file.' });
                 }
@@ -133,8 +174,14 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true, data: data[0] });
             }
 
-            // --- NEW: Case: Edit an existing Team ---
+            // --- Case: Edit an existing Team (FROM FORMDATA) ---
             case 'editTeam': {
+                const name = fields.name?.[0];
+                const acronym = fields.acronym?.[0];
+                const teamId = fields.teamId?.[0];
+                const existing_logo_url = fields.existing_logo_url?.[0];
+                const logoFile = files.logoFile?.[0];
+
                 if (!teamId || !name || !acronym) {
                     return res.status(400).json({ error: 'Missing team ID, name, or acronym for edit.' });
                 }
@@ -158,8 +205,9 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true, data: data[0] });
             }
 
-            // --- NEW: Case: Delete a Team ---
+            // --- Case: Delete a Team (FROM JSON) ---
             case 'deleteTeam': {
+                const { teamId } = reqBody; // <-- Use reqBody
                 if (!teamId) return res.status(400).json({ error: 'Team ID required for deletion.' });
 
                 const teamName = await getTeamName(teamId); // Get name for log
@@ -177,10 +225,10 @@ export default async (req, res) => {
             }
 
 
-            // --- Case: Add a new Event ---
+            // --- Case: Add a new Event (FROM JSON) ---
             case 'addEvent': {
                 // This case handles JSON body, not FormData, so payload is directly req.body
-                const { name: eventName, category_id, medal_value } = req.body; 
+                const { name: eventName, category_id, medal_value } = reqBody; // <-- Use reqBody
                 if (!eventName || !category_id || isNaN(medal_value)) {
                     return res.status(400).json({ error: 'Missing required fields for event.' });
                 }
@@ -195,9 +243,9 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true, data: data[0] });
             }
 
-            // --- Case: Delete an Event ---
+            // --- Case: Delete an Event (FROM JSON) ---
             case 'deleteEvent': {
-                const { eventId } = req.body; // JSON body
+                const { eventId } = reqBody; // <-- Use reqBody
                 if (!eventId) return res.status(400).json({ error: 'Event ID required.' });
                 
                 const eventName = await getEventName(eventId);
@@ -212,9 +260,9 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true });
             }
             
-            // --- Case: Update an Event's Status ---
+            // --- Case: Update an Event's Status (FROM JSON) ---
             case 'updateEventStatus': {
-                const { eventId, newStatus } = req.body; // JSON body
+                const { eventId, newStatus } = reqBody; // <-- Use reqBody
                 if (!eventId || !newStatus) return res.status(400).json({ error: 'Missing fields.' });
                 
                 const eventName = await getEventName(eventId);
@@ -231,9 +279,9 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true });
             }
 
-            // --- Case: Submit Event Results ---
+            // --- Case: Submit Event Results (FROM JSON) ---
             case 'submitResults': {
-                const { eventId, results } = req.body; // JSON body
+                const { eventId, results } = reqBody; // <-- Use reqBody
                 if (!eventId || !results) return res.status(400).json({ error: 'Missing fields.' });
 
                 const eventName = await getEventName(eventId);
@@ -262,7 +310,8 @@ export default async (req, res) => {
     } catch (error) {
         console.error('Error in /api/actions:', error);
         if (user) {
-            await logAction(user.id, 'error', `Failed action "${req.body.action || 'unknown'}": ${error.message}`);
+            const action = fields.action ? (Array.isArray(fields.action) ? fields.action[0] : fields.action) : 'unknown';
+            await logAction(user.id, 'error', `Failed action "${action || 'unknown'}": ${error.message}`);
         }
         res.status(500).json({ error: 'Internal Server Error: ' + error.message });
     }
