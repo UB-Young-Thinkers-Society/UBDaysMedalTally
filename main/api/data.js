@@ -111,6 +111,20 @@ export default async (req, res) => {
                 if (error) throw error;
                 return res.status(200).json(data);
             }
+            
+            // --- NEW: CASE TO GET A SINGLE TEAM BY ID (for the Edit button) ---
+            case 'teamById': {
+                if (!teamId) return res.status(400).json({ error: 'Missing teamId.' });
+                const { data, error } = await supabase
+                    .from('teams')
+                    .select('id, name, acronym, logo_url')
+                    .eq('id', teamId)
+                    .single(); // Use .single() to get one object, not an array
+                if (error) throw error;
+                return res.status(200).json(data);
+            }
+            // --- END OF NEW CASE ---
+
             case 'eventResults': {
                 if (!eventId) return res.status(400).json({ error: 'Missing eventId.' });
                 const { data, error } = await supabase

@@ -295,37 +295,54 @@ footer {
 }
 
 .add-logo {
-    width: 10%;
-    padding: 12px 18px;
-    border-radius: 12px;
+    /* This rule now styles the <input type="file"> */
+    /* We make it tiny and hide it visually so the <label> and <img> can be clicked */
+    width: 0.1px;
+    height: 0.1px;
+    opacity: 0;
+    overflow: hidden;
+    position: absolute;
+    z-index: -1;
+}
+
+/* NEW: Style for the logo preview <img> */
+#logo-preview {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
     border: 1px solid #ddd;
-    font-size: 1.5rem;
-    outline: none;
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    height: 100px;
+    background: #f3f3f3;
+    object-fit: cover; /* This makes the image cover the box nicely */
+    color: transparent; /* Hides broken image text if src is empty */
+    display: none; /* Hidden by default, JS will show it */
 }
 
-input[type="file"]::file-selector-button {
-  background-color: transparent;
-  color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.add-logo:focus, .add-logo:hover {
-    border-color: #0051ff;
-    box-shadow: 0 0 0 2px #4CAF5022;
-}
-
+/* NEW: Style the label to *look* like the old file input */
 .logo-label {
     font-size: 0.9rem;
     color: #555;
     margin-bottom: 6px;
     display: inline-block;
     text-align: center;
+    /* Makes the label control the hidden file input */
+    cursor: pointer; 
 }   
+
+/* When the preview is visible, it acts as the button */
+#logo-preview[src] {
+    display: block;
+    cursor: pointer;
+}
+
+/* When the preview is hidden, we can style the label as a fallback box */
+/* This part is optional but matches your screenshot */
+#logo-preview:not([src]) {
+    display: block;
+    border: 1px dashed #ccc;
+    background: #f9f9f9;
+    /* You might need to adjust the label to be on top or next to this */
+}
+
 
 .add-participant  .name {
     height: 100px;
@@ -431,15 +448,6 @@ input[type="file"]::file-selector-button {
     width: 100%;
     margin-bottom: 8px;
 }
-.add-logo {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    border: 1px solid #ddd;
-    background: #f3f3f3;
-    text-align: center;
-}
 
 .participant-names {
     display: flex;
@@ -471,6 +479,25 @@ input[type="file"]::file-selector-button {
     border-radius: 7px;
     font-size: 1rem;
 }
+
+/* NEW: Style for the dynamically added cancel button */
+#cancel-edit-btn {
+    width: 107%;
+    background: #6c757d; /* A neutral grey */
+    color: #fff;
+    border: none;
+    font-weight: 400;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 6px;
+    padding: 10px 0;
+    border-radius: 7px;
+    font-size: 1rem;
+}
+#cancel-edit-btn:hover {
+    background: #5a6268;
+}
+
 
 .add-btn:hover {
     background: #1a3fa6;
@@ -530,4 +557,3 @@ hr {
     min-width: 180px;
     margin-right: 0;
 }
-

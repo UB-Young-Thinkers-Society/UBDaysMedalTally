@@ -54,13 +54,18 @@
                 <form class="add-participant-form" id="add-team-form">
                     <div class="participant-fields">
                         <label for="add-logo" class="logo-label">Logo: </label>
-                        <input class="add-logo" id="add-logo" type="file" accept="image/*" required>
+                        
+                        <!-- NEW: Added <img> tag for the preview -->
+                        <img id="logo-preview" src="" alt="Logo preview"> 
+                        
+                        <input class="add-logo" id="add-logo" type="file" accept="image/*"> <!-- Removed 'required' as it's not needed for "Edit" -->
                         <div class="participant-names">
                             <input class="name" id="team-name" type="text" placeholder="Name" required>
                             <input class="acronym" id="team-acronym" type="text" placeholder="Acronym" required>
                         </div>
                     </div>
                     <button type="submit" class="add-btn add_participant_btn">Add Participant</button>
+                    <!-- "Cancel Edit" button will be added here by JS -->
                 </form>
 
                 <form class="events-config-form" id="add-event-form">
