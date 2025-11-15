@@ -112,7 +112,11 @@ async function loadAllEvents() {
             detailsDiv.style.display = 'none';
             
             // MODIFIED: (1) Re-added the 5th <th> for the delete button
+            // MODIFIED: (2) Added a search bar wrapper DIV
             detailsDiv.innerHTML = `
+                <div class="table-search-wrapper">
+                    <input type="search" class="event-search-input" placeholder="Search event name, medal count, or status...">
+                </div>
                 <table class="events-table">
                     <thead>
                         <tr>
@@ -120,14 +124,42 @@ async function loadAllEvents() {
                             <th>Medal Count</th>
                             <th>Status</th>
                             <th>Actions</th> 
-                            <th></th> <!-- For Delete Button -->
-                        </tr>
+                            <th></th> </tr>
                     </thead>
                     <tbody>
-                        <!-- Event rows will be built here -->
-                    </tbody>
+                        </tbody>
                 </table>
             `;
+
+            // *** NEW: ADD EVENT LISTENER FOR THE SEARCH BAR ***
+            const searchInput = detailsDiv.querySelector('.event-search-input');
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                // Find the table *within this specific detailsDiv*
+                const table = detailsDiv.querySelector('.events-table');
+                const rows = table.querySelectorAll('tbody tr');
+                
+                rows.forEach(row => {
+                    // Skip the 'No events' row
+                    if (row.querySelector('td[colspan="5"]')) {
+                        return;
+                    }
+
+                    // Get text content from the cells you want to search
+                    const eventName = row.cells[0].textContent.toLowerCase();
+                    const medalCount = row.cells[1].textContent.toLowerCase();
+                    const status = row.cells[2].textContent.toLowerCase();
+
+                    // Check if any cell content includes the search term
+                    const isVisible = eventName.includes(searchTerm) ||
+                                      medalCount.includes(searchTerm) ||
+                                      status.includes(searchTerm);
+                    
+                    // Show or hide the row
+                    row.style.display = isVisible ? '' : 'none';
+                });
+            });
+            // *** END OF NEW CODE ***
 
             const tbody = detailsDiv.querySelector('tbody');
             if (category.events.length === 0) {
