@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Official Medal Tally</title>
+    <link rel="stylesheet" href="css/live-feed.css">
+    <link rel="icon" href="img/Login-Logo.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Client-side Supabase for public data -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // The ANON key is safe to expose for client-side public data.
+        // We need this for the API to work, even though the logic is on the server.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
+</head>
+<body>
+    <div class="main-header">
+        <img src="img/Login-Logo.png" alt="Logo">
+        <div>
+            <div class="main-title">Official Medal Tally</div>
+            <div class="subtitle" id="last-updated">Loading...</div>
+        </div>
+    </div>
+    <div class="tally-card">
+        <div class="top-buttons" role="group" aria-label="Page navigation">
+            <button class="top-btn active">Live Count</button>
+            <button class="top-btn" onclick="window.location.href='details-category.html'">Details</button>
+        </div>
+        <div class="table-scroll">
+        <table class="tally-table">
+            <thead>
+                <tr>
+                    <th>Department</th>
+                    <th class="gold">Gold</th>
+                    <th class="silver">Silver</th>
+                    <th class="bronze">Bronze</th>
+                    <th class="total">Total</th>
+                </tr>
+            </thead>
+            <!-- 
+              The table body is now empty.
+              The new 'js/live-feed.js' script will fill this 
+              with dynamic data from the API.
+            -->
+            <tbody id="tally-body">
+                <!-- Loader Row -->
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; font-weight: 600;">
+                        Loading live medal tally...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+    <footer class="footer">
+        Made by <img src="img/UBYTeS New Logo 1.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
+    </footer>
+
+    <!-- This new script will run and populate the table -->
+    <script src="js/live-feed.js" defer></script>
+</body>
+</html>
