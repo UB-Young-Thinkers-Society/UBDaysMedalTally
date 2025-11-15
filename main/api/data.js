@@ -368,7 +368,6 @@ export default async (req, res) => {
                 break;
             }
 
-            // --- UPDATED CASE FOR THE LOG PAGE ---
             case 'getLogs': {
                 try {
                     // First, authenticate the user. Only logged-in users can see logs.
