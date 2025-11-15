@@ -31,7 +31,7 @@
             <div class="navButtons">
                 <a href="tabulation.html" class="nav-btn">Events</a>
                 <a href="config.html" class="nav-btn active">Config</a>
-                <a href="#" class="nav-btn">Log</a>
+                <a href="log.html" class="nav-btn">Log</a>
                 <a href="about-us.html" class="nav-btn">About Us</a>
             </div>
         </div>
@@ -53,14 +53,22 @@
             <div class="config-forms">
                 <form class="add-participant-form" id="add-team-form">
                     <div class="participant-fields">
-                        <label for="add-logo" class="logo-label">Logo: </label>
-                        <input class="add-logo" id="add-logo" type="file" accept="image/*" required>
+                        
+                        <!-- MODIFIED: The label now wraps the text and the preview image -->
+                        <!-- This makes the text AND the box clickable -->
+                        <label for="add-logo" class="logo-label">
+                            Logo:
+                            <img id="logo-preview" src="" alt="Logo preview"> 
+                        </label>
+                        
+                        <input class="add-logo" id="add-logo" type="file" accept="image/*"> <!-- Removed 'required' as it's not needed for "Edit" -->
                         <div class="participant-names">
                             <input class="name" id="team-name" type="text" placeholder="Name" required>
                             <input class="acronym" id="team-acronym" type="text" placeholder="Acronym" required>
                         </div>
                     </div>
                     <button type="submit" class="add-btn add_participant_btn">Add Participant</button>
+                    <!-- "Cancel Edit" button will be added here by JS -->
                 </form>
 
                 <form class="events-config-form" id="add-event-form">
@@ -78,10 +86,14 @@
             </div>
             <!-- Right: Logo -->
             <div class="logo-section">
-                <img src="img/logoFull.png" alt="Logo" class="main-logo">
+                <img src="img/iconx3.png" alt="Logo" class="main-logo">
             </div>
         </div>
     </div>
+
+    <img class="bgIcon1" src="img/bgIcon.png">
+    <img class="bgIcon2" src="img/bgIcon.png">
+    <img class="bgIcon3" src="img/bgIcon.png">
 
     <footer>
         <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>

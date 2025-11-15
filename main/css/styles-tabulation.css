@@ -5,7 +5,7 @@ body {
     font-family: "Albert Sans", sans-serif;
     background: #fff;
     position: relative;
-    min-height: 100vh;
+    min-height: 90vh;
     letter-spacing: -.5px;
 }
 
@@ -13,7 +13,7 @@ body {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     z-index: -99;
-    background: url('../img/BG.png') no-repeat center center;
+    background: url('../img/bg1.png') no-repeat center center;
     background-size: cover;
     opacity: 0.7;
 }
@@ -50,6 +50,51 @@ body {
     opacity: 0;
     pointer-events: none;
 }
+
+.bgIcon1 {
+    position: fixed;
+    bottom: -60%;
+    left: -20%;
+    opacity: 1;
+    z-index: -99;
+}
+
+.bgIcon2 {
+    position: fixed;
+    top: -90%;
+    right: -24%;
+    opacity: 1;
+    z-index: -99;
+    width: auto;
+    height: 150%;
+}
+
+.bgIcon3 {
+    position: fixed;
+    bottom: -18%;
+    right: -6%;
+    opacity: 1;
+    z-index: -99;
+    width: auto;
+    height: 40%;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.bgIcon1,
+.bgIcon2,
+.bgIcon3 {
+    transform-origin: center center;
+    will-change: transform;
+    animation: spin 30s linear infinite;
+}
+
+.bgIcon1 { animation-duration: 105s; }
+.bgIcon2 { animation-duration: 160s; }
+.bgIcon3 { animation-duration: 98s; }
 
 .header {
     display: flex;
@@ -335,6 +380,32 @@ footer {
 .filter.approved:disabled { background: #4a9e58; }
 .filter.published:disabled { background: #875dae; }
 .filter.locked:disabled { background: #e0c85c; }
+
+
+/* *** (3) Styles for Event Search Bar (MODIFIED) *** */
+.table-search-wrapper {
+    margin-bottom: 12px; /* Adds space between search and table */
+    margin-top: 4px; /* Adds a little space above it */
+}
+
+.event-search-input {
+    width: 100%;
+    padding: 12px 18px; /* MODIFIED: Increased padding */
+    font-size: 1.1rem; /* Matches category font */
+    font-family: "Albert Sans", sans-serif; /* Matches card font */
+    border: 1px solid #DBDBDB; /* Matches card border */
+    border-radius: 16px; /* MODIFIED: Matches card border-radius */
+    box-sizing: border-box; /* Ensures padding doesn't break width */
+    color: #333;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.event-search-input:focus {
+    outline: none;
+    border-color: #2d5be3;
+    box-shadow: 0 0 0 2px rgba(45, 91, 227, 0.2);
+}
+/* *** END OF SEARCH STYLES *** */
 
 
 /* (2) Styles for the new Confirmation Modal */

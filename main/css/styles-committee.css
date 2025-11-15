@@ -1,11 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 body {
-    background: url('../img/BG.png') no-repeat center center fixed;
+    background: url('../img/bg1.png') no-repeat center center fixed;
     margin: 0;
     font-family: "Albert Sans", sans-serif;
     position: relative;
-    min-height: 100vh;
+    min-height: 90vh;
     letter-spacing: -.5px;
 }
 
@@ -41,6 +41,51 @@ body {
     opacity: 0;
     pointer-events: none;
 }
+
+.bgIcon1 {
+    position: fixed;
+    bottom: -60%;
+    left: -20%;
+    opacity: 1;
+    z-index: -99;
+}
+
+.bgIcon2 {
+    position: fixed;
+    top: -90%;
+    right: -24%;
+    opacity: 1;
+    z-index: -99;
+    width: auto;
+    height: 150%;
+}
+
+.bgIcon3 {
+    position: fixed;
+    bottom: -18%;
+    right: -6%;
+    opacity: 1;
+    z-index: -99;
+    width: auto;
+    height: 40%;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.bgIcon1,
+.bgIcon2,
+.bgIcon3 {
+    transform-origin: center center;
+    will-change: transform;
+    animation: spin 30s linear infinite;
+}
+
+.bgIcon1 { animation-duration: 105s; }
+.bgIcon2 { animation-duration: 160s; }
+.bgIcon3 { animation-duration: 98s; }
 
 .container {
     position: relative;

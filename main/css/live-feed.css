@@ -3,11 +3,57 @@
 body {
     margin: 0;
     font-family: "Albert Sans", sans-serif;
-    background: url('../img/BG.png') no-repeat center center fixed;
+    background: url('../img/bg1.png') no-repeat center center fixed;
     position: relative;
-    min-height: 100vh;
+    min-height: 90vh;
     letter-spacing: -.5px;
 }
+
+.bgIcon1 {
+    position: fixed;
+    bottom: -60%;
+    left: -20%;
+    opacity: 1;
+    z-index: -99;
+}
+
+.bgIcon2 {
+    position: fixed;
+    top: -90%;
+    right: -24%;
+    opacity: 1;
+    z-index: -99;
+    width: auto;
+    height: 150%;
+}
+
+.bgIcon3 {
+    position: fixed;
+    bottom: -18%;
+    right: -6%;
+    opacity: 1;
+    z-index: -99;
+    width: auto;
+    height: 40%;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.bgIcon1,
+.bgIcon2,
+.bgIcon3 {
+    transform-origin: center center;
+    will-change: transform;
+    animation: spin 30s linear infinite;
+}
+
+.bgIcon1 { animation-duration: 105s; }
+.bgIcon2 { animation-duration: 160s; }
+.bgIcon3 { animation-duration: 98s; }
+
 .main-header {
     display: flex;
     align-items: center;
@@ -48,8 +94,13 @@ body {
     gap: clamp(4px, 1.2vw, 8px);
     background: #fff;
     border-radius: 8px;
+<<<<<<< HEAD
+    box-shadow: 0px 0px 5px 1px rgba(0, 0, 0, 0.1);
+    padding: 0 8px;
+=======
     box-shadow: 1px 1px 10px 1px rgba(0, 0, 0, 0.3);
     padding: clamp(4px, 1.2vw, 8px) clamp(6px, 1.5vw, 12px);
+>>>>>>> origin/main
     border: 1px solid #e0e0e0;
     height: auto;
     align-items: center;
@@ -85,6 +136,16 @@ body {
 .tally-card {
     position: relative;
     z-index: 1;
+<<<<<<< HEAD
+    width: calc(100vw - 2in);
+    min-height: calc(100vh - 3in);
+    margin: 0 auto 0 auto;
+    background-color: rgba(255, 255, 255, 0.95); /* White background with 70% opacity */
+    border: 1px solid #DBDBDB;
+    border-radius: 16px;
+    padding: 32px 32px 24px 32px;
+    box-shadow: 0px 0px 10px 1px rgba(0, 0, 0, 0.1);
+=======
     width: clamp(300px, 95vw, 1400px);
     min-height: clamp(480px, 80vh, 1000px);
     margin: 0 auto clamp(48px, 6vw, 96px) auto;
@@ -97,6 +158,7 @@ body {
     padding-inline: clamp(16px, 6vw, 32px);
     box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
     overflow: hidden; /* prevent content from overlapping edges */
+>>>>>>> origin/main
 }
 .tally-table {
     width: 100%;
@@ -154,6 +216,8 @@ body {
     border-right: none;
 }
 
+<<<<<<< HEAD
+=======
 /* Horizontal scroll wrapper for wide tables */
 .table-scroll {
     width: 100%;
@@ -164,6 +228,7 @@ body {
 .table-scroll .department-events-table {
     min-width: 650px; /* allow scroll when viewport is narrow */
 }
+>>>>>>> origin/main
 footer,
 .footer {
     position: fixed;
@@ -188,6 +253,7 @@ footer,
     height: 24px;
     margin-right: 8px;
 }
+
 @media (max-width: 900px) {
     .main-header { margin-left: 8px; }
     .tally-card { max-width: 99vw; }
