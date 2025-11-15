@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reader.readAsDataURL(file);
         } else {
             logoPreview.src = '';
-            logoPreview.style.display = 'none'; // Hide if no file selected
+            // logoPreview.style.display = 'none'; // <-- This was part of the original bug, now handled by CSS
         }
     });
 
@@ -148,7 +148,7 @@ async function loadTeams() {
 async function editTeamClicked(teamId) {
     try {
         // Fetch the specific team's details
-        const response = await fetch(`/api/data?type=teamById&teamId=${teamId}`);
+        const response = await fetch(`/api/data?type=teamById&teamId=${teamId}`); // <-- Uses the new API endpoint
         if (!response.ok) {
             throw new Error(`Failed to load team ${teamId}`);
         }
@@ -175,7 +175,8 @@ async function editTeamClicked(teamId) {
             cancelBtn.id = 'cancel-edit-btn';
             cancelBtn.textContent = 'Cancel Edit';
             cancelBtn.type = 'button';
-            cancelBtn.classList.add('btn', 'btn-secondary'); // Add some styling
+            cancelBtn.classList.add('add-btn'); // Use existing button class for styling
+            cancelBtn.style.backgroundColor = '#6c757d'; // Add a grey color
             cancelBtn.addEventListener('click', resetTeamForm);
             submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling); // Insert after submit
         }
@@ -239,7 +240,9 @@ function resetTeamForm() {
     // Clear and hide logo preview
     const logoPreview = document.getElementById('logo-preview');
     logoPreview.src = '';
-    logoPreview.style.display = 'none';
+    // logoPreview.style.display = 'none'; // <-- THIS LINE IS REMOVED (BUG FIX)
+    // By removing this line, the CSS :not([src]) rule will automatically
+    // show the empty dashed box.
 
     // Remove the cancel button if it exists
     const cancelBtn = document.getElementById('cancel-edit-btn');
@@ -256,6 +259,7 @@ async function handleAddTeam(e) {
     const nameInput = document.getElementById('team-name');
     const acronymInput = document.getElementById('team-acronym');
     const logoInput = document.getElementById('add-logo');
+    const logoPreview = document.getElementById('logo-preview'); // Get preview
     
     const submitBtn = e.target.querySelector('button[type="submit"]');
     const mode = submitBtn.getAttribute('data-mode') || 'add'; // 'add' or 'edit'
@@ -278,6 +282,12 @@ async function handleAddTeam(e) {
         formData.append('teamId', teamId); // Add teamId for editing
     }
 
+    // --- Validation: Ensure logo is provided when ADDING new team ---
+    if (mode === 'add' && !logoInput.files[0]) {
+        alert('Please select a logo file to add a new team.');
+        return;
+    }
+
     try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
         if (sessionError || !sessionData.session) {
@@ -288,6 +298,8 @@ async function handleAddTeam(e) {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${sessionData.session.access_token}`
+                // 'Content-Type': 'multipart/form-data' is NOT set here,
+                // the browser does it automatically for FormData
             },
             body: formData, 
         });
@@ -321,6 +333,11 @@ async function handleAddEvent(e) {
         category_id: eventCategorySelect.value,
         medal_value: parseInt(eventMedalInput.value),
     };
+
+    if (!eventData.name || !eventData.category_id || isNaN(eventData.medal_value)) {
+        alert('Please fill out all fields for the event.');
+        return;
+    }
 
     try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();

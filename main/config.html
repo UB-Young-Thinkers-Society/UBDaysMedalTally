@@ -53,10 +53,13 @@
             <div class="config-forms">
                 <form class="add-participant-form" id="add-team-form">
                     <div class="participant-fields">
-                        <label for="add-logo" class="logo-label">Logo: </label>
                         
-                        <!-- NEW: Added <img> tag for the preview -->
-                        <img id="logo-preview" src="" alt="Logo preview"> 
+                        <!-- MODIFIED: The label now wraps the text and the preview image -->
+                        <!-- This makes the text AND the box clickable -->
+                        <label for="add-logo" class="logo-label">
+                            Logo:
+                            <img id="logo-preview" src="" alt="Logo preview"> 
+                        </label>
                         
                         <input class="add-logo" id="add-logo" type="file" accept="image/*"> <!-- Removed 'required' as it's not needed for "Edit" -->
                         <div class="participant-names">

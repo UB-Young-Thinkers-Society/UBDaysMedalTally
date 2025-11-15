@@ -315,6 +315,7 @@ footer {
     object-fit: cover; /* This makes the image cover the box nicely */
     color: transparent; /* Hides broken image text if src is empty */
     display: none; /* Hidden by default, JS will show it */
+    margin-top: 2px; /* Add a small gap between "Logo:" text and box */
 }
 
 /* NEW: Style the label to *look* like the old file input */
@@ -322,7 +323,9 @@ footer {
     font-size: 0.9rem;
     color: #555;
     margin-bottom: 6px;
-    display: inline-block;
+    display: flex; /* CHANGED from inline-block */
+    flex-direction: column; /* Added */
+    align-items: center; /* Added */
     text-align: center;
     /* Makes the label control the hidden file input */
     cursor: pointer; 
@@ -331,7 +334,7 @@ footer {
 /* When the preview is visible, it acts as the button */
 #logo-preview[src] {
     display: block;
-    cursor: pointer;
+    /* cursor: pointer; */ /* REMOVED - Label handles cursor now */
 }
 
 /* When the preview is hidden, we can style the label as a fallback box */
