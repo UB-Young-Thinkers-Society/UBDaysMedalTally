@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+body {
+    margin: 0;
+    font-family: "Albert Sans", sans-serif;
+    background: url('../img/BG.png') no-repeat center center fixed;
+    position: relative;
+    min-height: 100vh;
+    letter-spacing: -.5px;
+}
+.main-header {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 2.5vw, 18px);
+    margin-top: clamp(12px, 4vw, 32px);
+    margin-left: clamp(8px, 4vw, 55px);
+    margin-bottom: clamp(10px, 2.5vw, 15px);
+}
+.main-header img {
+    width: clamp(48px, 9vw, 100px);
+    height: clamp(48px, 9vw, 100px);
+    object-fit: contain;
+}
+.main-title {
+    font-family: "Albert Sans", sans-serif;
+    font-size: clamp(1.8rem, 5.5vw, 5rem);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: clamp(-1px, -0.5vw, -3px);
+    color: #444;
+    margin-bottom: 0;
+    transition: font-size 0.2s ease, line-height 0.2s ease;
+}
+.subtitle {
+    font-size: clamp(0.85rem, 2.4vw, 1rem);
+    color: #444;
+    margin-top: clamp(-6px, -0.8vw, -15px);
+    margin-left: clamp(2px, 0.6vw, 4px);
+    font-weight: 600;
+    line-height: 1.3;
+    transition: font-size 0.2s ease, line-height 0.2s ease;
+}
+.top-buttons {
+    position: absolute;
+    top: clamp(8px, 2vw, 16px);
+    right: clamp(8px, 2vw, 16px);
+    display: flex;
+    gap: clamp(4px, 1.2vw, 8px);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 1px 1px 10px 1px rgba(0, 0, 0, 0.3);
+    padding: clamp(4px, 1.2vw, 8px) clamp(6px, 1.5vw, 12px);
+    border: 1px solid #e0e0e0;
+    height: auto;
+    align-items: center;
+    width: auto;
+    max-width: clamp(220px, 35vw, 420px);
+    z-index: 5;
+}
+.top-btn {
+    background: none;
+    border: none;
+    border-radius: 8px;
+    padding: 0 clamp(10px, 2vw, 15px);
+    font-size: clamp(0.9rem, 1.6vw, 1.3rem);
+    font-weight: 900;
+    color: #222;
+    cursor: pointer;
+    height: clamp(32px, 6vw, 40px);
+    transition: background 0.2s, color 0.2s, font-size 0.2s ease;
+    margin: 0;
+    outline: none;
+    box-shadow: none;
+    font-family: "Albert Sans", sans-serif;
+    white-space: nowrap;
+}
+.top-btn.active {
+    background: #e0e0e0;
+    color: #222;
+}
+.top-btn:not(.active):hover {
+    background: #f5f5f5;
+    color: #222;
+}
+.tally-card {
+    position: relative;
+    z-index: 1;
+    width: clamp(300px, 95vw, 1400px);
+    min-height: clamp(480px, 80vh, 1000px);
+    margin: 0 auto clamp(48px, 6vw, 96px) auto;
+    background-color: rgba(255, 255, 255, 0.95);
+    border: 1px solid #DBDBDB;
+    border-radius: 16px;
+    box-sizing: border-box; /* include padding in width to avoid side cut-off */
+    padding: clamp(72px, 10vw, 96px) clamp(16px, 4vw, 32px) clamp(24px, 5vw, 32px);
+    /* Ensure a bit more breathing room on very small screens */
+    padding-inline: clamp(16px, 6vw, 32px);
+    box-shadow: 5px 5px 10px 2px rgba(0, 0, 0, 0.3);
+    overflow: hidden; /* prevent content from overlapping edges */
+}
+.tally-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+}
+.tally-table th, .tally-table td {
+    padding: clamp(8px, 1.2vw, 12px) clamp(6px, 1vw, 8px);
+    text-align: left;
+    word-break: break-word;
+}
+.tally-table th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+    font-weight: 700;
+    color: #222;
+    background: none;
+    border-bottom: 2px solid #eee;
+}
+.tally-table th.gold { color: #FFD700; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table td.gold { color: #FFD700; font-weight: 700; text-align: center;}
+.tally-table td.silver { color: #B0B0B0; font-weight: 700; text-align: center;}
+.tally-table td.bronze { color: #C9894B; font-weight: 700; text-align: center;}
+.tally-table tr {
+    border-bottom: 1px solid #f3f3f3;
+}
+.tally-table tr:last-child {
+    border-bottom: none;
+}
+.dept-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+    object-fit: cover;
+    background: #eee;
+}
+.dept-name {
+    font-weight: 500;
+    color: #222;
+}
+.tally-table th.total, .tally-table td.total {
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+    white-space: nowrap;
+}
+.tally-table th, .tally-table td {
+    border-right: 1px solid #eee;
+}
+.tally-table th:last-child, .tally-table td:last-child {
+    border-right: none;
+}
+
+/* Horizontal scroll wrapper for wide tables */
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.table-scroll .tally-table,
+.table-scroll .department-events-table {
+    min-width: 650px; /* allow scroll when viewport is narrow */
+}
+footer,
+.footer {
+    position: fixed;
+    bottom: 18px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 2;
+    font-size: 1.4rem;
+    letter-spacing: -1px;
+    color: #222;
+    background: none;
+}
+.ub-logo {
+    vertical-align: middle;
+    width: 22px;
+    height: 22px;
+    margin: 0 4px;
+}
+.footer img {
+    vertical-align: middle;
+    height: 24px;
+    margin-right: 8px;
+}
+@media (max-width: 900px) {
+    .main-header { margin-left: 8px; }
+    .tally-card { max-width: 99vw; }
+    .top-buttons { right: 8px; }
+}
+
+/* Small devices: tighten spacing and adjust title line-height */
+@media (max-width: 768px) {
+    .main-title { line-height: 1.1; }
+    .subtitle { line-height: 1.25; }
+}
+
+@media (max-width: 480px) {
+    .main-title { font-size: clamp(1.6rem, 8vw, 2.2rem); line-height: 1.15; }
+    .main-header img { width: clamp(40px, 12vw, 60px); height: clamp(40px, 12vw, 60px); }
+}
