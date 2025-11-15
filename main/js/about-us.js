@@ -61,7 +61,7 @@ function buildNavbar(role) {
             navHTML = `
                 <a href="tabulation.html" class="nav-btn">Events</a>
                 <a href="config.html" class="nav-btn">Config</a>
-                <a href="#" class="nav-btn">Log</a>
+                <a href="log.html" class="nav-btn">Log</a>
                 <a href="about-us.html" class="nav-btn active">About Us</a>
             `;
             break;
@@ -69,7 +69,6 @@ function buildNavbar(role) {
             // Committee gets their specific navigation
             navHTML = `
                 <a href="computation.html" class="nav-btn">Computation</a>
-                <a href="#" class="nav-btn">Log</a>
                 <a href="about-us.html" class="nav-btn active">About Us</a>
             `;
             break;

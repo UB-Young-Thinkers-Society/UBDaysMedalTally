@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBDays2025 Tabulation</title>
-    <link rel="stylesheet" href="css/styles-tabulation.css">
+    <title>Activity Log</title>
+    <!-- Re-using the config page styles -->
+    <link rel="stylesheet" href="css/styles-config.css">
+    <!-- New styles just for this log page -->
+    <link rel="stylesheet" href="css/styles-log.css">
     <link rel="icon" href="img/iconx1.png">
 
     <!-- Client-side Supabase for AUTHENTICATION only -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script>
-        // The ANON key is safe to expose for client-side auth.
         const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -27,10 +29,11 @@
                 <img src="img/iconx3.png" alt="Admin" class="admin-icon">
                 <span>Tabulation Head</span>
             </div>
-            <div class="navButtons">
-                <a href="tabulation.html" class="nav-btn active">Events</a>
+            <!-- This navbar will be built by js/log-logic.js -->
+            <div class="navButtons" id="navButtons">
+                <a href="tabulation.html" class="nav-btn">Events</a>
                 <a href="config.html" class="nav-btn">Config</a>
-                <a href="log.html" class="nav-btn">Log</a>
+                <a href="log.html" class="nav-btn active">Log</a>
                 <a href="about-us.html" class="nav-btn">About Us</a>
             </div>
         </div>
@@ -40,47 +43,24 @@
     </div>
 
     <div class="main-card">
-        <!-- This is the container for all category accordions -->
-        <div class="categories" id="categories-container">
-            <!-- Category accordions will be dynamically inserted here -->
+        <h1>Activity Log</h1>
+        <p>Showing the 20 most recent activities.</p>
+        
+        <!-- Log entries will be built by JS here -->
+        <div class="log-container" id="log-container">
+            <div class="log-item loading">Loading recent activity...</div>
         </div>
     </div>
 
     <footer>
         <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
     </footer>
-    
-
-    <!-- 
-      =========================================
-      NEW: APPROVAL MODAL
-      =========================================
-    -->
-    <div class="modal-overlay" id="approval-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Confirm Details</h2>
-                <span class="event-name-display" id="modal-event-name">Loading...</span>
-            </div>
-            <div class="modal-body">
-                <h3>Rankings</h3>
-                <div class="modal-rankings-list" id="modal-rankings-list">
-                    <!-- Rankings will be dynamically inserted here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn cancel" id="modal-cancel-btn">Cancel</button>
-                <button class="modal-btn confirm" id="modal-confirm-btn">Confirm</button>
-            </div>
-        </div>
-    </div>
-    <!-- End of Modal -->
 
     <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .8">
     <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .8">
     <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .8">
 
     <div class="background"></div>
-    <script src="js/tabulation-logic.js" defer></script>
+    <script src="js/log-logic.js" defer></script>
 </body>
 </html>
