@@ -190,7 +190,7 @@ export default async (req, res) => {
                 
                 } catch (authError) {
                     console.error('getLogs Authentication Error:', authError.message);
-                    return res.status(4T01).json({ error: authError.message });
+                    return res.status(401).json({ error: authError.message });
                 }
 
                 try {
