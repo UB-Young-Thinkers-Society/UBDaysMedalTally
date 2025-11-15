@@ -173,7 +173,7 @@ async function loadAllEvents() {
 }
 
 /**
- * MODIFIED: (2) Applies conditional disabling to action buttons
+ * MODIFIED: (3) Applies new conditional disabling including 'locked' state rule.
  */
 function createEventRow(event) {
     const tr = document.createElement('tr');
@@ -182,26 +182,32 @@ function createEventRow(event) {
 
     const eventName = event.name || "Unnamed Event";
     const medalCount = event.medal_value ?? "0"; 
-    const statusText = event.status || "N/A";
+    const statusText = event.status || "N-A";
     const statusClass = event.status ? event.status.replace(' ', '-').toLowerCase() : "none";
 
-    // --- NEW: Conditional Logic for Action Buttons ---
-    const currentStatus = event.status || 'ongoing'; // Default to 'ongoing' if null
+    // --- NEW: (3) Conditional Logic for Action Buttons ---
+    const currentStatus = event.status || 'ongoing'; 
 
-    // 'For Review' button is disabled if 'ongoing' (per user) or 'self'
-    const disableForReview = (currentStatus === 'ongoing') || (currentStatus === 'for review');
+    // 'For Review' button logic
+    const disableForReview = (currentStatus === 'for review') || 
+                             (currentStatus === 'ongoing') || 
+                             (currentStatus === 'locked'); // NEW RULE
 
-    // 'Approved' button is disabled if 'ongoing' (per user) or 'self'
-    const disableApproved = (currentStatus === 'ongoing') || (currentStatus === 'approved');
+    // 'Approved' button logic
+    const disableApproved = (currentStatus === 'approved') || 
+                            (currentStatus === 'ongoing') || 
+                            (currentStatus === 'locked'); // NEW RULE
 
-    // 'Published' button is disabled if 'ongoing', 'for review' (must be approved first), or 'self'
-    const disablePublished = (currentStatus === 'ongoing') || (currentStatus === 'for review') || (currentStatus === 'published');
+    // 'Published' button logic
+    const disablePublished = (currentStatus === 'published') || 
+                             (currentStatus === 'ongoing') || 
+                             (currentStatus === 'for review');
+                             // 'locked' state *enables* this button
 
-    // 'Locked' button is disabled if it's NOT 'published' (it's the only forward path) or 'self'
-    const disableLocked = (currentStatus !== 'published');
-    // --- END: NEW LOGIC ---
+    // 'Locked' button logic
+    const disableLocked = (currentStatus !== 'published'); // Only enabled if current status is 'published'
+    // --- END: NEW LOGIC (3) ---
 
-    // (2) Changed innerHTML to include disabled attributes
     tr.innerHTML = `
         <td>${eventName}</td>
         <td>${medalCount}</td>
@@ -217,9 +223,6 @@ function createEventRow(event) {
         </td>
     `;
     
-    // (2) REMOVED old logic block that just disabled the active button.
-    // The new logic handles this automatically.
-
     // Add event listeners for the new buttons
     tr.querySelector('.delete-btn').addEventListener('click', (e) => {
         e.stopPropagation(); // Stop accordion from toggling
@@ -227,8 +230,6 @@ function createEventRow(event) {
     });
 
     tr.querySelectorAll('.filter').forEach(button => {
-        // The listener is still added, but if the button is disabled,
-        // it won't fire anyway.
         button.addEventListener('click', (e) => {
             e.stopPropagation();
             const newStatus = e.target.dataset.status;
@@ -314,7 +315,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
             throw new Error(err.error || 'Failed to update status');
         }
 
-        // --- NEW: (2) Update button states after successful change ---
+        // --- NEW: (3) Update button states after successful change ---
         const newStatusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
         tableRow.querySelector('.status').textContent = newStatusText;
         tableRow.querySelector('.status').className = `status ${newStatus.replace(' ', '-').toLowerCase()}`;
@@ -328,11 +329,20 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
         // Apply the same logic as in createEventRow
         const currentStatus = newStatus; // The new status is now the current one
 
-        reviewBtn.disabled = (currentStatus === 'ongoing') || (currentStatus === 'for review');
-        approvedBtn.disabled = (currentStatus === 'ongoing') || (currentStatus === 'approved');
-        publishedBtn.disabled = (currentStatus === 'ongoing') || (currentStatus === 'for review') || (currentStatus === 'published');
+        reviewBtn.disabled = (currentStatus === 'for review') || 
+                             (currentStatus === 'ongoing') || 
+                             (currentStatus === 'locked');
+
+        approvedBtn.disabled = (currentStatus === 'approved') || 
+                               (currentStatus === 'ongoing') || 
+                               (currentStatus === 'locked');
+
+        publishedBtn.disabled = (currentStatus === 'published') || 
+                                (currentStatus === 'ongoing') || 
+                                (currentStatus === 'for review');
+
         lockedBtn.disabled = (currentStatus !== 'published');
-        // --- END: (2) ---
+        // --- END: (3) ---
 
         const detailsDiv = tableRow.closest('.category-details');
         if (detailsDiv) {
