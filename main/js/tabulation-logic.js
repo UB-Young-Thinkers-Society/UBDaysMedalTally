@@ -98,11 +98,12 @@ async function loadAllEvents() {
             
             const ongoing = category.events.filter(e => e.status === 'ongoing').length;
             const submitted = category.events.filter(e => e.status === 'for review').length;
+            const approved = category.events.filter(e => e.status === 'approved').length;
             const published = category.events.filter(e => e.status === 'published').length;
 
             categoryDiv.innerHTML = `
                 <div class="cat-title">${category.name}</div>
-                <div class="cat-status">${ongoing} Ongoing &nbsp;|&nbsp; ${submitted} For Review &nbsp;|&nbsp; ${published} Published</div>
+                <div class="cat-status">${ongoing} Ongoing &nbsp;|&nbsp; ${submitted} For Review &nbsp;|&nbsp; ${approved} Approved &nbsp;|&nbsp; ${published} Published</div>
                 <div class="cat-arrow" id="arrow">&#9662;</div>
             `;
             
