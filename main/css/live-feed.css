@@ -222,7 +222,7 @@ body {
     display: inline-block;
     width: 32px;
     height: 32px;
-    line-height: 29px; /* Slightly adjusted for vertical centering */
+    line-height: 25px; /* Slightly adjusted for vertical centering */
     border-radius: 50%;
     font-weight: 700;
     font-size: 0.9em;
