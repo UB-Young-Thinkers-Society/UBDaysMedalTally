@@ -6,6 +6,7 @@ let allEventsData = []; // Caches all events from the API
 let allTeamsData = [];  // Caches all teams from the API
 let selectedEvent = null; // Stores the entire selected event object
 let sortableInstance = null; // To hold the SortableJS object
+let modalConfirmCallback = null; // To hold the function to run on modal confirm
 
 // --- 1. AUTHENTICATION & SESSION -------------------
 async function checkSession(authorizedRole) {
@@ -67,6 +68,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelector('.tie-group').addEventListener('input', updateRanksAndVisuals);
     const computationForm = document.getElementById('computation-form');
     computationForm.addEventListener('submit', handleSubmit);
+    
+    // NEW: Add listener for the clear button
+    document.getElementById('clear-btn').addEventListener('click', promptClearAndReset);
+
+    // NEW: Add listeners for the custom modal
+    document.getElementById('modal-btn-confirm').addEventListener('click', executeModalConfirm);
+    document.getElementById('modal-btn-cancel').addEventListener('click', hideModal);
+    document.getElementById('custom-modal-overlay').addEventListener('click', (e) => {
+        if (e.target.id === 'custom-modal-overlay') {
+            hideModal();
+        }
+    });
+    document.getElementById('modal-box').addEventListener('click', (e) => e.stopPropagation());
+
+
     addNewRankRow();
     addNewRankRow();
     const loader = document.getElementById('loader');
@@ -105,7 +121,8 @@ async function fetchAllTeams() {
 }
 
 /**
- * MODIFIED: This function now disables events based on status.
+ * MODIFIED: This function now disables events based on status
+ * AND adds a status badge.
  */
 function renderDropdown(query) {
     const resultsContainer = document.getElementById('event-search-results');
@@ -127,9 +144,40 @@ function renderDropdown(query) {
             matchingEvents.forEach(event => {
                 const eventEl = document.createElement('div');
                 eventEl.className = 'search-results-item';
-                eventEl.textContent = event.name;
                 
-                // --- NEW LOGIC ---
+                // Create span for event name
+                const eventName = document.createElement('span');
+                eventName.textContent = event.name;
+
+                // --- NEW: Create status badge ---
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'event-status-badge';
+                statusBadge.textContent = event.status.toUpperCase().replace('_', ' ');
+
+                let statusClass = '';
+                switch (event.status) {
+                    case 'ongoing':
+                        statusClass = 'status-ongoing';
+                        break;
+                    case 'for review':
+                        statusClass = 'status-for_review';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-approved';
+                        break;
+                    case 'published':
+                        statusClass = 'status-published';
+                        break;
+                    case 'locked':
+                        statusClass = 'status-locked';
+                        break;
+                    default:
+                        statusClass = 'status-ongoing'; // Default color
+                }
+                statusBadge.classList.add(statusClass);
+                // --- END NEW BADGE LOGIC ---
+
+
                 // We only allow submitting to 'ongoing' or 'for review' events
                 const isEditable = event.status === 'ongoing' || event.status === 'for review';
                 
@@ -147,6 +195,10 @@ function renderDropdown(query) {
                     }
                     // If not editable, the click does nothing.
                 });
+
+                // Append name and badge
+                eventEl.appendChild(eventName);
+                eventEl.appendChild(statusBadge);
                 resultsContainer.appendChild(eventEl);
             });
         }
@@ -176,6 +228,8 @@ function selectEvent(event) {
     document.querySelector('.tie-group').disabled = false;
     document.getElementById('add-row-btn').disabled = false;
     document.querySelector('.submit-btn').disabled = false;
+    // NEW: Enable the clear button
+    document.getElementById('clear-btn').disabled = false;
 
     loadEventResults(event.id);
 }
@@ -453,11 +507,161 @@ function updateRanksAndVisuals() {
     return positionToRank;
 }
 
-// ... (handleSubmit is unchanged) ...
+// --- 5. NEW MODAL & FORM HELPER FUNCTIONS --------
+
+/**
+ * Shows the custom modal.
+ * @param {string} title - The title for the modal.
+ * @param {string} message - The HTML content for the message.
+ * @param {boolean} showCancel - Whether to show the "Cancel" button.
+ * @param {function | null} confirmCallback - Function to run on confirm.
+ * @param {boolean} isError - If true, styles the confirm button as red.
+ */
+function showModal(title, message, showCancel = false, confirmCallback = null, isError = false) {
+    document.getElementById('modal-title').textContent = title;
+    document.getElementById('modal-message').innerHTML = message;
+    
+    const modalButtons = document.querySelector('.modal-buttons');
+    const confirmBtn = document.getElementById('modal-btn-confirm');
+    
+    if (showCancel) {
+        modalButtons.classList.remove('alert-mode');
+    } else {
+        modalButtons.classList.add('alert-mode');
+    }
+
+    if (isError) {
+        modalButtons.classList.add('error-mode');
+        confirmBtn.textContent = 'Close';
+    } else {
+        modalButtons.classList.remove('error-mode');
+        confirmBtn.textContent = 'Confirm';
+    }
+
+    modalConfirmCallback = confirmCallback;
+    document.getElementById('custom-modal-overlay').classList.remove('hidden');
+}
+
+/**
+ * Hides the custom modal and clears its callback.
+ */
+function hideModal() {
+    document.getElementById('custom-modal-overlay').classList.add('hidden');
+    modalConfirmCallback = null;
+}
+
+/**
+ * Executes the stored callback function when "Confirm" is clicked.
+ */
+function executeModalConfirm() {
+    if (typeof modalConfirmCallback === 'function') {
+        modalConfirmCallback();
+    }
+    hideModal();
+}
+
+/**
+ * Resets the entire form to its initial, blank state.
+ */
+function clearForm() {
+    document.getElementById('eventSearch').value = '';
+    selectedEvent = null;
+    document.querySelector('.tie-group').value = '';
+    document.getElementById('tabulation-list').innerHTML = '';
+    
+    addNewRankRow();
+    addNewRankRow();
+    updateRanksAndVisuals();
+    
+    // Disable form elements
+    document.querySelector('.tie-group').disabled = true;
+    document.getElementById('add-row-btn').disabled = true;
+    document.querySelector('.submit-btn').disabled = true;
+    document.getElementById('clear-btn').disabled = true;
+}
+
+// --- 6. FORM SUBMISSION LOGIC --------------------
+
+/**
+ * NEW: Prompts the user before clearing event results.
+ */
+function promptClearAndReset(e) {
+    e.preventDefault();
+    if (!selectedEvent) {
+        showModal("Error", "Please select an event first.", false, null, true);
+        return;
+    }
+
+    showModal(
+        "Clear & Reset Event?",
+        `Are you sure you want to clear all results for <strong>${selectedEvent.name}</strong> and reset its status to 'ongoing'?<br><br><strong>This action cannot be undone.</strong>`,
+        true,
+        handleClearAndReset // Pass the actual function to run on confirm
+    );
+}
+
+/**
+ * NEW: Handles the API call to clear and reset an event.
+ */
+async function handleClearAndReset() {
+    const submitBtn = document.querySelector('.submit-btn');
+    const clearBtn = document.getElementById('clear-btn');
+    submitBtn.disabled = true;
+    clearBtn.disabled = true;
+    clearBtn.textContent = 'Resetting...';
+
+    try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
+        const accessToken = sessionData.session.access_token;
+
+        const payload = {
+            action: "clearAndReset",
+            eventId: selectedEvent.id
+        };
+
+        const response = await fetch('/api/actions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Server failed to reset event.');
+        }
+
+        showModal("Success", `Event <strong>${selectedEvent.name}</strong> has been cleared and reset to 'ongoing'.`);
+        
+        // Refetch events to update status in search dropdown
+        await fetchAllEvents(); 
+        
+        // Clear the form
+        clearForm();
+
+    } catch (error) {
+        showModal('Error', error.message, false, null, true);
+    } finally {
+        // clearForm() already disables the buttons, but we'll reset text
+        clearBtn.textContent = 'Clear & Reset';
+    }
+}
+
+
+/**
+ * MODIFIED: Uses custom modal for alerts.
+ */
 async function handleSubmit(e) {
     e.preventDefault();
     const submitBtn = document.querySelector('.submit-btn');
+    const clearBtn = document.getElementById('clear-btn');
     submitBtn.disabled = true;
+    clearBtn.disabled = true;
     submitBtn.textContent = 'Submitting...';
     try {
         if (!selectedEvent) {
@@ -519,19 +723,21 @@ async function handleSubmit(e) {
             const err = await response.json();
             throw new Error(err.error || 'Server failed to submit results.');
         }
-        alert('Results submitted successfully for review!');
         
-        document.getElementById('eventSearch').value = '';
-        selectedEvent = null;
-        document.querySelector('.tie-group').value = '';
-        document.getElementById('tabulation-list').innerHTML = '';
-        addNewRankRow();
-        addNewRankRow();
-        updateRanksAndVisuals();
+        // MODIFIED: Use custom modal
+        showModal('Success', 'Results submitted successfully for review!');
+        
+        // MODIFIED: Use helper function
+        clearForm();
+        
+        // NEW: Refetch events to update status in search
+        await fetchAllEvents();
+
     } catch (error) {
-        alert('Error: ' + error.message);
+        // MODIFIED: Use custom modal
+        showModal('Error', error.message, false, null, true);
     } finally {
-        submitBtn.disabled = false;
+        // clearForm() already disables the buttons, but we'll reset text
         submitBtn.textContent = 'Submit';
     }
 }

@@ -304,6 +304,38 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true, message: 'Results submitted.' });
             }
 
+            // --- NEW CASE: Clear Event Results and Reset Status (FROM JSON) ---
+            case 'clearAndReset': {
+                const { eventId } = reqBody; // <-- Use reqBody
+                if (!eventId) {
+                    return res.status(400).json({ error: 'Missing eventId.' });
+                }
+
+                const eventName = await getEventName(eventId);
+
+                // 1. Delete all results for this event
+                const { error: deleteError } = await supabase
+                    .from('results')
+                    .delete()
+                    .eq('event_id', eventId);
+                
+                if (deleteError) throw deleteError;
+
+                // 2. Update the event's status back to 'ongoing'
+                const { error: updateError } = await supabase
+                    .from('events')
+                    .update({ status: 'ongoing' })
+                    .eq('id', eventId);
+
+                if (updateError) throw updateError;
+
+                // 3. Log the action
+                await logAction(user.id, 'clearAndReset', `Cleared all results for event ${eventName} and reset status to 'ongoing'.`);
+
+                return res.status(200).json({ success: true, message: 'Event cleared and reset.' });
+            }
+            // --- END NEW CASE ---
+
             default:
                 return res.status(400).json({ error: 'Invalid "action" parameter.' });
         }

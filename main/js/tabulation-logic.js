@@ -98,11 +98,12 @@ async function loadAllEvents() {
             
             const ongoing = category.events.filter(e => e.status === 'ongoing').length;
             const submitted = category.events.filter(e => e.status === 'for review').length;
+            const approved = category.events.filter(e => e.status === 'approved').length;
             const published = category.events.filter(e => e.status === 'published').length;
 
             categoryDiv.innerHTML = `
                 <div class="cat-title">${category.name}</div>
-                <div class="cat-status">${ongoing} ongoing &nbsp;|&nbsp; ${submitted} Submitted &nbsp;|&nbsp; ${published} Published</div>
+                <div class="cat-status">${ongoing} Ongoing &nbsp;|&nbsp; ${submitted} For Review &nbsp;|&nbsp; ${approved} Approved &nbsp;|&nbsp; ${published} Published</div>
                 <div class="cat-arrow" id="arrow">&#9662;</div>
             `;
             
@@ -335,7 +336,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
 
         approvedBtn.disabled = (currentStatus === 'approved') || 
                                (currentStatus === 'ongoing') || 
-                               (currentStatus === 'locked');
+                               (currentS === 'locked');
 
         publishedBtn.disabled = (currentStatus === 'published') || 
                                 (currentStatus === 'ongoing') || 
@@ -351,49 +352,61 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
 
     } catch (error) {
         console.error('Error updating status:', error);
-        alert('Error: ' + error.message);
+        // MODIFICATION: Use generic modal for error
+        showGenericModal('alert', 'Update Error', 'Error: ' + error.message);
     }
 }
 
+// MODIFICATION: Replaced confirm() with showGenericModal()
 async function handleDeleteEvent(eventId, eventName, tableRow) {
-    if (!confirm(`Are you sure you want to delete the event: "${eventName}"?`)) {
-        return;
-    }
-    try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData.session) throw new Error('Session expired.');
-        const accessToken = sessionData.session.access_token;
+    
+    // Define the function to run on confirmation
+    const onConfirmDelete = async () => {
+        try {
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError || !sessionData.session) throw new Error('Session expired.');
+            const accessToken = sessionData.session.access_token;
 
-        const response = await fetch('/api/actions', {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${accessToken}`
-            },
-            body: JSON.stringify({ 
-                action: "deleteEvent", // <-- ADD THIS
-                eventId 
-            })
-        });
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Failed to delete event');
-        }
-        
-        tableRow.style.opacity = 0;
-        tableRow.style.transition = 'opacity 0.3s';
-        setTimeout(() => { 
-            tableRow.remove(); 
-            const detailsDiv = tableRow.closest('.category-details');
-            if (detailsDiv) {
-                updateCategoryHeader(detailsDiv);
+            const response = await fetch('/api/actions', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`
+                },
+                body: JSON.stringify({ 
+                    action: "deleteEvent", // <-- ADD THIS
+                    eventId 
+                })
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to delete event');
             }
-        }, 300);
+            
+            tableRow.style.opacity = 0;
+            tableRow.style.transition = 'opacity 0.3s';
+            setTimeout(() => { 
+                tableRow.remove(); 
+                const detailsDiv = tableRow.closest('.category-details');
+                if (detailsDiv) {
+                    updateCategoryHeader(detailsDiv);
+                }
+            }, 300);
 
-    } catch (error) {
-        console.error('Error deleting event:', error);
-        alert('Error: ' + error.message);
-    }
+        } catch (error) {
+            console.error('Error deleting event:', error);
+            // MODIFICATION: Use generic modal for error
+            showGenericModal('alert', 'Delete Error', 'Error: ' + error.message);
+        }
+    };
+
+    // Show the confirmation modal
+    showGenericModal(
+        'confirm',
+        'Delete Event?',
+        `Are you sure you want to delete the event: <strong>"${eventName}"</strong>? This action cannot be undone.`,
+        onConfirmDelete
+    );
 }
 
 function updateCategoryHeader(detailsDiv) {
@@ -402,23 +415,24 @@ function updateCategoryHeader(detailsDiv) {
         if (!categoryDiv) return;
         const statusDisplay = categoryDiv.querySelector('.cat-status');
         const allRows = detailsDiv.querySelectorAll('tbody tr');
-        let ongoing = 0, submitted = 0, published = 0;
+        let ongoing = 0, approved = 0, submitted = 0, published = 0;
         allRows.forEach(row => {
             const statusSpan = row.querySelector('.status');
             if (!statusSpan) return; 
             const status = statusSpan.textContent.toLowerCase();
             if (status === 'ongoing') ongoing++;
             else if (status === 'for review') submitted++;
+            else if (status === 'approved') approved++;
             else if (status === 'published') published++;
         });
-        statusDisplay.textContent = `${ongoing} ongoing  |  ${submitted} Submitted  |  ${published} Published`;
+        statusDisplay.textContent = `${ongoing} Ongoing   |   ${submitted} For Review   |   ${approved} Approved   |   ${published} Published`;
     } catch (error) {
         console.error('Error updating category header:', error);
     }
 }
 
 
-// --- 5. MODAL LOGIC ------------------------
+// --- 5. MODAL LOGIC (APPROVAL) ------------------------
 
 function showApprovalModal(eventId, eventName, tableRow) {
     const modal = document.getElementById('approval-modal');
@@ -433,12 +447,14 @@ function showApprovalModal(eventId, eventName, tableRow) {
 
     loadModalData(eventId, rankingList);
 
+    // Clone and replace buttons to remove old listeners
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 
     const newCancelBtn = cancelBtn.cloneNode(true);
     cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
 
+    // Add new listeners
     newConfirmBtn.addEventListener('click', () => {
         updateEventStatusInDB(eventId, 'approved', tableRow);
         hideApprovalModal();
@@ -507,4 +523,73 @@ async function loadModalData(eventId, rankingListElement) {
         document.getElementById('modal-confirm-btn').disabled = true;
         document.getElementById('modal-confirm-btn').textContent = 'Error';
     }
+}
+
+
+// --- 6. NEW GENERIC MODAL LOGIC ------------------------
+
+/**
+ * Shows the generic modal for alerts or confirmations.
+ * @param {'alert' | 'confirm'} type - The type of modal to show.
+ * @param {string} title - The text for the modal header.
+ * @param {string} message - The HTML content for the modal body.
+ * @param {function} onConfirm - The callback function to run if 'Confirm' is clicked.
+ */
+function showGenericModal(type, title, message, onConfirm = () => {}) {
+    const modal = document.getElementById('generic-modal-overlay');
+    const modalTitle = document.getElementById('generic-modal-title');
+    const modalMessage = document.getElementById('generic-modal-message');
+    
+    const confirmBtn = document.getElementById('generic-modal-btn-confirm');
+    const cancelBtn = document.getElementById('generic-modal-btn-cancel');
+    const okBtn = document.getElementById('generic-modal-btn-ok');
+
+    // Set content
+    modalTitle.textContent = title;
+    modalMessage.innerHTML = message; // Use .innerHTML to allow <strong> tags
+
+    // Clone buttons to remove old listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+    const newOkBtn = okBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+
+    if (type === 'confirm') {
+        // Show confirm/cancel, hide OK
+        newConfirmBtn.style.display = 'inline-block';
+        newCancelBtn.style.display = 'inline-block';
+        newOkBtn.style.display = 'none';
+
+        // Add listeners
+        newConfirmBtn.addEventListener('click', () => {
+            onConfirm(); // Run the callback
+            hideGenericModal();
+        });
+        newCancelBtn.addEventListener('click', () => {
+            hideGenericModal();
+        });
+
+    } else if (type === 'alert') {
+        // Show OK, hide confirm/cancel
+        newConfirmBtn.style.display = 'none';
+        newCancelBtn.style.display = 'none';
+        newOkBtn.style.display = 'inline-block';
+
+        // Add listener
+        newOkBtn.addEventListener('click', () => {
+            hideGenericModal();
+        });
+    }
+
+    // Show the modal
+    modal.classList.add('visible');
+}
+
+function hideGenericModal() {
+    const modal = document.getElementById('generic-modal-overlay');
+    modal.classList.remove('visible');
 }

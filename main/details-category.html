@@ -32,16 +32,33 @@
         </div>
         
         <div class="details-filter-bar">
-            <select id="filter-category" disabled>
-                <option value="">Loading Categories...</option>
-            </select>
-            <select id="filter-event" disabled>
-                <option value="">Select Category First</option>
-            </select>
-            
             <!-- 
-              MODIFIED: (Request #1) Replaced <select> with custom dropdown
+              MODIFIED: (Request #1) Replaced <select> with custom searchable dropdown
             -->
+            <div class="custom-select-wrapper" id="category-select-wrapper">
+                <div class="custom-select-box" id="filter-category-box" data-category-id="null">
+                    <input type="text" id="filter-category-search" class="custom-select-search" placeholder="Loading Categories..." disabled>
+                    <span class="custom-select-arrow"></span>
+                </div>
+                <div class="custom-select-list hidden" id="category-list">
+                    <!-- Category options will be built by JS -->
+                </div>
+            </div>
+
+            <!-- 
+              MODIFIED: (Request #1) Replaced <select> with custom searchable dropdown
+            -->
+            <div class="custom-select-wrapper" id="event-select-wrapper">
+                <div class="custom-select-box" id="filter-event-box" data-event-id="null">
+                    <input type="text" id="filter-event-search" class="custom-select-search" placeholder="Select Category First" disabled>
+                    <span class="custom-select-arrow"></span>
+                </div>
+                <div class="custom-select-list hidden" id="event-list">
+                    <!-- Event options will be built by JS -->
+                </div>
+            </div>
+            
+            <!-- This is the existing Department dropdown -->
             <div class="custom-select-wrapper">
                 <div class="custom-select-box" id="filter-department" data-team-id="null">
                     <span class="placeholder">Enter Department</span>
@@ -97,9 +114,9 @@
 
     </div>
 
-    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .8">
-    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .8">
-    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .8">
+    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .4">
+    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .2">
+    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .4">
     
     <footer class="footer">
         Made by <img src="img/ubytesLogo@3x.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
