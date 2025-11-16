@@ -230,6 +230,32 @@
 .custom-select-item .name {
     font-weight: 500;
     color: #333;
+    flex-grow: 1; /* NEW: Allow name to fill space */
+    flex-shrink: 1; /* NEW: Allow name to shrink */
+    min-width: 0; /* Prevents overflow */
+    word-break: break-word; /* Wrap long names */
+}
+
+
+/* NEW: (Request) Styles for event status badge */
+.event-status-badge {
+    flex-shrink: 0; /* Don't shrink */
+    padding: 3px 8px;
+    border-radius: 6px;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: auto; /* Pushes to the right */
+}
+
+.event-status-badge.ongoing {
+    background-color: #2d5be3;
+}
+
+.event-status-badge.published {
+    background-color: #a259e6;
 }
 
 

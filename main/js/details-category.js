@@ -206,7 +206,27 @@ function populateEventFilter(categoryId) {
                 item.className = 'custom-select-item';
                 item.dataset.eventId = event.id;
                 item.dataset.eventName = event.name;
-                item.innerHTML = `<span class="name">${event.name}</span>`;
+
+                // NEW: (Request) Add status badge
+                let statusBadge = '';
+                if (event.status) {
+                    let statusClass = '';
+                    let statusText = '';
+                    if (event.status === 'ongoing') {
+                        statusClass = 'ongoing';
+                        statusText = 'Ongoing';
+                    } else if (event.status === 'published') {
+                        statusClass = 'published';
+                        statusText = 'Published';
+                    }
+                    
+                    if (statusText) {
+                        statusBadge = `<span class="event-status-badge ${statusClass}">${statusText}</span>`;
+                    }
+                }
+                
+                // MODIFIED: (Request) Add badge to HTML
+                item.innerHTML = `<span class="name">${event.name}</span> ${statusBadge}`;
                 eventListEl.appendChild(item);
             });
             eventSearchInput.disabled = false;
