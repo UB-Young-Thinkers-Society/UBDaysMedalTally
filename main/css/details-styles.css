@@ -330,6 +330,26 @@
 }
 @media (max-width: 480px) {
     .details-filter-bar { grid-template-columns: 1fr; }
+
+    /* NEW: Adjust fonts for very small screens */
+    .details-message {
+        font-size: 0.95rem;
+        padding: 24px 10px;
+    }
+
+    .department-events-table .event-name {
+        font-size: 1rem;
+    }
+    .department-events-table .sub-event {
+        font-size: 0.9rem;
+    }
+    
+    /* Adjust dropdown text */
+    .custom-select-search,
+    .custom-select-search::placeholder,
+    .custom-select-box .placeholder {
+        font-size: 0.9rem;
+    }
 }
 
 /* Prevent wrapping under images for department cells across tables */
@@ -364,6 +384,36 @@
 /* Small device refinements */
 @media (max-width: 768px) {
     .department-title h2 { line-height: 1.25; }
+
+    /* NEW: Make department header stack vertically */
+    .department-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px; /* Add gap between title and tally */
+    }
+
+    /* NEW: Adjust title bar font */
+    .details-title-bar h2 {
+        font-size: 1.5rem; /* Down from 1.8rem */
+    }
+
+    /* NEW: Adjust table header fonts */
+    .details-rank-list th {
+        font-size: 0.95rem; /* Down from 1.1rem */
+        padding-top: 12px;
+    }
+    
+    /* NEW: Adjust table cell padding and font */
+    .details-rank-list td {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        font-size: 0.95rem;
+    }
+
+    /* NEW: Adjust department list item font */
+    .custom-select-item .name {
+        font-size: 0.95rem;
+    }
 }
 
 /* Ensure custom department select fills the grid cell equally */
