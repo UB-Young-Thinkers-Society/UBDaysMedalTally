@@ -392,6 +392,13 @@
         gap: 12px; /* Add gap between title and tally */
     }
 
+    /* NEW: Center the medal tally when stacked */
+    .department-medal-tally {
+        width: 100%;
+        justify-content: center;
+        padding-top: 4px; /* Add a little space */
+    }
+
     /* NEW: Adjust title bar font */
     .details-title-bar h2 {
         font-size: 1.5rem; /* Down from 1.8rem */

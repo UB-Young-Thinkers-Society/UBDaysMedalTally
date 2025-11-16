@@ -120,7 +120,8 @@ body {
     background: #fff;
     border-radius: 8px;
     box-shadow: 0px 0px 1px 1px rgba(0, 0, 0, 0.1);
-    padding: clamp(4px, 1.2vw, 8px) clamp(6px, 1.5vw, 12px);
+    /* padding: clamp(4px, 1.2vw, 8px) clamp(6px, 1.5vw, 12px); */
+    padding: 2px;
     border: 1px solid #e0e0e0;
     height: auto;
     align-items: center;
@@ -137,7 +138,7 @@ body {
     font-weight: 900;
     color: #222;
     cursor: pointer;
-    height: clamp(32px, 6vw, 40px);
+    height: clamp(32px, 3vw, 40px);
     transition: background 0.2s, color 0.2s, font-size 0.2s ease;
     margin: 0;
     outline: none;
@@ -360,16 +361,14 @@ footer,
     .top-buttons {
         top: 6px;
         right: 6px;
-        /* --- MODIFIED RULES --- */
-        padding: 2px; /* Made smaller */
+        padding: 2px; 
         gap: 2px;
     }
     .top-btn {
-        /* --- MODIFIED RULES --- */
-        font-size: 0.7rem; /* Made smaller */
+        font-size: 0.7rem; 
         font-weight: 700;
-        height: 24px; /* Made smaller */
-        padding: 0 6px; /* Made smaller */
+        height: 24px; 
+        padding: 0 6px; 
     }
 
     /* Adjust table for small screens */
