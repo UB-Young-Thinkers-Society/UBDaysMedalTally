@@ -49,7 +49,7 @@
                     <!-- Results will be built by JS here -->
                 </div>
             </div>
-            <input class="tie-group" type="text" placeholder="Tie Groups (e.g. 1 - 2)">
+            <input class="tie-group" type="text" placeholder="Tie Groups (e.g. 1 - 2)" disabled>
         </div>
         
         <!-- 
@@ -77,11 +77,15 @@
             </div>
 
             <!-- NEW: The "Add Row" button you requested -->
-            <button type="button" id="add-row-btn" class="add-row-btn">
+            <button type="button" id="add-row-btn" class="add-row-btn" disabled>
                 <span>+</span>
             </button>
             
-            <button type="submit" class="submit-btn">Submit</button>
+            <!-- NEW: Button container for layout -->
+            <div class="button-container">
+                <button type="button" id="clear-btn" class="clear-btn" disabled>Clear & Reset</button>
+                <button type="submit" class="submit-btn" disabled>Submit</button>
+            </div>
         </form>
     </div>
 
@@ -93,8 +97,18 @@
         <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
     </footer>
 
+    <!-- NEW: Custom Modal for alerts and confirmations -->
+    <div id="custom-modal-overlay" class="modal-overlay hidden">
+        <div class="modal-content" id="modal-box">
+            <h3 id="modal-title">Confirmation</h3>
+            <div id="modal-message">Are you sure?</div>
+            <div class="modal-buttons">
+                <button id="modal-btn-cancel" class="modal-btn modal-btn-cancel">Cancel</button>
+                <button id="modal-btn-confirm" class="modal-btn modal-btn-confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/computation-logic.js" defer></script>
 </body>
 </html>
-
-    
