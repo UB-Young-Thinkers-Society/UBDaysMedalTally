@@ -19,52 +19,38 @@
 </head>
 <body>
     <div class="main-header">
-        <img src="img/titleLogo.png" alt="Logo">
-        <div>
-            <div class="main-title">Official Medal Tally</div>
-            <div class="subtitle" id="last-updated">Loading...</div>
-        </div>
-    </div>
-    <div class="tally-card">
-        <div class="top-buttons" role="group" aria-label="Page navigation">
-            <button class="top-btn active">Live Count</button>
-            <button class="top-btn" onclick="window.location.href='details-category.html'">Details</button>
-            <button class="top-btn" onclick="window.location.href='about-us.html'">About Us</button>
+<!-- ... (existing code) ... -->
         </div>
         <div class="table-scroll">
         <table class="tally-table">
             <thead>
+                <!-- --- MODIFIED --- -->
+                <!-- Removed 'sortable' class and 'data-sort-key' attributes to fix layout -->
                 <tr>
-                    <th class="sortable" data-sort-key="name">Department<span class="sort-arrow"></span></th>
-                    <th class="gold sortable" data-sort-key="gold">Gold<span class="sort-arrow"></span></th>
-                    <th class="silver sortable" data-sort-key="silver">Silver<span class="sort-arrow"></span></th>
-                    <th class="bronze sortable" data-sort-key="bronze">Bronze<span class="sort-arrow"></span></th>
-                    <th class="total sortable" data-sort-key="total">Total<span class="sort-arrow"></span></th>
+                    <th>Department</th>
+                    <th class="gold">Gold</th>
+                    <th class="silver">Silver</th>
+                    <th class="bronze">Bronze</th>
+                    <th class="total">Total</th>
                 </tr>
+                <!-- --- END MODIFIED --- -->
             </thead>
             <!-- 
               The table body is now empty.
-              The new 'js/live-feed.js' script will fill this 
-              with dynamic data from the API.
-            -->
+<!-- ... (existing code) ... -->
             <tbody id="tally-body">
                 <!-- Loader Row -->
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 40px; font-weight: 600;">
-                        Loading live medal tally...
-                    </td>
-                </tr>
-            </tbody>
+<!-- ... (existing code) ... -->
         </table>
         </div>
     </div>
 
-    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .8">
-    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .8">
-    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .8">
+    <img class="bgIcon1" src="img/bgIcon.png">
+    <img class="bgIcon2" src="img/bgIcon.png">
+    <img class="bgIcon3" src="img/bgIcon.png">
 
     <footer class="footer">
-        Made by <img src="img/ubytesLogo@3x.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
+<!-- ... (existing code) ... -->
     </footer>
 
     <!-- This new script will run and populate the table -->

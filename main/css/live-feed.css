@@ -178,28 +178,27 @@ body {
     font-size: clamp(0.9rem, 1.6vw, 1.1rem);
 }
 
-/* --- ADDED RULES for Animation --- */
-.tally-table tbody {
+/* --- REMOVED RULES for Animation --- */
+/* .tally-table tbody {
     position: relative;
 }
 .tally-table tr {
-    /* These properties will be animated by the JS */
     transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
     will-change: transform, opacity;
 }
 .tally-table tr.row-removing {
-    /* Animation for rows being removed */
     opacity: 0;
     transform: scale(0.95);
-}
-/* --- END ADDED RULES --- */
+} 
+*/
+/* --- END REMOVED RULES --- */
 
-/* --- ADDED RULES for Sorting --- */
-.tally-table th.sortable {
+/* --- REMOVED RULES for Sorting --- */
+/* .tally-table th.sortable {
     cursor: pointer;
     user-select: none;
     position: relative;
-    padding-right: 20px; /* Space for the arrow */
+    padding-right: 20px; 
 }
 .tally-table th.sortable:hover {
     background-color: #f9f9f9;
@@ -213,12 +212,10 @@ body {
     position: absolute;
     right: 8px;
     top: 50%;
-    margin-top: -3px; /* Default to 'inactive' state */
+    margin-top: -3px; 
     opacity: 0.3;
     transition: all 0.2s ease;
 }
-
-/* Default 'both' arrow look */
 .tally-table th.sortable:not(.sorted) .sort-arrow {
     border-top: 5px solid #aaa;
     margin-top: -2px;
@@ -226,20 +223,19 @@ body {
 .tally-table th.sortable:not(.sorted):hover .sort-arrow {
     opacity: 0.7;
 }
-
-/* Active sorting arrow styles */
 .tally-table th.sortable.sorted .sort-arrow {
     opacity: 1;
 }
 .tally-table th.sortable.sorted[data-sort-dir="desc"] .sort-arrow {
-    border-top: 5px solid #333; /* Down arrow */
+    border-top: 5px solid #333; 
     margin-top: -2px;
 }
 .tally-table th.sortable.sorted[data-sort-dir="asc"] .sort-arrow {
-    border-bottom: 5px solid #333; /* Up arrow */
+    border-bottom: 5px solid #333; 
     margin-top: -7px;
-}
-/* --- END ADDED RULES --- */
+} 
+*/
+/* --- END REMOVED RULES --- */
 
 
 .tally-table th, .tally-table td {
@@ -385,7 +381,8 @@ footer,
     }
     /* --- END MODIFIED RULES --- */
 
-   
+    /* Reposition background icons for mobile layout */
+    
     
     /* Top-Right Element (was .bgIcon2) */
     .bgIcon2 {
