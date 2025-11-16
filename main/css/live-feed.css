@@ -215,6 +215,17 @@ body {
     font-weight: 500;
     color: #222;
 }
+/* --- MODIFIED RULES (Added .tally-table for specificity) --- */
+/* Hide the acronym version by default */
+.tally-table .dept-name.acronym {
+    display: none;
+}
+/* Show the full-name version by default */
+.tally-table .dept-name.full-name {
+    display: inline;
+}
+/* --- END MODIFIED RULES --- */
+
 .tally-table th.total, .tally-table td.total {
     font-weight: 700;
     color: #222;
@@ -261,6 +272,7 @@ footer,
     /* --- ADDED RULE --- */
     flex-shrink: 0; /* Prevents footer from shrinking */
 }
+
 
 @media (max-width: 900px) {
     /* Removed rules that conflicted with new centered header */
@@ -351,6 +363,19 @@ footer,
     .ub-logo {
         height: 1.1em;
     }
+
+    /* --- MODIFIED RULES FOR ACRONYM (Added .tally-table for specificity) --- */
+    /* On mobile, hide the full name */
+    .tally-table .dept-name.full-name {
+        display: none;
+    }
+    /* On mobile, show the acronym */
+    .tally-table .dept-name.acronym {
+        display: inline;
+    }
+    /* --- END MODIFIED RULES --- */
+
+    
     
     /* Top-Right Element (was .bgIcon2) */
     .bgIcon2 {
