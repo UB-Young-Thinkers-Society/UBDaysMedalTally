@@ -177,61 +177,71 @@ body {
     border-collapse: collapse;
     font-size: clamp(0.9rem, 1.6vw, 1.1rem);
 }
-.tally-table th, .tally-table td {
-    padding: clamp(8px, 1.2vw, 12px) clamp(6px, 1vw, 8px);
-    text-align: left;
-    word-break: break-word;
-}
-.tally-table th {
-    font-family: 'Montserrat', sans-serif;
-    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
-    font-weight: 700;
-    color: #222;
-    background: none;
-    border-bottom: 2px solid #eee;
-}
-.tally-table th.gold { color: #FFD700; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
-.tally-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
-.tally-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
-.tally-table td.gold { color: #FFD700; font-weight: 700; text-align: center;}
-.tally-table td.silver { color: #B0B0B0; font-weight: 700; text-align: center;}
-.tally-table td.bronze { color: #C9894B; font-weight: 700; text-align: center;}
-.tally-table tr {
-    border-bottom: 1px solid #f3f3f3;
-}
-.tally-table tr:last-child {
-    border-bottom: none;
-}
-.dept-logo {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    margin-right: 8px;
-    vertical-align: middle;
-    object-fit: cover;
-    background: #eee;
-}
-.dept-name {
-    font-weight: 500;
-    color: #222;
-}
-/* --- MODIFIED RULES (Added .tally-table for specificity) --- */
-/* Hide the acronym version by default */
-.tally-table .dept-name.acronym {
-    display: none;
-}
-/* Show the full-name version by default */
-.tally-table .dept-name.full-name {
-    display: inline;
-}
-/* --- END MODIFIED RULES --- */
 
-.tally-table th.total, .tally-table td.total {
-    font-weight: 700;
-    color: #222;
-    text-align: center;
-    white-space: nowrap;
+/* --- ADDED RULES for Animation --- */
+.tally-table tbody {
+    position: relative;
 }
+.tally-table tr {
+    /* These properties will be animated by the JS */
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    will-change: transform, opacity;
+}
+.tally-table tr.row-removing {
+    /* Animation for rows being removed */
+    opacity: 0;
+    transform: scale(0.95);
+}
+/* --- END ADDED RULES --- */
+
+/* --- ADDED RULES for Sorting --- */
+.tally-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    padding-right: 20px; /* Space for the arrow */
+}
+.tally-table th.sortable:hover {
+    background-color: #f9f9f9;
+}
+.sort-arrow {
+    display: inline-block;
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    margin-top: -3px; /* Default to 'inactive' state */
+    opacity: 0.3;
+    transition: all 0.2s ease;
+}
+
+/* Default 'both' arrow look */
+.tally-table th.sortable:not(.sorted) .sort-arrow {
+    border-top: 5px solid #aaa;
+    margin-top: -2px;
+}
+.tally-table th.sortable:not(.sorted):hover .sort-arrow {
+    opacity: 0.7;
+}
+
+/* Active sorting arrow styles */
+.tally-table th.sortable.sorted .sort-arrow {
+    opacity: 1;
+}
+.tally-table th.sortable.sorted[data-sort-dir="desc"] .sort-arrow {
+    border-top: 5px solid #333; /* Down arrow */
+    margin-top: -2px;
+}
+.tally-table th.sortable.sorted[data-sort-dir="asc"] .sort-arrow {
+    border-bottom: 5px solid #333; /* Up arrow */
+    margin-top: -7px;
+}
+/* --- END ADDED RULES --- */
+
+
 .tally-table th, .tally-table td {
     border-right: 1px solid #eee;
 }
@@ -375,7 +385,7 @@ footer,
     }
     /* --- END MODIFIED RULES --- */
 
-    
+   
     
     /* Top-Right Element (was .bgIcon2) */
     .bgIcon2 {

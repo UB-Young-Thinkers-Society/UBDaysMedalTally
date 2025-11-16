@@ -35,11 +35,12 @@
         <table class="tally-table">
             <thead>
                 <tr>
-                    <th>Department</th>
-                    <th class="gold">Gold</th>
-                    <th class="silver">Silver</th>
-                    <th class="bronze">Bronze</th>
-                    <th class="total">Total</th>
+                    <!-- MODIFIED: Added 'sortable' class and 'data-sort-key' -->
+                    <th class="sortable" data-sort-key="name">Department <span class="sort-arrow"></span></th>
+                    <th class="gold sortable" data-sort-key="gold">Gold <span class="sort-arrow"></span></th>
+                    <th class="silver sortable" data-sort-key="silver">Silver <span class="sort-arrow"></span></th>
+                    <th class="bronze sortable" data-sort-key="bronze">Bronze <span class="sort-arrow"></span></th>
+                    <th class="total sortable" data-sort-key="total">Total <span class="sort-arrow"></span></th>
                 </tr>
             </thead>
             <!-- 
@@ -59,9 +60,9 @@
         </div>
     </div>
 
-    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .4">
-    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .2">
-    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .4">
+    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .8">
+    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .8">
+    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .8">
 
     <footer class="footer">
         Made by <img src="img/ubytesLogo@3x.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
