@@ -177,67 +177,50 @@ body {
     border-collapse: collapse;
     font-size: clamp(0.9rem, 1.6vw, 1.1rem);
 }
-
-/* --- REMOVED RULES for Animation --- */
-/* .tally-table tbody {
-    position: relative;
+.tally-table th, .tally-table td {
+    padding: clamp(8px, 1.2vw, 12px) clamp(6px, 1vw, 8px);
+    text-align: left;
+    word-break: break-word;
 }
+.tally-table th {
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(0.95rem, 1.5vw, 1.1rem);
+    font-weight: 700;
+    color: #222;
+    background: none;
+    border-bottom: 2px solid #eee;
+}
+.tally-table th.gold { color: #FFD700; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table th.silver { color: #B0B0B0; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table th.bronze { color: #C9894B; text-align: center; white-space: nowrap; font-size: clamp(0.85rem, 1.4vw, 1.05rem); }
+.tally-table td.gold { color: #FFD700; font-weight: 700; text-align: center;}
+.tally-table td.silver { color: #B0B0B0; font-weight: 700; text-align: center;}
+.tally-table td.bronze { color: #C9894B; font-weight: 700; text-align: center;}
 .tally-table tr {
-    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    will-change: transform, opacity;
+    border-bottom: 1px solid #f3f3f3;
 }
-.tally-table tr.row-removing {
-    opacity: 0;
-    transform: scale(0.95);
-} 
-*/
-/* --- END REMOVED RULES --- */
-
-/* --- REMOVED RULES for Sorting --- */
-/* .tally-table th.sortable {
-    cursor: pointer;
-    user-select: none;
-    position: relative;
-    padding-right: 20px; 
+.tally-table tr:last-child {
+    border-bottom: none;
 }
-.tally-table th.sortable:hover {
-    background-color: #f9f9f9;
+.dept-logo {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+    object-fit: cover;
+    background: #eee;
 }
-.sort-arrow {
-    display: inline-block;
-    width: 0; 
-    height: 0; 
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    margin-top: -3px; 
-    opacity: 0.3;
-    transition: all 0.2s ease;
+.dept-name {
+    font-weight: 500;
+    color: #222;
 }
-.tally-table th.sortable:not(.sorted) .sort-arrow {
-    border-top: 5px solid #aaa;
-    margin-top: -2px;
+.tally-table th.total, .tally-table td.total {
+    font-weight: 700;
+    color: #222;
+    text-align: center;
+    white-space: nowrap;
 }
-.tally-table th.sortable:not(.sorted):hover .sort-arrow {
-    opacity: 0.7;
-}
-.tally-table th.sortable.sorted .sort-arrow {
-    opacity: 1;
-}
-.tally-table th.sortable.sorted[data-sort-dir="desc"] .sort-arrow {
-    border-top: 5px solid #333; 
-    margin-top: -2px;
-}
-.tally-table th.sortable.sorted[data-sort-dir="asc"] .sort-arrow {
-    border-bottom: 5px solid #333; 
-    margin-top: -7px;
-} 
-*/
-/* --- END REMOVED RULES --- */
-
-
 .tally-table th, .tally-table td {
     border-right: 1px solid #eee;
 }
@@ -278,7 +261,6 @@ footer,
     /* --- ADDED RULE --- */
     flex-shrink: 0; /* Prevents footer from shrinking */
 }
-
 
 @media (max-width: 900px) {
     /* Removed rules that conflicted with new centered header */
@@ -369,20 +351,6 @@ footer,
     .ub-logo {
         height: 1.1em;
     }
-
-    /* --- MODIFIED RULES FOR ACRONYM (Added .tally-table for specificity) --- */
-    /* On mobile, hide the full name */
-    .tally-table .dept-name.full-name {
-        display: none;
-    }
-    /* On mobile, show the acronym */
-    .tally-table .dept-name.acronym {
-        display: inline;
-    }
-    /* --- END MODIFIED RULES --- */
-
-    /* Reposition background icons for mobile layout */
-    
     
     /* Top-Right Element (was .bgIcon2) */
     .bgIcon2 {

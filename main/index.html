@@ -19,13 +19,21 @@
 </head>
 <body>
     <div class="main-header">
-<!-- ... (existing code) ... -->
+        <img src="img/titleLogo.png" alt="Logo">
+        <div>
+            <div class="main-title">Official Medal Tally</div>
+            <div class="subtitle" id="last-updated">Loading...</div>
+        </div>
+    </div>
+    <div class="tally-card">
+        <div class="top-buttons" role="group" aria-label="Page navigation">
+            <button class="top-btn active">Live Count</button>
+            <button class="top-btn" onclick="window.location.href='details-category.html'">Details</button>
+            <button class="top-btn" onclick="window.location.href='about-us.html'">About Us</button>
         </div>
         <div class="table-scroll">
         <table class="tally-table">
             <thead>
-                <!-- --- MODIFIED --- -->
-                <!-- Removed 'sortable' class and 'data-sort-key' attributes to fix layout -->
                 <tr>
                     <th>Department</th>
                     <th class="gold">Gold</th>
@@ -33,24 +41,30 @@
                     <th class="bronze">Bronze</th>
                     <th class="total">Total</th>
                 </tr>
-                <!-- --- END MODIFIED --- -->
             </thead>
             <!-- 
               The table body is now empty.
-<!-- ... (existing code) ... -->
+              The new 'js/live-feed.js' script will fill this 
+              with dynamic data from the API.
+            -->
             <tbody id="tally-body">
                 <!-- Loader Row -->
-<!-- ... (existing code) ... -->
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; font-weight: 600;">
+                        Loading live medal tally...
+                    </td>
+                </tr>
+            </tbody>
         </table>
         </div>
     </div>
 
-    <img class="bgIcon1" src="img/bgIcon.png">
-    <img class="bgIcon2" src="img/bgIcon.png">
-    <img class="bgIcon3" src="img/bgIcon.png">
+    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .6">
+    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .2">
+    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .6">
 
     <footer class="footer">
-<!-- ... (existing code) ... -->
+        Made by <img src="img/ubytesLogo@3x.png" class="ub-logo" alt="UBYTeS Logo"> University of Bohol Young Thinkers Society
     </footer>
 
     <!-- This new script will run and populate the table -->
