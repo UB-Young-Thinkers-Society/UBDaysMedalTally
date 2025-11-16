@@ -105,7 +105,8 @@ async function fetchAllTeams() {
 }
 
 /**
- * MODIFIED: This function now disables events based on status.
+ * MODIFIED: This function now disables events based on status
+ * AND adds a status badge.
  */
 function renderDropdown(query) {
     const resultsContainer = document.getElementById('event-search-results');
@@ -127,9 +128,40 @@ function renderDropdown(query) {
             matchingEvents.forEach(event => {
                 const eventEl = document.createElement('div');
                 eventEl.className = 'search-results-item';
-                eventEl.textContent = event.name;
                 
-                // --- NEW LOGIC ---
+                // Create span for event name
+                const eventName = document.createElement('span');
+                eventName.textContent = event.name;
+
+                // --- NEW: Create status badge ---
+                const statusBadge = document.createElement('span');
+                statusBadge.className = 'event-status-badge';
+                statusBadge.textContent = event.status.toUpperCase().replace('_', ' ');
+
+                let statusClass = '';
+                switch (event.status) {
+                    case 'ongoing':
+                        statusClass = 'status-ongoing';
+                        break;
+                    case 'for review':
+                        statusClass = 'status-for_review';
+                        break;
+                    case 'approved':
+                        statusClass = 'status-approved';
+                        break;
+                    case 'published':
+                        statusClass = 'status-published';
+                        break;
+                    case 'locked':
+                        statusClass = 'status-locked';
+                        break;
+                    default:
+                        statusClass = 'status-ongoing'; // Default color
+                }
+                statusBadge.classList.add(statusClass);
+                // --- END NEW BADGE LOGIC ---
+
+
                 // We only allow submitting to 'ongoing' or 'for review' events
                 const isEditable = event.status === 'ongoing' || event.status === 'for review';
                 
@@ -147,6 +179,10 @@ function renderDropdown(query) {
                     }
                     // If not editable, the click does nothing.
                 });
+
+                // Append name and badge
+                eventEl.appendChild(eventName);
+                eventEl.appendChild(statusBadge);
                 resultsContainer.appendChild(eventEl);
             });
         }
