@@ -1,12 +1,14 @@
 // This script runs on the public-facing live feed page.
 
+// A simple lock to prevent multiple refreshes from running at the same time
 let isUpdating = false;
 
-// --- ADDED Sorting State ---
-let cachedTeams = []; // Store the last fetched data
-let currentSortKey = 'gold'; // Default sort
-let currentSortDirection = 'desc'; // Default direction
-// --- END ADDED ---
+// Store the last fetched data
+let cachedTeams = []; 
+// Default sort
+let currentSortKey = 'gold'; 
+// Default direction
+let currentSortDirection = 'desc'; 
 
 document.addEventListener('DOMContentLoaded', () => {
     // Run both functions immediately on page load
@@ -30,7 +32,6 @@ document.addEventListener('DOMContentLoaded', () => {
  * Updates the "As of..." subtitle with the current date and time.
  */
 function updateTimestamp() {
-    // ... (This function is unchanged) ...
     const subtitle = document.getElementById('last-updated');
     if (!subtitle) return;
 
@@ -46,7 +47,6 @@ function updateTimestamp() {
     subtitle.textContent = `As of ${now.toLocaleDateString('en-US', options)}`;
 }
 
-// --- ADDED ---
 /**
  * Attaches click event listeners to sortable table headers.
  */
@@ -93,7 +93,6 @@ function updateHeaderStyles() {
         }
     });
 }
-// --- END ADDED ---
 
 /**
  * Fetches the calculated medal tally from our secure API.
@@ -104,7 +103,11 @@ async function fetchAndRenderTally() {
     isUpdating = true;
 
     try {
-        const response = await fetch('/api-test/data?type=medalTally'); // Using test API for demo
+        // --- FIXED ---
+        // This is the correct API endpoint
+        const response = await fetch('/api/data?type=medalTally');
+        // --- END FIXED ---
+        
         if (!response.ok) {
             throw new Error('Failed to load data from the server.');
         }
@@ -138,6 +141,7 @@ async function renderTable() {
     }
 
     // --- FLIP Animation Step 1: FIRST ---
+    // Get the current position of all existing rows
     const oldPositions = new Map();
     const existingRows = new Map();
     tbody.querySelectorAll('tr[data-team-id]').forEach(row => {
@@ -146,7 +150,7 @@ async function renderTable() {
         existingRows.set(id, row);
     });
 
-    // --- ADDED: Sort the data ---
+    // --- Sort the data ---
     cachedTeams.sort((a, b) => {
         const key = currentSortKey;
         const dir = currentSortDirection === 'asc' ? 1 : -1;
@@ -154,23 +158,32 @@ async function renderTable() {
         if (key === 'name') {
             return a.name.localeCompare(b.name) * dir;
         } else {
+            // Ensure values are numbers for correct sorting
+            const valA = Number(a[key]) || 0;
+            const valB = Number(b[key]) || 0;
+
             // Primary sort (e.g., 'gold')
-            if (a[key] !== b[key]) {
-                return (a[key] - b[key]) * dir;
+            if (valA !== valB) {
+                return (valA - valB) * dir;
             }
+            
+            // Tie-breaking logic:
+            // Always sort by Gold (desc), then Silver (desc), then Bronze (desc)
+            
             // Secondary sort (tie-breaker)
-            if (key !== 'gold' && a.gold !== b.gold) {
-                return (a.gold - b.gold) * -1; // Always desc
+            if (key !== 'gold' && (Number(a.gold) || 0) !== (Number(b.gold) || 0)) {
+                return (Number(a.gold) || 0) - (Number(b.gold) || 0) * -1; // Always desc
             }
             // Tertiary sort
-            if (key !== 'silver' && a.silver !== b.silver) {
-                return (a.silver - b.silver) * -1; // Always desc
+            if (key !== 'silver' && (Number(a.silver) || 0) !== (Number(b.silver) || 0)) {
+                return (Number(a.silver) || 0) - (Number(b.silver) || 0) * -1; // Always desc
             }
             // Quaternary sort
-            if (key !== 'bronze' && a.bronze !== b.bronze) {
-                return (a.bronze - b.bronze) * -1; // Always desc
+            if (key !== 'bronze' && (Number(a.bronze) || 0) !== (Number(b.bronze) || 0)) {
+                return (Number(a.bronze) || 0) - (Number(b.bronze) || 0) * -1; // Always desc
             }
-            // Final tie-breaker: name
+            
+            // Final tie-breaker: name (asc)
             return a.name.localeCompare(b.name);
         }
     });
@@ -188,9 +201,17 @@ async function renderTable() {
 
     // --- Loop 1: Update, create, and order rows ---
     cachedTeams.forEach(team => {
-        const id = team.acronym;
+        // Use acronym as a reliable ID
+        const id = team.acronym; 
+        if (!id) {
+             console.warn("Team data missing acronym:", team);
+             return; // Skip teams without an ID
+        }
+
         let row = existingRows.get(id);
         const logo = team.logo_url || 'img/Login-Logo.png';
+        
+        // This is the HTML that will be rendered
         const rowHTML = `
             <td>
                 <img src="${logo}" class="dept-logo" alt="${team.acronym} Logo" onerror="this.src='img/Login-Logo.png';">
@@ -207,7 +228,8 @@ async function renderTable() {
             // Row exists: update its content and mark as handled
             existingRows.delete(id);
             // Check if content has changed to prevent unnecessary re-renders
-            if (row.innerHTML.trim() !== rowHTML.trim()) {
+            // This avoids re-rendering rows that haven't changed
+            if (row.innerHTML.replace(/\s/g, '') !== rowHTML.replace(/\s/g, '')) {
                  row.innerHTML = rowHTML;
             }
         } else {
@@ -223,12 +245,14 @@ async function renderTable() {
     });
 
     // --- Loop 2: Handle removed rows ---
+    // Any rows left in existingRows are no longer in the data
     existingRows.forEach((row, id) => {
         row.classList.add('row-removing');
         setTimeout(() => row.remove(), 500); // Remove from DOM after animation
     });
 
     // --- DOM Update ---
+    // Replace old content with the new, correctly-ordered fragment
     tbody.innerHTML = '';
     tbody.appendChild(fragment);
 
@@ -249,11 +273,18 @@ async function renderTable() {
             row.style.transform = `translateY(${diff}px)`;
             row.style.transition = 'none'; // No transition for the "invert" step
             rowsToPlay.push(row);
+        } else {
+            // Row didn't move, but might be new. Handle fade-in for new rows.
+            if (row.style.opacity === '0') {
+                 rowsToPlay.push(row);
+            }
         }
     });
 
     // --- FLIP Animation Step 4: PLAY ---
     // Force a browser repaint before applying the "play" animation
+    // This is a common trick to make sure the "invert" styles (transform)
+    // are applied *before* the "play" styles (transition)
     tbody.offsetHeight; 
 
     rowsToPlay.forEach(row => {
