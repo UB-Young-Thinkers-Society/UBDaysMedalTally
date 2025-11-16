@@ -236,7 +236,7 @@ body {
 .tally-table td.gold .medal-count {
     background-color: #FFD700;
     border: 1px solid #fff2a5;
-    /* color: #333;  */
+    color: #554800; 
 }
 .tally-table td.silver .medal-count {
     background-color: #B0B0B0;
