@@ -53,7 +53,7 @@
 
     <!-- 
       =========================================
-      NEW: APPROVAL MODAL
+      APPROVAL MODAL (For Rankings)
       =========================================
     -->
     <div class="modal-overlay" id="approval-modal">
@@ -74,7 +74,32 @@
             </div>
         </div>
     </div>
-    <!-- End of Modal -->
+    <!-- End of Approval Modal -->
+
+    <!-- 
+      =========================================
+      NEW: GENERIC CONFIRM/ALERT MODAL
+      =========================================
+    -->
+    <div class="modal-overlay" id="generic-modal-overlay">
+        <div class="modal-content modal-content-small" id="generic-modal">
+            <div class="modal-header">
+                <h2 id="generic-modal-title">Confirm Action</h2>
+            </div>
+            <div class="modal-body">
+                <!-- Message is inserted here by JS -->
+                <p id="generic-modal-message">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <!-- Buttons are shown/hidden by JS -->
+                <button class="modal-btn cancel-gray" id="generic-modal-btn-cancel">Cancel</button>
+                <button class="modal-btn confirm-blue" id="generic-modal-btn-confirm">Confirm</button>
+                <button class="modal-btn ok-blue" id="generic-modal-btn-ok" style="display: none;">OK</button>
+            </div>
+        </div>
+    </div>
+    <!-- End of Generic Modal -->
+
 
     <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .8">
     <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .8">

@@ -474,6 +474,24 @@ footer {
     flex-grow: 1;
 }
 
+/* MODIFICATION: Specific padding for generic modal body */
+#generic-modal .modal-body {
+    padding: 20px 30px; /* Add padding back for generic modal */
+}
+
+#generic-modal .modal-body p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #444;
+}
+
+#generic-modal .modal-body p strong {
+    color: #222;
+    font-weight: 600;
+}
+
+
 .modal-rankings-list {
     margin-top: 20px;
     display: flex;
@@ -565,3 +583,38 @@ footer {
     color: white;
 }
 .modal-btn.cancel:hover { background: #d32f2f; }
+
+
+/* =========================================
+  NEW: GENERIC MODAL STYLES
+  =========================================
+*/
+
+/* Make generic modal smaller */
+.modal-content-small {
+    max-width: 450px;
+    max-height: 80vh;
+}
+
+/* Blue confirm button (like screenshot) */
+.modal-btn.confirm-blue {
+    background: #2d5be3;
+    color: white;
+}
+.modal-btn.confirm-blue:hover { background: #1f44c4; }
+
+/* Gray cancel button (like screenshot) */
+.modal-btn.cancel-gray {
+    background: #f0f0f0;
+    color: #555;
+    border: 1px solid #ddd;
+}
+.modal-btn.cancel-gray:hover { background: #e5e5e5; }
+
+/* OK button (for alerts) */
+.modal-btn.ok-blue {
+    background: #2d5be3;
+    color: white;
+    min-width: 80px;
+}
+.modal-btn.ok-blue:hover { background: #1f44c4; }
