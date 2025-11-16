@@ -102,7 +102,7 @@ async function loadAllEvents() {
 
             categoryDiv.innerHTML = `
                 <div class="cat-title">${category.name}</div>
-                <div class="cat-status">${ongoing} ongoing &nbsp;|&nbsp; ${submitted} Submitted &nbsp;|&nbsp; ${published} Published</div>
+                <div class="cat-status">${ongoing} Ongoing &nbsp;|&nbsp; ${submitted} For Review &nbsp;|&nbsp; ${published} Published</div>
                 <div class="cat-arrow" id="arrow">&#9662;</div>
             `;
             

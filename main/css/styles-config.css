@@ -185,7 +185,7 @@ h2 {
     z-index: 1;
     width: calc(100vw - 2.0in);
     min-height: calc(100vh - 3in);
-    margin: 0 auto 2in auto;
+    margin: 0 auto 15% auto;
     background: #fff;
     border: 1px solid #DBDBDB;
     padding: 32px 32px 24px 32px;
