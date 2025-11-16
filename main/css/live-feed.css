@@ -17,7 +17,7 @@ body {
     bottom: -60%;
     left: -20%;
     /* --- MODIFIED RULE --- */
-    opacity: 0.8; /* Moved from inline HTML style */
+    opacity: 0.4; /* Moved from inline HTML style */
     z-index: -99;
     /* Added size and max-size for better scaling */
     width: 70vh;
@@ -31,7 +31,7 @@ body {
     top: -90%;
     right: -24%;
     /* --- MODIFIED RULE --- */
-    opacity: 0.8; /* Moved from inline HTML style */
+    opacity: 0.2; /* Moved from inline HTML style */
     z-index: -99;
     width: auto;
     /* Made height relative to viewport and capped it */
@@ -44,7 +44,7 @@ body {
     bottom: -18%;
     right: -6%;
     /* --- MODIFIED RULE --- */
-    opacity: 0.8; /* Moved from inline HTML style */
+    opacity: 0.4; /* Moved from inline HTML style */
     z-index: -99;
     width: auto;
     /* Made height relative to viewport and capped it */
@@ -392,7 +392,7 @@ footer,
     .medal-count {
         width: 22px;
         height: 22px;
-        line-height: 25px; 
+        line-height: 24px; 
         font-size: 0.7em;
     }
     /* --- END ADDED RULES --- */
