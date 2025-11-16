@@ -184,46 +184,58 @@ async function editTeamClicked(teamId) {
 
     } catch (error) {
         console.error('Error fetching team for edit:', error);
-        alert('Could not load team details for editing: ' + error.message);
+        // MODIFICATION: Use generic modal for error
+        showGenericModal('alert', 'Load Error', 'Could not load team details for editing: ' + error.message);
     }
 }
 
 // --- NEW: Function to handle Delete button click ---
+// MODIFICATION: Replaced confirm() with showGenericModal()
 async function deleteTeamClicked(teamId, teamName) {
-    if (!confirm(`Are you sure you want to delete team "${teamName}"? This action cannot be undone.`)) {
-        return;
-    }
 
-    try {
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-        if (sessionError || !sessionData.session) {
-            throw new Error('Your session has expired. Please log in again.');
+    // Define the function to run on confirmation
+    const onConfirmDelete = async () => {
+        try {
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError || !sessionData.session) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            const response = await fetch('/api/actions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionData.session.access_token}`
+                },
+                body: JSON.stringify({
+                    action: 'deleteTeam', // New action for backend
+                    teamId: teamId
+                }),
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to delete team.');
+            }
+
+            // MODIFICATION: Use generic modal for success
+            showGenericModal('alert', 'Success', `Team "<strong>${teamName}</strong>" deleted successfully!`);
+            loadTeams(); // Reload the list of teams
+
+        } catch (error) {
+            console.error('Error deleting team:', error);
+            // MODIFICATION: Use generic modal for error
+            showGenericModal('alert', 'Delete Error', 'Error deleting team: ' + error.message);
         }
+    };
 
-        const response = await fetch('/api/actions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${sessionData.session.access_token}`
-            },
-            body: JSON.stringify({
-                action: 'deleteTeam', // New action for backend
-                teamId: teamId
-            }),
-        });
-
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Failed to delete team.');
-        }
-
-        alert(`Team "${teamName}" deleted successfully!`);
-        loadTeams(); // Reload the list of teams
-
-    } catch (error) {
-        console.error('Error deleting team:', error);
-        alert('Error deleting team: ' + error.message);
-    }
+    // Show the confirmation modal
+    showGenericModal(
+        'confirm',
+        'Delete Team?',
+        `Are you sure you want to delete team "<strong>${teamName}</strong>"? This action cannot be undone.`,
+        onConfirmDelete
+    );
 }
 
 // --- NEW: Function to reset the form after edit/add ---
@@ -253,6 +265,7 @@ function resetTeamForm() {
 
 // --- 4. FORM HANDLERS (CALLING APIs) ----------------
 
+// MODIFICATION: Replaced all alert() calls
 async function handleAddTeam(e) {
     e.preventDefault(); 
     
@@ -284,7 +297,8 @@ async function handleAddTeam(e) {
 
     // --- Validation: Ensure logo is provided when ADDING new team ---
     if (mode === 'add' && !logoInput.files[0]) {
-        alert('Please select a logo file to add a new team.');
+        // MODIFICATION: Use generic modal for validation
+        showGenericModal('alert', 'Missing Information', 'Please select a logo file to add a new team.');
         return;
     }
 
@@ -311,16 +325,19 @@ async function handleAddTeam(e) {
             throw new Error(errorText);
         }
 
-        alert(`Team ${mode === 'edit' ? 'updated' : 'added'} successfully!`);
+        // MODIFICATION: Use generic modal for success
+        showGenericModal('alert', 'Success', `Team ${mode === 'edit' ? 'updated' : 'added'} successfully!`);
         resetTeamForm(); // Clear and reset the form
         loadTeams(); // Reload the list of teams
 
     } catch (error) {
         console.error(`Error ${mode === 'edit' ? 'updating' : 'adding'} team:`, error);
-        alert(`Error ${mode === 'edit' ? 'updating' : 'adding'} team: ` + error.message);
+        // MODIFICATION: Use generic modal for error
+        showGenericModal('alert', 'Error', `Error ${mode === 'edit' ? 'updating' : 'adding'} team: ` + error.message);
     }
 }
 
+// MODIFICATION: Replaced all alert() calls
 async function handleAddEvent(e) {
     e.preventDefault(); 
     const eventNameInput = document.getElementById('event-name');
@@ -335,7 +352,8 @@ async function handleAddEvent(e) {
     };
 
     if (!eventData.name || !eventData.category_id || isNaN(eventData.medal_value)) {
-        alert('Please fill out all fields for the event.');
+        // MODIFICATION: Use generic modal for validation
+        showGenericModal('alert', 'Missing Information', 'Please fill out all fields for the event.');
         return;
     }
 
@@ -361,13 +379,83 @@ async function handleAddEvent(e) {
             throw new Error(errorText);
         }
 
-        alert('Event added successfully!');
+        // MODIFICATION: Use generic modal for success
+        showGenericModal('alert', 'Success', 'Event added successfully!');
         eventNameInput.value = '';
         eventCategorySelect.value = '';
         eventMedalInput.value = '';
 
     } catch (error) {
         console.error('Error adding event:', error);
-        alert('Error adding event: ' + error.message);
+        // MODIFICATION: Use generic modal for error
+        showGenericModal('alert', 'Error', 'Error adding event: ' + error.message);
     }
+}
+
+// --- 5. NEW GENERIC MODAL LOGIC ------------------------
+
+/**
+ * Shows the generic modal for alerts or confirmations.
+ * @param {'alert' | 'confirm'} type - The type of modal to show.
+ * @param {string} title - The text for the modal header.
+ * @param {string} message - The HTML content for the modal body.
+ * @param {function} onConfirm - The callback function to run if 'Confirm' is clicked.
+ */
+function showGenericModal(type, title, message, onConfirm = () => {}) {
+    const modal = document.getElementById('generic-modal-overlay');
+    const modalTitle = document.getElementById('generic-modal-title');
+    const modalMessage = document.getElementById('generic-modal-message');
+    
+    const confirmBtn = document.getElementById('generic-modal-btn-confirm');
+    const cancelBtn = document.getElementById('generic-modal-btn-cancel');
+    const okBtn = document.getElementById('generic-modal-btn-ok');
+
+    // Set content
+    modalTitle.textContent = title;
+    modalMessage.innerHTML = message; // Use .innerHTML to allow <strong> tags
+
+    // Clone buttons to remove old listeners
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+
+    const newOkBtn = okBtn.cloneNode(true);
+    okBtn.parentNode.replaceChild(newOkBtn, okBtn);
+
+    if (type === 'confirm') {
+        // Show confirm/cancel, hide OK
+        newConfirmBtn.style.display = 'inline-block';
+        newCancelBtn.style.display = 'inline-block';
+        newOkBtn.style.display = 'none';
+
+        // Add listeners
+        newConfirmBtn.addEventListener('click', () => {
+            onConfirm(); // Run the callback
+            hideGenericModal();
+        });
+        newCancelBtn.addEventListener('click', () => {
+            hideGenericModal();
+        });
+
+    } else if (type === 'alert') {
+        // Show OK, hide confirm/cancel
+        newConfirmBtn.style.display = 'none';
+        newCancelBtn.style.display = 'none';
+        newOkBtn.style.display = 'inline-block';
+
+        // Add listener
+        newOkBtn.addEventListener('click', () => {
+            hideGenericModal();
+        });
+    }
+
+    // Show the modal
+    modal.classList.add('visible');
+}
+
+function hideGenericModal() {
+    const modal = document.getElementById('generic-modal-overlay');
+    modal.classList.remove('visible');
 }

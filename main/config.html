@@ -99,6 +99,30 @@
         <span>Made by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
     </footer>
 
+    <!-- 
+      =========================================
+      NEW: GENERIC CONFIRM/ALERT MODAL
+      =========================================
+    -->
+    <div class="modal-overlay" id="generic-modal-overlay">
+        <div class="modal-content modal-content-small" id="generic-modal">
+            <div class="modal-header">
+                <h2 id="generic-modal-title">Confirm Action</h2>
+            </div>
+            <div class="modal-body">
+                <!-- Message is inserted here by JS -->
+                <p id="generic-modal-message">Are you sure?</p>
+            </div>
+            <div class="modal-footer">
+                <!-- Buttons are shown/hidden by JS -->
+                <button class="modal-btn cancel-gray" id="generic-modal-btn-cancel">Cancel</button>
+                <button class="modal-btn confirm-blue" id="generic-modal-btn-confirm">Confirm</button>
+                <button class="modal-btn ok-blue" id="generic-modal-btn-ok" style="display: none;">OK</button>
+            </div>
+        </div>
+    </div>
+    <!-- End of Generic Modal -->
+
     <div class="background"></div>
     <script src="js/config-page-logic.js" defer></script>
 </body>
