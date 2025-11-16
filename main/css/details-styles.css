@@ -14,30 +14,9 @@
     align-items: stretch;
 }
 
-.details-filter-bar select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: clamp(8px, 1.2vw, 10px) clamp(12px, 2vw, 16px);
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: clamp(0.9rem, 2.2vw, 1rem);
-    outline: none;
-    background-color: #fff;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: right clamp(10px, 2vw, 16px) center;
-    background-size: 10px;
-    cursor: pointer;
-}
-
-.details-filter-bar select:disabled {
-    background-color: #f8f8f8;
-    color: #aaa;
-    cursor: not-allowed;
-}
+/* MODIFIED: (Request #1) Removed old 'select' styles.
+  New styles for searchable dropdowns are below.
+*/
 
 .details-title-bar {
     border-bottom: 1px solid #eee;
@@ -124,7 +103,7 @@
 
 
 /* =========================================
-   STYLES FOR DEPARTMENT DROPDOWN & VIEW
+   STYLES FOR ALL CUSTOM DROPDOWNS
 ========================================= */
 
 /* (FIX #1) Align logo and text in department dropdown */
@@ -132,26 +111,76 @@
     position: relative;
     flex-basis: 33.3%;
 }
+
+/* MODIFIED: (Request #1) Made box relative and removed padding */
 .custom-select-box {
+    position: relative;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
-    padding: 10px 16px;
     font-size: 1rem;
     cursor: pointer;
     display: flex;
-    align-items: center; /* THIS IS THE FIX */
-    gap: 12px;
+    align-items: center;
+    /* padding: 0; */ /* Padding is now on inner elements */
+}
+
+/* NEW: (Request #1) Styles for the searchable input */
+.custom-select-search {
+    width: 100%;
+    box-sizing: border-box;
+    padding: clamp(8px, 1.2vw, 10px) clamp(12px, 2vw, 16px);
+    padding-right: 40px; /* Space for arrow */
+    border: none;
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
+    outline: none;
+    background-color: transparent;
+    font-family: inherit; /* Use website font */
+    color: #333;
+    border-radius: 8px; /* Match parent */
+}
+.custom-select-search::placeholder {
+    color: #777;
+}
+.custom-select-search:disabled {
+    background-color: #f8f8f8;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+/* NEW: (Request #1) Arrow for custom dropdowns */
+.custom-select-arrow {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none; /* Click falls through */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%204%205%22%3E%3Cpath%20fill%3D%22%23333%22%20d%3D%22M2%200L0%202h4zm0%205L0%203h4z%22/%3E%3C/svg%3E');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 10px;
+}
+
+
+/* MODIFIED: (Request #1) Added padding to non-input content */
+.custom-select-box .placeholder,
+.custom-select-box .selected-team {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Add back padding for this specific element */
+    padding: clamp(8px, 1.2vw, 10px) clamp(12px, 2vw, 16px);
+    width: 100%;
+    box-sizing: border-box;
 }
 .custom-select-box .placeholder {
     color: #777;
 }
-.custom-select-box .selected-team {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
+
 .custom-select-box .selected-team img {
     width: 28px;
     height: 28px;
@@ -329,7 +358,7 @@
 
 /* Stack filters full-width on very small screens */
 @media (max-width: 480px) {
-    .details-filter-bar select { flex-basis: 100%; min-width: 100%; }
+    /* This rule is no longer needed as the grid handles it */
 }
 
 /* Small device refinements */

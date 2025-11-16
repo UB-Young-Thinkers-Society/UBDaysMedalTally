@@ -9,18 +9,35 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTeams();
     updateTimestamp();
 
-    document.getElementById('filter-category').addEventListener('change', handleCategoryChange);
-    document.getElementById('filter-event').addEventListener('change', handleEventChange);
+    // --- MODIFIED: (Request #1) Listeners for Searchable Dropdowns ---
+    const categorySearch = document.getElementById('filter-category-search');
+    const categoryList = document.getElementById('category-list');
+    
+    const eventSearch = document.getElementById('filter-event-search');
+    const eventList = document.getElementById('event-list');
 
-    // NEW: Listeners for the custom department dropdown
-    document.getElementById('filter-department').addEventListener('click', toggleDeptDropdown);
+    // Toggle dropdowns on focus
+    categorySearch.addEventListener('focus', () => toggleDropdown('category-list'));
+    eventSearch.addEventListener('focus', () => toggleDropdown('event-list'));
+
+    // Handle search/filter on input
+    categorySearch.addEventListener('input', filterCategoryList);
+    eventSearch.addEventListener('input', filterEventList);
+
+    // Handle selection from list
+    categoryList.addEventListener('click', handleCategorySelect);
+    eventList.addEventListener('click', handleEventSelect);
+
+    // --- Listeners for Department Dropdown (Unchanged) ---
+    document.getElementById('filter-department').addEventListener('click', () => toggleDropdown('department-list'));
     document.getElementById('department-list').addEventListener('click', handleDeptSelect);
     
-    // Close dropdown if clicking outside
+    // Close dropdowns if clicking outside
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select-wrapper')) {
-            const listEl = document.getElementById('department-list');
-            if (listEl) listEl.classList.add('hidden');
+            document.getElementById('department-list').classList.add('hidden');
+            document.getElementById('category-list').classList.add('hidden');
+            document.getElementById('event-list').classList.add('hidden');
         }
     });
 });
@@ -36,26 +53,55 @@ function updateTimestamp() {
 
 // --- 3. DROPDOWN POPULATION FUNCTIONS --------------
 
+/**
+ * NEW: (Request #1) Helper to toggle dropdowns
+ */
+function toggleDropdown(listId) {
+    const allLists = document.querySelectorAll('.custom-select-list');
+    allLists.forEach(list => {
+        if (list.id !== listId) {
+            list.classList.add('hidden');
+        }
+    });
+    // Toggle the target list
+    document.getElementById(listId).classList.toggle('hidden');
+}
+
+/**
+ * MODIFIED: (Request #1) Load categories into custom list
+ */
 async function loadCategories() {
-    // ... (This function is unchanged)
-    const selectEl = document.getElementById('filter-category');
-    const eventSelectEl = document.getElementById('filter-event');
+    const listEl = document.getElementById('category-list');
+    const searchInput = document.getElementById('filter-category-search');
     try {
         const response = await fetch('/api/data?type=allEvents'); 
         if (!response.ok) throw new Error('Failed to load categories');
         allCategoriesAndEvents = await response.json();
-        selectEl.innerHTML = '<option value="">Enter Event Category</option>'; 
+        
+        listEl.innerHTML = ''; // Clear loading
+        
+        // Add a "placeholder" option
+        const allOption = document.createElement('div');
+        allOption.className = 'custom-select-item';
+        allOption.dataset.categoryId = ""; // Empty value
+        allOption.dataset.categoryName = "Enter Event Category"; // Placeholder text
+        allOption.innerHTML = `<span class="name" style="color: #777;">Enter Event Category</span>`;
+        listEl.appendChild(allOption);
+
         allCategoriesAndEvents.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat.id; 
-            option.textContent = cat.name;
-            selectEl.appendChild(option);
+            const item = document.createElement('div');
+            item.className = 'custom-select-item';
+            item.dataset.categoryId = cat.id;
+            item.dataset.categoryName = cat.name;
+            item.innerHTML = `<span class="name">${cat.name}</span>`;
+            listEl.appendChild(item);
         });
-        selectEl.disabled = false;
-        eventSelectEl.disabled = true;
+        searchInput.disabled = false;
+        searchInput.placeholder = "Enter Event Category";
     } catch (error) {
         console.error(error);
-        selectEl.innerHTML = '<option value="">Error loading</option>';
+        listEl.innerHTML = '<div class="custom-select-item">Error loading</div>';
+        searchInput.placeholder = "Error loading";
     }
 }
 
@@ -88,10 +134,36 @@ async function loadTeams() {
     }
 }
 
-function handleCategoryChange(e) {
+/**
+ * NEW: (Request #1) Replaces old handleCategoryChange
+ */
+function handleCategorySelect(e) {
+    const item = e.target.closest('.custom-select-item');
+    if (!item) return;
+
+    const { categoryId, categoryName } = item.dataset;
+    
+    const box = document.getElementById('filter-category-box');
+    const searchInput = document.getElementById('filter-category-search');
+    
+    box.dataset.categoryId = categoryId;
+    searchInput.value = categoryName;
+    document.getElementById('category-list').classList.add('hidden');
+
+    // Restore full list
+    filterCategoryList({ target: { value: '' } });
+
+    // Trigger the logic to update the next filter
+    populateEventFilter(categoryId);
+}
+
+/**
+ * NEW: (Request #1) Logic from old handleCategoryChange, now populates event list
+ */
+function populateEventFilter(categoryId) {
     currentCategory = null;
-    const categoryId = e.target.value;
-    const eventSelectEl = document.getElementById('filter-event');
+    const eventListEl = document.getElementById('event-list');
+    const eventSearchInput = document.getElementById('filter-event-search');
     const titleEl = document.getElementById('details-title');
     const tableBodyEl = document.getElementById('category-rankings-body');
 
@@ -101,42 +173,90 @@ function handleCategoryChange(e) {
     showView('category');
     // --- END FIX ---
 
-    eventSelectEl.innerHTML = '<option value="">Enter Event</option>';
-    eventSelectEl.disabled = true;
+    // Reset event filter
+    eventListEl.innerHTML = '';
+    eventSearchInput.value = ''; // Clear text
+    eventSearchInput.placeholder = 'Enter Event';
+    eventSearchInput.disabled = true;
+    document.getElementById('filter-event-box').dataset.eventId = "null";
+
     titleEl.textContent = '';
     
     if (!categoryId) {
         tableBodyEl.innerHTML = '<tr><td colspan="5" class="details-message empty">Please select a category to see rankings.</td></tr>';
         toggleTableHeaders('tally'); 
+        eventSearchInput.placeholder = 'Select Category First';
         return;
     }
 
-    currentCategory = allCategoriesAndEvents.find(cat => cat.id === categoryId); 
+    currentCategory = allCategoriesAndEvents.find(cat => cat.id.toString() === categoryId); 
     
     if (currentCategory) {
+        // Add "All Events" option for the category
+        const allEventsOption = document.createElement('div');
+        allEventsOption.className = 'custom-select-item';
+        allEventsOption.dataset.eventId = ""; // Empty value
+        allEventsOption.dataset.eventName = `All ${currentCategory.name} Events`;
+        allEventsOption.innerHTML = `<span class="name" style="font-weight: 700;">All ${currentCategory.name} Events</span>`;
+        eventListEl.appendChild(allEventsOption);
+
         if (currentCategory.events.length > 0) {
             currentCategory.events.forEach(event => {
-                const option = document.createElement('option');
-                option.value = event.id;
-                option.textContent = event.name;
-                eventSelectEl.appendChild(option);
+                const item = document.createElement('div');
+                item.className = 'custom-select-item';
+                item.dataset.eventId = event.id;
+                item.dataset.eventName = event.name;
+                item.innerHTML = `<span class="name">${event.name}</span>`;
+                eventListEl.appendChild(item);
             });
-            eventSelectEl.disabled = false;
+            eventSearchInput.disabled = false;
         } else {
-            eventSelectEl.innerHTML = '<option value="">No events found</option>';
+            eventListEl.innerHTML = '<div class="custom-select-item">No events found</div>';
+            eventSearchInput.placeholder = 'No events found';
         }
         titleEl.textContent = currentCategory.name;
         fetchAndDisplayCategoryTally(currentCategory.id);
     }
 }
 
+
 // --- 4. CUSTOM DROPDOWN LOGIC ---------------
 
-function toggleDeptDropdown() {
-    document.getElementById('department-list').classList.toggle('hidden');
+/**
+ * NEW: (Request #1) Filter function for category list
+ */
+function filterCategoryList(e) {
+    const filter = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('#category-list .custom-select-item');
+    items.forEach(item => {
+        const name = item.dataset.categoryName.toLowerCase();
+        if (name.includes(filter)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
 }
 
+/**
+ * NEW: (Request #1) Filter function for event list
+ */
+function filterEventList(e) {
+    const filter = e.target.value.toLowerCase();
+    const items = document.querySelectorAll('#event-list .custom-select-item');
+    items.forEach(item => {
+        const name = item.dataset.eventName.toLowerCase();
+        if (name.includes(filter)) {
+            item.style.display = '';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+
+
 function handleDeptSelect(e) {
+    // ... (This function is unchanged)
     const item = e.target.closest('.custom-select-item');
     if (!item) return;
 
@@ -160,6 +280,7 @@ function handleDeptSelect(e) {
  * NEW: (FIX #2) Helper function to reset the department dropdown
  */
 function resetDeptDropdown() {
+    // ... (This function is unchanged)
     const boxEl = document.getElementById('filter-department');
     if (boxEl) {
         boxEl.dataset.teamId = "null";
@@ -182,17 +303,32 @@ function showView(viewType) {
     }
 }
 
-function handleEventChange(e) {
-    const eventId = e.target.value;
+/**
+ * NEW: (Request #1) Replaces old handleEventChange
+ */
+function handleEventSelect(e) {
+    const item = e.target.closest('.custom-select-item');
+    if (!item) return;
+
+    const { eventId, eventName } = item.dataset;
+    
+    const box = document.getElementById('filter-event-box');
+    const searchInput = document.getElementById('filter-event-search');
+    
+    box.dataset.eventId = eventId;
+    searchInput.value = eventName;
+    document.getElementById('event-list').classList.add('hidden');
+
+    // Restore full list
+    filterEventList({ target: { value: '' } });
+
+    // --- Start logic from old handleEventChange ---
     const titleEl = document.getElementById('details-title');
 
-    // --- (FIX #2) ---
-    // Reset department dropdown and show category view
     resetDeptDropdown();
     showView('category');
-    // --- END FIX ---
 
-    if (!eventId) {
+    if (!eventId) { // "All Events" selected
         if (currentCategory) {
             titleEl.textContent = currentCategory.name;
             fetchAndDisplayCategoryTally(currentCategory.id);
@@ -201,13 +337,15 @@ function handleEventChange(e) {
     }
     let selectedEvent = null;
     if (currentCategory) {
-        selectedEvent = currentCategory.events.find(ev => ev.id === eventId);
+        selectedEvent = currentCategory.events.find(ev => ev.id.toString() === eventId);
     }
     if (selectedEvent) {
         titleEl.textContent = `${currentCategory.name} - ${selectedEvent.name}`;
-        fetchAndDisplayEventRankings(selectedEvent);
+        fetchAndDisplayEventRankings(selectedEvent); // Call existing function
     }
+    // --- End logic from old handleEventChange ---
 }
+
 
 function toggleTableHeaders(mode) {
     // ... (This function is unchanged)
