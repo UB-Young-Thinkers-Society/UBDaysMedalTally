@@ -403,16 +403,17 @@ function updateCategoryHeader(detailsDiv) {
         if (!categoryDiv) return;
         const statusDisplay = categoryDiv.querySelector('.cat-status');
         const allRows = detailsDiv.querySelectorAll('tbody tr');
-        let ongoing = 0, submitted = 0, published = 0;
+        let ongoing = 0, approved = 0, submitted = 0, published = 0;
         allRows.forEach(row => {
             const statusSpan = row.querySelector('.status');
             if (!statusSpan) return; 
             const status = statusSpan.textContent.toLowerCase();
             if (status === 'ongoing') ongoing++;
             else if (status === 'for review') submitted++;
+            else if (status === 'approved') approved++;
             else if (status === 'published') published++;
         });
-        statusDisplay.textContent = `${ongoing} ongoing  |  ${submitted} Submitted  |  ${published} Published`;
+        statusDisplay.textContent = `${ongoing} ongoing  |  ${submitted} For Review  |  ${approved} Approved  |  ${published} Published`;
     } catch (error) {
         console.error('Error updating category header:', error);
     }
