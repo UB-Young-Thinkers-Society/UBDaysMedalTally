@@ -97,7 +97,7 @@ body {
     font-size: clamp(1.8rem, 5.5vw, 5rem);
     line-height: 1.1;
     font-weight: 800;
-    letter-spacing: clamp(-1px, -0.5vw, -3px);
+    letter-spacing: clamp(-1px, -0.8vw, -3px);
     color: #444;
     margin-bottom: 0;
     transition: font-size 0.2s ease, line-height 0.2s ease;
