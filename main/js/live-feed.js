@@ -56,7 +56,9 @@ async function fetchAndRenderTally() {
             tr.innerHTML = `
                 <td>
                     <img src="${logo}" class="dept-logo" alt="${team.acronym} Logo" onerror="this.src='img/Login-Logo.png';">
-                    <span class="dept-name">${team.name}</span>
+                    <!-- MODIFIED: Added both full name and acronym in separate spans -->
+                    <span class="dept-name full-name">${team.name}</span>
+                    <span class="dept-name acronym">${team.acronym}</span>
                 </td>
                 <td class="gold">${team.gold}</td>
                 <td class="silver">${team.silver}</td>
