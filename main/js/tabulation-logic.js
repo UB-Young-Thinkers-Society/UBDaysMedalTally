@@ -413,7 +413,7 @@ function updateCategoryHeader(detailsDiv) {
             else if (status === 'approved') approved++;
             else if (status === 'published') published++;
         });
-        statusDisplay.textContent = `${ongoing} ongoing  |  ${submitted} For Review  |  ${approved} Approved  |  ${published} Published`;
+        statusDisplay.textContent = `${ongoing} Ongoing   |   ${submitted} For Review   |   ${approved} Approved   |   ${published} Published`;
     } catch (error) {
         console.error('Error updating category header:', error);
     }
