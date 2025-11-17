@@ -336,7 +336,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
 
         approvedBtn.disabled = (currentStatus === 'approved') || 
                                (currentStatus === 'ongoing') || 
-                               (currentS === 'locked');
+                               (currentStatus === 'locked');
 
         publishedBtn.disabled = (currentStatus === 'published') || 
                                 (currentStatus === 'ongoing') || 
