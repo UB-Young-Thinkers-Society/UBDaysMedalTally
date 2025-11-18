@@ -212,7 +212,7 @@ function populateEventFilter(categoryId) {
                 if (event.status) {
                     let statusClass = '';
                     let statusText = '';
-                    if (event.status === 'ongoing') {
+                    if (event.status === 'ongoing' || event.status === 'for review' || event.status === 'approved') {
                         statusClass = 'ongoing';
                         statusText = 'Ongoing';
                     } else if (event.status === 'published') {
