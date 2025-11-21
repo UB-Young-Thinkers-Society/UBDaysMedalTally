@@ -333,12 +333,61 @@ footer {
     margin: 0 4px;
 }
 
+
+/* --- MOBILE BREAKPOINT FIXES --- */
 @media (max-width: 700px) {
-    .header { width: calc(100vw - 0.6in); margin: 2rem auto 1rem auto; }
-    .navSection { gap: 12px; }
-    .main-card { width: calc(100vw - 0.8in); margin-bottom: 1.4in; }
-    .intro-hero { grid-template-columns: 1fr; }
+    
+    /* Fix container width logic - avoid inches on mobile */
+    .header { 
+        width: 95%; 
+        margin: 1.5rem auto 1rem auto; 
+    }
+    
+    /* Fix Nav Section Flex */
+    .navSection {
+        width: 100%;
+        gap: 8px;
+        padding: 0 12px;
+        justify-content: space-between;
+    }
+
+    /* !!! FIX: CHANGED FROM 5px TO 0.9rem !!! */
+    .accInfo { 
+        font-size: 0.9rem; 
+        padding: 0; /* Remove padding to save space */
+    }
+    
+    /* Reduce icon size slightly for mobile */
+    .admin-icon {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* Adjust nav buttons for mobile */
+    .navButtons {
+        padding: 0;
+        gap: 12px;
+        font-size: 0.9rem;
+    }
+
+    /* Main Card Mobile Layout */
+    .main-card { 
+        width: 90%; 
+        margin: 0 auto 100px auto; /* increased bottom margin for footer */
+        padding: 20px;
+    }
+
+    .intro-hero { 
+        grid-template-columns: 1fr; 
+    }
+
+    /* Hide logout button text on very small screens if needed, 
+       or just keep it small */
+    .logout {
+        font-size: 0.9rem;
+    }
 }
+
 .tech-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
