@@ -75,6 +75,7 @@ function buildNavbar(role) {
         default:
             // Fallback for unknown roles (or just show 'About Us')
             navHTML = `
+                <a href="index.html" class="nav-btn">Live</a>
                 <a href="about-us.html" class="nav-btn active">About Us</a>
             `;
     }
