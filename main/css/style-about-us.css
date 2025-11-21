@@ -333,12 +333,67 @@ footer {
     margin: 0 4px;
 }
 
+
+/* --- MOBILE BREAKPOINT FIXES --- */
 @media (max-width: 700px) {
-    .header { width: calc(100vw - 0.6in); margin: 2rem auto 1rem auto; }
-    .navSection { gap: 12px; }
-    .main-card { width: calc(100vw - 0.8in); margin-bottom: 1.4in; }
-    .intro-hero { grid-template-columns: 1fr; }
+    
+    /* Fix container width logic */
+    .header { 
+        width: 95%; 
+        margin: 1.5rem auto 1rem auto; 
+    }
+    
+    /* Flexbox adjustment */
+    .navSection {
+        width: 100%;
+        gap: 8px;
+        padding: 0 12px;
+        justify-content: space-between;
+    }
+
+    /* HIDE THE TEXT ON MOBILE */
+    .accInfo span {
+        display: none; 
+    }
+
+    /* Fix the container holding the logo */
+    .accInfo { 
+        padding: 0; 
+        display: flex;
+        align-items: center;
+    }
+    
+    /* Keep logo visible */
+    .admin-icon {
+        width: 28px;
+        height: 28px;
+        margin: 0;
+    }
+
+    /* Adjust nav buttons for mobile */
+    .navButtons {
+        padding: 0;
+        gap: 12px;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    /* Main Card Mobile Layout */
+    .main-card { 
+        width: 90%; 
+        margin: 0 auto 100px auto; 
+        padding: 20px;
+    }
+
+    .intro-hero { 
+        grid-template-columns: 1fr; 
+    }
+
+    .logout {
+        font-size: 0.9rem;
+    }
 }
+
 .tech-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
