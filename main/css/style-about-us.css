@@ -337,13 +337,13 @@ footer {
 /* --- MOBILE BREAKPOINT FIXES --- */
 @media (max-width: 700px) {
     
-    /* Fix container width logic - avoid inches on mobile */
+    /* Fix container width logic */
     .header { 
         width: 95%; 
         margin: 1.5rem auto 1rem auto; 
     }
     
-    /* Fix Nav Section Flex */
+    /* Flexbox adjustment */
     .navSection {
         width: 100%;
         gap: 8px;
@@ -351,16 +351,23 @@ footer {
         justify-content: space-between;
     }
 
-    /* !!! FIX: CHANGED FROM 5px TO 0.9rem !!! */
+    /* HIDE THE TEXT ON MOBILE */
+    .accInfo span {
+        display: none; 
+    }
+
+    /* Fix the container holding the logo */
     .accInfo { 
-        font-size: 0.9rem; 
-        padding: 0; /* Remove padding to save space */
+        padding: 0; 
+        display: flex;
+        align-items: center;
     }
     
-    /* Reduce icon size slightly for mobile */
+    /* Keep logo visible */
     .admin-icon {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
+        margin: 0;
     }
 
     /* Adjust nav buttons for mobile */
@@ -368,12 +375,13 @@ footer {
         padding: 0;
         gap: 12px;
         font-size: 0.9rem;
+        flex-shrink: 0;
     }
 
     /* Main Card Mobile Layout */
     .main-card { 
         width: 90%; 
-        margin: 0 auto 100px auto; /* increased bottom margin for footer */
+        margin: 0 auto 100px auto; 
         padding: 20px;
     }
 
@@ -381,8 +389,6 @@ footer {
         grid-template-columns: 1fr; 
     }
 
-    /* Hide logout button text on very small screens if needed, 
-       or just keep it small */
     .logout {
         font-size: 0.9rem;
     }
