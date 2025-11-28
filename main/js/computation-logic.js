@@ -398,14 +398,14 @@ function handleCustomSelectClick(e) {
         const list = row.querySelector('.custom-select-list');
         const selectedIds = getCurrentlySelectedTeamIds();
         const currentRowTeamId = row.dataset.teamId;
-        Array.from(list.children).forEach(item => {
-            const itemTeamId = item.dataset.teamId;
-            if (selectedIds.has(itemTeamId) && itemTeamId !== currentRowTeamId) {
-                item.classList.add('disabled');
-            } else {
-                item.classList.remove('disabled');
-            }
-        });
+        // Array.from(list.children).forEach(item => {
+        //     const itemTeamId = item.dataset.teamId;
+        //     if (selectedIds.has(itemTeamId) && itemTeamId !== currentRowTeamId) {
+        //         item.classList.add('disabled');
+        //     } else {
+        //         item.classList.remove('disabled');
+        //     }
+        // });
         list.classList.toggle('hidden');
         return;
     }
