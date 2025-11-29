@@ -38,7 +38,24 @@ async function getMedalTally(categoryId = null) {
         .eq('events.status', 'published');
 
     if (categoryId) {
+        // CASE 1: Specific Category Selected (Details Page)
+        // We strictly filter by this ID. Even if it's "Juniors League", it will show up here.
         query = query.eq('events.category_id', categoryId);
+    } else {
+        // CASE 2: No Category Selected (Main Live Feed)
+        // Requirement: Exclude "Juniors League" from the overall count.
+        
+        // 1. Find the ID of the category named "Juniors League" (case-insensitive)
+        const { data: excludedCategory } = await supabase
+            .from('categories')
+            .select('id')
+            .ilike('name', 'Juniors League') 
+            .maybeSingle();
+
+        // 2. If found, exclude its ID from the calculation
+        if (excludedCategory) {
+            query = query.neq('events.category_id', excludedCategory.id);
+        }
     }
 
     const { data: publishedResults, error: resultsError } = await query;
