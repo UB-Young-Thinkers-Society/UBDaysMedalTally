@@ -87,43 +87,6 @@ body {
     padding-left: clamp(16px, 6vw, 32px); 
     padding-right: clamp(16px, 6vw, 32px);
 }
-
-.blurBG {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(175, 175, 175, 0.6);
-    backdrop-filter: blur(12px);
-    z-index: 10;
-}
-
-.blurBG > img {
-    display: block;
-    margin: 2% auto 0 auto;
-    width: 40%;
-    height: auto;
-}
-
-@media (max-width: 600px) {
-    .blurBG > img {
-        width: 80%;
-        height: auto;
-        margin: 50% auto 0 auto;
-    }
-}
-
-.blurBG > h1 {
-    text-align: center;
-    color: #444;
-    font-size: clamp(1rem, 1.5vw, 2rem);
-    font-weight: 600;
-    margin-top: 1rem;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-
 .main-header img {
     width: clamp(48px, 9vw, 100px);
     height: clamp(48px, 9vw, 100px);
@@ -331,11 +294,11 @@ footer,
     left: 0;
     width: 100%;
     text-align: center;
-    z-index: 99;
+    z-index: 2;
     /* --- MODIFIED RULE --- */
     font-size: clamp(0.9rem, 1.8vw, 1.2rem); /* Made footer font responsive */
     letter-spacing: -0.5px; /* Adjusted letter-spacing */
-    color: #333;
+    color: #222;
     background: none;
 }
 .ub-logo {
