@@ -846,7 +846,7 @@ async function handleExportPDF() {
         }
 
         // Save
-        doc.save(`UBDays2025_Full_Report_${Date.now()}.pdf`);
+        doc.save(`UBDays2025_Full_Report.pdf`);
 
         showGenericModal('alert', 'Export Complete', 'The PDF report has been downloaded successfully.');
 
