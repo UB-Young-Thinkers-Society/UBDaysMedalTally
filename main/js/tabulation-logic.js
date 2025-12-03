@@ -696,7 +696,7 @@ async function handleExportPDF() {
             if (categoryTableBody.length > 0) {
                 doc.autoTable({
                     startY: startY,
-                    head: [['Event', 'Medal Value', 'Gold', 'Silver', 'Bronze']], // NEW HEADER
+                    head: [['Event Name', 'Medal Value', 'Gold', 'Silver', 'Bronze']], // NEW HEADER
                     body: categoryTableBody,
                     theme: 'striped',
                     headStyles: { fillColor: colors.red, textColor: 255 },
@@ -815,7 +815,7 @@ async function handleExportPDF() {
                 if (teamTableBody.length > 0) {
                     doc.autoTable({
                         startY: startY,
-                        head: [['Category', 'Event', 'Points', 'Medal Won']], // NEW HEADER
+                        head: [['Category', 'Event Name', 'Medal Value', 'Placement']], // NEW HEADER
                         body: teamTableBody,
                         theme: 'grid',
                         headStyles: { fillColor: [80, 80, 80], textColor: 255 }, // Dark Gray
