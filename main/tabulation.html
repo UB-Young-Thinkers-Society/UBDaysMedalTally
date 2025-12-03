@@ -15,6 +15,10 @@
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     </script>
+
+    <!-- NEW: jsPDF and AutoTable for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div id="loader">
@@ -31,6 +35,8 @@
                 <a href="tabulation.html" class="nav-btn active">Events</a>
                 <a href="config.html" class="nav-btn">Config</a>
                 <a href="log.html" class="nav-btn">Log</a>
+                <!-- NEW: Export Button added here -->
+                <a href="#" id="exportBtn" class="nav-btn">Export</a>
                 <a href="about-us.html" class="nav-btn">About Us</a>
             </div>
         </div>
@@ -78,7 +84,7 @@
 
     <!-- 
       =========================================
-      NEW: GENERIC CONFIRM/ALERT MODAL
+      GENERIC CONFIRM/ALERT MODAL
       =========================================
     -->
     <div class="modal-overlay" id="generic-modal-overlay">
