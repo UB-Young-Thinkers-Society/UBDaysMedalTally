@@ -1,4 +1,4 @@
-// --- 1. AUTHENTICATION & SESSION -------------------
+// --- 1. AUTHENTICATION & SESSION (NEW) -------------------
 
 /**
  * Securely checks the user's session and role.
@@ -14,7 +14,7 @@ async function checkSession(authorizedRole) {
     const accessToken = sessionData.session.access_token;
 
     try {
-        const response = await fetch('/api/auth', { // Use the same secure API
+        const response = await fetch('/api/auth', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
@@ -65,6 +65,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         signOut();
     });
 
+    // --- NEW: EXPORT LISTENER ---
+    const exportBtn = document.getElementById('exportBtn');
+    if (exportBtn) {
+        exportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleExportPDF();
+        });
+    }
+
     const loader = document.getElementById('loader');
     loader.classList.add('hide');
     setTimeout(() => { loader.style.display = 'none'; }, 600);
@@ -72,10 +81,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // --- 3. DYNAMIC DATA LOADING ---------------------
 
-/**
- * Fetches all events, grouped by category, from our new secure API
- * and then calls render functions to build the page.
- */
 async function loadAllEvents() {
     try {
         const response = await fetch('/api/data?type=allEvents');
@@ -173,41 +178,31 @@ async function loadAllEvents() {
     }
 }
 
-/**
- * MODIFIED: (3) Applies new conditional disabling including 'locked' state rule.
- */
 function createEventRow(event) {
     const tr = document.createElement('tr');
     tr.dataset.eventId = event.id; 
-    tr.dataset.eventName = event.name; // Store event name for the modal
+    tr.dataset.eventName = event.name; 
 
     const eventName = event.name || "Unnamed Event";
     const medalCount = event.medal_value ?? "0"; 
     const statusText = event.status || "N-A";
     const statusClass = event.status ? event.status.replace(' ', '-').toLowerCase() : "none";
 
-    // --- NEW: (3) Conditional Logic for Action Buttons ---
     const currentStatus = event.status || 'ongoing'; 
 
-    // 'For Review' button logic
     const disableForReview = (currentStatus === 'for review') || 
                              (currentStatus === 'ongoing') || 
-                             (currentStatus === 'locked'); // NEW RULE
+                             (currentStatus === 'locked');
 
-    // 'Approved' button logic
     const disableApproved = (currentStatus === 'approved') || 
                             (currentStatus === 'ongoing') || 
-                            (currentStatus === 'locked'); // NEW RULE
+                            (currentStatus === 'locked');
 
-    // 'Published' button logic
     const disablePublished = (currentStatus === 'published') || 
                              (currentStatus === 'ongoing') || 
                              (currentStatus === 'for review');
-                             // 'locked' state *enables* this button
 
-    // 'Locked' button logic
-    const disableLocked = (currentStatus !== 'published'); // Only enabled if current status is 'published'
-    // --- END: NEW LOGIC (3) ---
+    const disableLocked = (currentStatus !== 'published');
 
     tr.innerHTML = `
         <td>${eventName}</td>
@@ -224,9 +219,8 @@ function createEventRow(event) {
         </td>
     `;
     
-    // Add event listeners for the new buttons
     tr.querySelector('.delete-btn').addEventListener('click', (e) => {
-        e.stopPropagation(); // Stop accordion from toggling
+        e.stopPropagation(); 
         handleDeleteEvent(event.id, event.name, tr);
     });
 
@@ -241,9 +235,6 @@ function createEventRow(event) {
     return tr;
 }
 
-/**
- * Handles the accordion open/close logic.
- */
 function toggleAccordion(catDiv, detailsDiv) {
     var arrow = catDiv.querySelector('#arrow');
     if (!detailsDiv) return;
@@ -264,34 +255,23 @@ function toggleAccordion(catDiv, detailsDiv) {
     }
 }
 
-// --- 4. API CALL HANDLERS (MODIFIED) -------------------
+// --- 4. API CALL HANDLERS -------------------
 
-/**
- * MODIFIED: (3) Removed all status restrictions.
- */
 async function handleStatusUpdate(eventId, eventName, newStatus, tableRow) {
     const currentStatus = tableRow.querySelector('.status').textContent.toLowerCase();
 
-    // If you click the button that is already active, do nothing.
     if (newStatus === currentStatus) {
         return;
     }
 
-    // If "approved" is clicked, show modal.
-    // This is the only special check.
     if (newStatus === 'approved') {
         showApprovalModal(eventId, eventName, tableRow);
-        return; // Stop here
+        return; 
     }
     
-    // For all other status clicks ("for review", "published", "locked"),
-    // just update the status directly.
     await updateEventStatusInDB(eventId, newStatus, tableRow);
 }
 
-/**
- * This function *only* calls the API.
- */
 async function updateEventStatusInDB(eventId, newStatus, tableRow) {
     try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -305,7 +285,7 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
                 'Authorization': `Bearer ${accessToken}`
             },
             body: JSON.stringify({ 
-                action: "updateEventStatus", // <-- ADD THIS
+                action: "updateEventStatus", 
                 eventId, 
                 newStatus 
             })
@@ -316,19 +296,16 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
             throw new Error(err.error || 'Failed to update status');
         }
 
-        // --- NEW: (3) Update button states after successful change ---
         const newStatusText = newStatus.charAt(0).toUpperCase() + newStatus.slice(1);
         tableRow.querySelector('.status').textContent = newStatusText;
         tableRow.querySelector('.status').className = `status ${newStatus.replace(' ', '-').toLowerCase()}`;
         
-        // Get all buttons in this row
         const reviewBtn = tableRow.querySelector('.filter.review');
         const approvedBtn = tableRow.querySelector('.filter.approved');
         const publishedBtn = tableRow.querySelector('.filter.published');
         const lockedBtn = tableRow.querySelector('.filter.locked');
 
-        // Apply the same logic as in createEventRow
-        const currentStatus = newStatus; // The new status is now the current one
+        const currentStatus = newStatus; 
 
         reviewBtn.disabled = (currentStatus === 'for review') || 
                              (currentStatus === 'ongoing') || 
@@ -343,7 +320,6 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
                                 (currentStatus === 'for review');
 
         lockedBtn.disabled = (currentStatus !== 'published');
-        // --- END: (3) ---
 
         const detailsDiv = tableRow.closest('.category-details');
         if (detailsDiv) {
@@ -352,15 +328,11 @@ async function updateEventStatusInDB(eventId, newStatus, tableRow) {
 
     } catch (error) {
         console.error('Error updating status:', error);
-        // MODIFICATION: Use generic modal for error
         showGenericModal('alert', 'Update Error', 'Error: ' + error.message);
     }
 }
 
-// MODIFICATION: Replaced confirm() with showGenericModal()
 async function handleDeleteEvent(eventId, eventName, tableRow) {
-    
-    // Define the function to run on confirmation
     const onConfirmDelete = async () => {
         try {
             const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -374,7 +346,7 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
                     'Authorization': `Bearer ${accessToken}`
                 },
                 body: JSON.stringify({ 
-                    action: "deleteEvent", // <-- ADD THIS
+                    action: "deleteEvent", 
                     eventId 
                 })
             });
@@ -395,12 +367,10 @@ async function handleDeleteEvent(eventId, eventName, tableRow) {
 
         } catch (error) {
             console.error('Error deleting event:', error);
-            // MODIFICATION: Use generic modal for error
             showGenericModal('alert', 'Delete Error', 'Error: ' + error.message);
         }
     };
 
-    // Show the confirmation modal
     showGenericModal(
         'confirm',
         'Delete Event?',
@@ -431,7 +401,6 @@ function updateCategoryHeader(detailsDiv) {
     }
 }
 
-
 // --- 5. MODAL LOGIC (APPROVAL) ------------------------
 
 function showApprovalModal(eventId, eventName, tableRow) {
@@ -447,14 +416,12 @@ function showApprovalModal(eventId, eventName, tableRow) {
 
     loadModalData(eventId, rankingList);
 
-    // Clone and replace buttons to remove old listeners
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
 
     const newCancelBtn = cancelBtn.cloneNode(true);
     cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
 
-    // Add new listeners
     newConfirmBtn.addEventListener('click', () => {
         updateEventStatusInDB(eventId, 'approved', tableRow);
         hideApprovalModal();
@@ -470,10 +437,6 @@ function hideApprovalModal() {
     modal.classList.remove('visible');
 }
 
-/**
- * MODIFIED: (2) Now uses 'result.rank' to display the rank number,
- * which correctly shows ties.
- */
 async function loadModalData(eventId, rankingListElement) {
     try {
         const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -502,10 +465,8 @@ async function loadModalData(eventId, rankingListElement) {
         results.forEach(result => {
             const team = result.teams;
             const rankRow = document.createElement('div');
-            // MODIFIED: (2) Use the real rank for the class
             rankRow.className = `modal-rank-row rank-${result.rank}`;
             
-            // MODIFIED: (2) Use the real rank for the text
             rankRow.innerHTML = `
                 <div class="modal-rank-num">${result.rank}</div> 
                 <div class="modal-team-info">
@@ -525,16 +486,8 @@ async function loadModalData(eventId, rankingListElement) {
     }
 }
 
+// --- 6. GENERIC MODAL LOGIC ------------------------
 
-// --- 6. NEW GENERIC MODAL LOGIC ------------------------
-
-/**
- * Shows the generic modal for alerts or confirmations.
- * @param {'alert' | 'confirm'} type - The type of modal to show.
- * @param {string} title - The text for the modal header.
- * @param {string} message - The HTML content for the modal body.
- * @param {function} onConfirm - The callback function to run if 'Confirm' is clicked.
- */
 function showGenericModal(type, title, message, onConfirm = () => {}) {
     const modal = document.getElementById('generic-modal-overlay');
     const modalTitle = document.getElementById('generic-modal-title');
@@ -544,11 +497,9 @@ function showGenericModal(type, title, message, onConfirm = () => {}) {
     const cancelBtn = document.getElementById('generic-modal-btn-cancel');
     const okBtn = document.getElementById('generic-modal-btn-ok');
 
-    // Set content
     modalTitle.textContent = title;
-    modalMessage.innerHTML = message; // Use .innerHTML to allow <strong> tags
+    modalMessage.innerHTML = message; 
 
-    // Clone buttons to remove old listeners
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
     
@@ -559,14 +510,12 @@ function showGenericModal(type, title, message, onConfirm = () => {}) {
     okBtn.parentNode.replaceChild(newOkBtn, okBtn);
 
     if (type === 'confirm') {
-        // Show confirm/cancel, hide OK
         newConfirmBtn.style.display = 'inline-block';
         newCancelBtn.style.display = 'inline-block';
         newOkBtn.style.display = 'none';
 
-        // Add listeners
         newConfirmBtn.addEventListener('click', () => {
-            onConfirm(); // Run the callback
+            onConfirm(); 
             hideGenericModal();
         });
         newCancelBtn.addEventListener('click', () => {
@@ -574,22 +523,306 @@ function showGenericModal(type, title, message, onConfirm = () => {}) {
         });
 
     } else if (type === 'alert') {
-        // Show OK, hide confirm/cancel
         newConfirmBtn.style.display = 'none';
         newCancelBtn.style.display = 'none';
         newOkBtn.style.display = 'inline-block';
 
-        // Add listener
         newOkBtn.addEventListener('click', () => {
             hideGenericModal();
         });
     }
 
-    // Show the modal
     modal.classList.add('visible');
 }
 
 function hideGenericModal() {
     const modal = document.getElementById('generic-modal-overlay');
     modal.classList.remove('visible');
+}
+
+
+// --- 7. NEW: PDF EXPORT LOGIC ------------------------
+
+async function handleExportPDF() {
+    const exportBtn = document.getElementById('exportBtn');
+    exportBtn.textContent = 'Generating PDF...';
+    exportBtn.style.pointerEvents = 'none';
+    exportBtn.style.opacity = '0.7';
+
+    // Show spinner
+    const loader = document.getElementById('loader');
+    loader.style.display = 'flex';
+    loader.classList.remove('hide');
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        // Define standard UB colors
+        const colors = {
+            blue: [45, 91, 227], // #2d5be3
+            yellow: [255, 200, 0], // #ffc800
+            red: [175, 76, 76], // #af4c4c
+            gold: [255, 215, 0],
+            silver: [192, 192, 192],
+            bronze: [205, 127, 50],
+            dark: [51, 51, 51],
+            lightGray: [240, 240, 240]
+        };
+
+        const todayStr = new Date().toLocaleString();
+
+        // ----------------------------------------------------
+        // PHASE 1: OVERALL MEDAL TALLY (Page 1)
+        // ----------------------------------------------------
+        
+        // Fetch data for page 1
+        const tallyResponse = await fetch('/api/data?type=medalTally');
+        if (!tallyResponse.ok) throw new Error('Failed to fetch medal tally');
+        const tallyData = await tallyResponse.json();
+
+        // Title
+        doc.setFontSize(22);
+        doc.setTextColor(...colors.dark);
+        doc.text("UB Days 2025 - Official Medal Tally", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${todayStr}`, 14, 28);
+
+        // Define Table Headers
+        const tallyHead = [['Rank', 'Department', 'Gold', 'Silver', 'Bronze', 'Total']];
+        const tallyBody = tallyData.map((team, index) => [
+            index + 1,
+            team.name,
+            team.gold,
+            team.silver,
+            team.bronze,
+            team.total
+        ]);
+
+        doc.autoTable({
+            startY: 35,
+            head: tallyHead,
+            body: tallyBody,
+            theme: 'grid',
+            headStyles: { fillColor: colors.blue, textColor: 255, fontStyle: 'bold' },
+            columnStyles: {
+                0: { halign: 'center', fontStyle: 'bold' }, // Rank
+                2: { halign: 'center', textColor: [200, 150, 0] }, // Gold (Dark Gold color)
+                3: { halign: 'center', textColor: [100, 100, 100] }, // Silver
+                4: { halign: 'center', textColor: [150, 90, 30] }, // Bronze
+                5: { halign: 'center', fontStyle: 'bold' } // Total
+            },
+            alternateRowStyles: { fillColor: colors.lightGray }
+        });
+
+
+        // ----------------------------------------------------
+        // PHASE 2: CATEGORICAL SUMMARIES (Page 2+)
+        // ----------------------------------------------------
+        
+        doc.addPage();
+        doc.setFontSize(18);
+        doc.setTextColor(...colors.dark);
+        doc.text("Categorical Summary", 14, 20);
+
+        // 1. Fetch Categories
+        const categoriesResponse = await fetch('/api/data?type=allEvents');
+        if (!categoriesResponse.ok) throw new Error('Failed to fetch categories');
+        const categories = await categoriesResponse.json();
+
+        // 2. Fetch details for *published* events only
+        // This is complex. We need to iterate categories, find events, and get winners.
+        
+        let startY = 30;
+
+        for (const category of categories) {
+            
+            // Check if page break is needed before header
+            if (startY > 250) {
+                doc.addPage();
+                startY = 20;
+            }
+
+            // Print Category Name
+            doc.setFontSize(14);
+            doc.setTextColor(...colors.blue);
+            doc.setFont("helvetica", "bold");
+            doc.text(category.name, 14, startY);
+            startY += 8;
+
+            const categoryTableBody = [];
+
+            // Get events for this category
+            for (const event of category.events) {
+                // We only care about published events for the report
+                if (event.status !== 'published') continue;
+
+                // Fetch results for this specific event
+                const { data: sessionData } = await supabase.auth.getSession();
+                const resResponse = await fetch(`/api/data?type=eventResults&eventId=${event.id}`, {
+                    headers: { 'Authorization': `Bearer ${sessionData.session.access_token}` }
+                });
+                
+                if (resResponse.ok) {
+                    const results = await resResponse.json();
+                    
+                    // Find winners
+                    let goldWinner = results.find(r => r.rank === 1)?.teams.acronym || "-";
+                    let silverWinner = results.find(r => r.rank === 2)?.teams.acronym || "-";
+                    let bronzeWinner = results.find(r => r.rank === 3)?.teams.acronym || "-";
+                    
+                    // Handle ties (simplified: join acronyms)
+                    const goldTies = results.filter(r => r.rank === 1).map(r => r.teams.acronym);
+                    if (goldTies.length > 1) goldWinner = goldTies.join(" / ");
+                    
+                    const silverTies = results.filter(r => r.rank === 2).map(r => r.teams.acronym);
+                    if (silverTies.length > 1) silverWinner = silverTies.join(" / ");
+
+                    const bronzeTies = results.filter(r => r.rank === 3).map(r => r.teams.acronym);
+                    if (bronzeTies.length > 1) bronzeWinner = bronzeTies.join(" / ");
+
+                    categoryTableBody.push([
+                        event.name,
+                        goldWinner,
+                        silverWinner,
+                        bronzeWinner
+                    ]);
+                }
+            }
+
+            if (categoryTableBody.length > 0) {
+                doc.autoTable({
+                    startY: startY,
+                    head: [['Event', 'Gold', 'Silver', 'Bronze']],
+                    body: categoryTableBody,
+                    theme: 'striped',
+                    headStyles: { fillColor: colors.red, textColor: 255 },
+                    columnStyles: {
+                        1: { fontStyle: 'bold', textColor: [200, 150, 0] },
+                        2: { fontStyle: 'bold', textColor: [100, 100, 100] },
+                        3: { fontStyle: 'bold', textColor: [150, 90, 30] }
+                    },
+                    margin: { left: 14, right: 14 }
+                });
+                startY = doc.lastAutoTable.finalY + 15;
+            } else {
+                doc.setFontSize(10);
+                doc.setTextColor(150);
+                doc.setFont("helvetica", "italic");
+                doc.text("(No published results yet)", 14, startY);
+                doc.setFont("helvetica", "normal");
+                startY += 15;
+            }
+        }
+
+
+        // ----------------------------------------------------
+        // PHASE 3: TEAM SUMMARIES (Page X+)
+        // ----------------------------------------------------
+
+        doc.addPage();
+        doc.setFontSize(18);
+        doc.setTextColor(...colors.dark);
+        doc.text("Team Performance Summary", 14, 20);
+        startY = 30;
+
+        // 1. Fetch Teams
+        const teamsResponse = await fetch('/api/data?type=teams');
+        if (!teamsResponse.ok) throw new Error('Failed to fetch teams');
+        const teams = await teamsResponse.json();
+        
+        // Sort teams alphabetically
+        teams.sort((a, b) => a.name.localeCompare(b.name));
+
+        for (const team of teams) {
+             // Check if page break is needed
+             if (startY > 250) {
+                doc.addPage();
+                startY = 20;
+            }
+
+            // Fetch results for this team
+            const teamResResponse = await fetch(`/api/data?type=departmentResults&teamId=${team.id}`);
+            if (teamResResponse.ok) {
+                const teamData = await teamResResponse.json();
+                
+                // Team Header
+                doc.setFontSize(14);
+                doc.setTextColor(...colors.blue);
+                doc.setFont("helvetica", "bold");
+                const medalSummary = `(G: ${teamData.totals.totalGold}, S: ${teamData.totals.totalSilver}, B: ${teamData.totals.totalBronze})`;
+                doc.text(`${team.name} ${medalSummary}`, 14, startY);
+                startY += 8;
+
+                // Flatten data for table: Event | Result | Medal
+                const teamTableBody = [];
+                
+                // data.categories is an Object { "CategoryName": [events...] }
+                Object.keys(teamData.categories).forEach(catName => {
+                    teamData.categories[catName].forEach(result => {
+                        let outcome = "-";
+                        if (result.gold > 0) outcome = "Gold";
+                        else if (result.silver > 0) outcome = "Silver";
+                        else if (result.bronze > 0) outcome = "Bronze";
+
+                        if (outcome !== "-") {
+                            teamTableBody.push([
+                                catName,
+                                result.event_name,
+                                outcome
+                            ]);
+                        }
+                    });
+                });
+
+                if (teamTableBody.length > 0) {
+                    doc.autoTable({
+                        startY: startY,
+                        head: [['Category', 'Event', 'Medal Won']],
+                        body: teamTableBody,
+                        theme: 'grid',
+                        headStyles: { fillColor: [80, 80, 80], textColor: 255 }, // Dark Gray
+                        columnStyles: {
+                            2: { fontStyle: 'bold' } // Medal column
+                        },
+                        // Custom cell styling for medals
+                        didParseCell: function(data) {
+                            if (data.section === 'body' && data.column.index === 2) {
+                                if (data.cell.raw === 'Gold') data.cell.styles.textColor = [200, 150, 0];
+                                if (data.cell.raw === 'Silver') data.cell.styles.textColor = [100, 100, 100];
+                                if (data.cell.raw === 'Bronze') data.cell.styles.textColor = [150, 90, 30];
+                            }
+                        },
+                        margin: { left: 14, right: 14 }
+                    });
+                    startY = doc.lastAutoTable.finalY + 15;
+                } else {
+                    doc.setFontSize(10);
+                    doc.setTextColor(150);
+                    doc.setFont("helvetica", "italic");
+                    doc.text("No medals won yet.", 14, startY);
+                    startY += 15;
+                }
+
+            }
+        }
+
+        // Save
+        doc.save(`UBDays2025_Full_Report_${Date.now()}.pdf`);
+
+        showGenericModal('alert', 'Export Complete', 'The PDF report has been downloaded successfully.');
+
+    } catch (error) {
+        console.error('Export error:', error);
+        showGenericModal('alert', 'Export Error', 'Failed to generate PDF: ' + error.message);
+    } finally {
+        // Reset UI
+        loader.classList.add('hide');
+        setTimeout(() => { loader.style.display = 'none'; }, 600);
+        exportBtn.textContent = 'Export';
+        exportBtn.style.pointerEvents = 'auto';
+        exportBtn.style.opacity = '1';
+    }
 }
