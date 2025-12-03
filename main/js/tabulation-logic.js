@@ -685,6 +685,7 @@ async function handleExportPDF() {
 
                     categoryTableBody.push([
                         event.name,
+                        event.medal_value || 0, // NEW COLUMN: Medal Value
                         goldWinner,
                         silverWinner,
                         bronzeWinner
@@ -695,14 +696,15 @@ async function handleExportPDF() {
             if (categoryTableBody.length > 0) {
                 doc.autoTable({
                     startY: startY,
-                    head: [['Event', 'Gold', 'Silver', 'Bronze']],
+                    head: [['Event', 'Medal Value', 'Gold', 'Silver', 'Bronze']], // NEW HEADER
                     body: categoryTableBody,
                     theme: 'striped',
                     headStyles: { fillColor: colors.red, textColor: 255 },
                     columnStyles: {
-                        1: { fontStyle: 'bold', textColor: [200, 150, 0] },
-                        2: { fontStyle: 'bold', textColor: [100, 100, 100] },
-                        3: { fontStyle: 'bold', textColor: [150, 90, 30] }
+                        1: { halign: 'center' }, // Center medal value
+                        2: { fontStyle: 'bold', textColor: [200, 150, 0] },
+                        3: { fontStyle: 'bold', textColor: [100, 100, 100] },
+                        4: { fontStyle: 'bold', textColor: [150, 90, 30] }
                     },
                     margin: { left: 14, right: 14 }
                 });
@@ -756,40 +758,74 @@ async function handleExportPDF() {
                 doc.text(`${team.name} ${medalSummary}`, 14, startY);
                 startY += 8;
 
-                // Flatten data for table: Event | Result | Medal
-                const teamTableBody = [];
-                
+                // --- MODIFIED: COLLECT DATA AND SORT ---
+                const rawRows = [];
+
                 // data.categories is an Object { "CategoryName": [events...] }
                 Object.keys(teamData.categories).forEach(catName => {
                     teamData.categories[catName].forEach(result => {
-                        let outcome = "-";
-                        if (result.gold > 0) outcome = "Gold";
-                        else if (result.silver > 0) outcome = "Silver";
-                        else if (result.bronze > 0) outcome = "Bronze";
+                        let medalType = "";
+                        let medalValue = 0; // NEW: Capture value for display
+                        let sortOrder = 4; // 1=Gold, 2=Silver, 3=Bronze
 
-                        if (outcome !== "-") {
-                            teamTableBody.push([
-                                catName,
-                                result.event_name,
-                                outcome
-                            ]);
+                        // Determine medal and sort order
+                        if (result.gold > 0) {
+                            medalType = "Gold";
+                            medalValue = result.gold;
+                            sortOrder = 1;
+                        } else if (result.silver > 0) {
+                            medalType = "Silver";
+                            medalValue = result.silver;
+                            sortOrder = 2;
+                        } else if (result.bronze > 0) {
+                            medalType = "Bronze";
+                            medalValue = result.bronze;
+                            sortOrder = 3;
+                        }
+
+                        // Only add if they actually won something
+                        if (medalType !== "") {
+                            rawRows.push({
+                                category: catName,
+                                event: result.event_name,
+                                value: medalValue,
+                                medal: medalType,
+                                order: sortOrder
+                            });
                         }
                     });
                 });
 
+                // Sort: Gold -> Silver -> Bronze, then alphabetically by Event
+                rawRows.sort((a, b) => {
+                    if (a.order !== b.order) {
+                        return a.order - b.order; // Primary: Medal Rank
+                    }
+                    return a.event.localeCompare(b.event); // Secondary: Event Name
+                });
+
+                // Map to table body format: [Category, Event, Points, Medal]
+                const teamTableBody = rawRows.map(row => [
+                    row.category,
+                    row.event,
+                    row.value, // Points
+                    row.medal  // Medal
+                ]);
+
                 if (teamTableBody.length > 0) {
                     doc.autoTable({
                         startY: startY,
-                        head: [['Category', 'Event', 'Medal Won']],
+                        head: [['Category', 'Event', 'Points', 'Medal Won']], // NEW HEADER
                         body: teamTableBody,
                         theme: 'grid',
                         headStyles: { fillColor: [80, 80, 80], textColor: 255 }, // Dark Gray
                         columnStyles: {
-                            2: { fontStyle: 'bold' } // Medal column
+                            2: { halign: 'center' }, // Center points
+                            3: { fontStyle: 'bold' } // Medal column
                         },
                         // Custom cell styling for medals
                         didParseCell: function(data) {
-                            if (data.section === 'body' && data.column.index === 2) {
+                            if (data.section === 'body' && data.column.index === 3) {
                                 if (data.cell.raw === 'Gold') data.cell.styles.textColor = [200, 150, 0];
                                 if (data.cell.raw === 'Silver') data.cell.styles.textColor = [100, 100, 100];
                                 if (data.cell.raw === 'Bronze') data.cell.styles.textColor = [150, 90, 30];
