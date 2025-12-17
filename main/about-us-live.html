@@ -4,34 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UBDays 2025</title>
-    <link rel="stylesheet" href="css/styles-about-us.css">
+    <link rel="stylesheet" href="css/style-about-us.css">
     <link rel="icon" href="img/iconx1.png">
 
+    <!-- Client-side Supabase for AUTHENTICATION only -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        // The ANON key is safe to expose for client-side auth.
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    </script>
 </head>
 <body>
 
-    <div id="loader">
+    <!-- <div id="loader">
         <div class="spinner"></div>
-    </div>
+    </div> -->
 
     <div class="header">
-        <div class="navSection" style="width: 100%">
+        <div class="navSection">
             <div class="accInfo">
                 <img src="img/iconx3.png" alt="UB Logo" class="admin-icon">
+                <span>About Us</span>
             </div>
+            <!-- This div is now empty. JS will build the buttons here. -->
             <div class="navButtons">
-                <a href="index.html" class="nav-btn">Live</a>
-                <a href="about-us-live.html" class="nav-btn active">About Us</a>
+                <!-- <a href="tabulation.html" class="nav-btn">Events</a> ... -->
             </div>
         </div>
     </div>
 
     <div class="main-card">
+<!--         (All your existing <section> content goes here)
+        <section class="about-section intro-hero">
+            <div class="hero-content">
+                <h2 class="section-title">UB Days Medal Tally</h2>
+                <p class="section-text hero-tagline">
+                    Transparent. Real-time. Accurate. A fair and modern tabulation system for University of Bohol Days.
+                </p>
+                <div class="hero-chips">
+                    <span class="chip primary">Real-time updates</span>
+                    <span class="chip accent">Transparent results</span>
+                    <span class="chip success">Fairness for all</span>
+                    <span class="chip neutral">Digital innovation</span>
+                </div>
+            </div>
+            <div class="hero-highlights">
+                <div class="highlight-card">
+                    <div class="highlight-title">Live Tracking</div>
+                    <div class="highlight-desc">Medals update instantly as events conclude.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-title">Unified Workflow</div>
+                    <div class="highlight-desc">From committee input to published standings.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-title">Open Visibility</div>
+                    <div class="highlight-desc">Everyone sees the same verified numbers.</div>
+                </div>
+            </div>
+        </section>
+-->
         <section class="about-section ubytes-hero-section">
         <div class="ubytes-logo-side">
             <img src="img/ubytes.png" alt="UBYTeS Logo" class="ubytes-logo">
+            <!--<div class="ubytes-full-name">University of Bohol Young Thinkers Society</div>-->
         </div>
-
         <div class="ubytes-info-side">
             <h2 class="section-title">University of Bohol Young Thinkers Society</h2>
             <p class="section-text">
@@ -41,9 +80,59 @@
                 We are passionate about using technology to create innovative solutions and foster a community of learning. This real-time medal tally system is one of our projects, built to bring transparency and modern data tracking to the UB Days celebration.
             </p>
         </div>
-
     </section>
-
+<!--   
+        <section class="about-section">
+            <h2 class="section-title">System Overview</h2>
+            <div class="tech-grid">
+                <div class="tech-card" data-tech="html">
+                    <div class="tech-icon">HTML</div>
+                    <div class="tech-title">Structure</div>
+                    <div class="tech-desc">Clean, accessible layouts align with event workflows and results display.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Semantic elements and consistent sections keep the experience intuitive.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="css">
+                    <div class="tech-icon">CSS</div>
+                    <div class="tech-title">Style</div>
+                    <div class="tech-desc">Responsive design, subtle shadows, and animations for clarity and delight.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Color scheme follows UB branding; components maintain uniform spacing.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="js">
+                    <div class="tech-icon">JS</div>
+                    <div class="tech-title">Interaction</div>
+                    <div class="tech-desc">Snappy interactions power filters, reveals, and smooth transitions.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Lightweight scripts drive real-time feedback and micro-animations.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="supabase">
+                    <div class="tech-icon">SB</div>
+                    <div class="tech-title">Database & Auth</div>
+                    <div class="tech-desc">Secure storage of events, roles, and live medal counts.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Supabase handles data access and session control across roles.
+                    </div>
+                </div>
+                <div class="tech-card" data-tech="vercel">
+                    <div class="tech-icon">V</div>
+                    <div class="tech-title">Hosting</div>
+                    <div class="tech-desc">Fast, reliable delivery of pages and assets during UB Days.</div>
+                    <button class="tech-toggle">Learn more</button>
+                    <div class="tech-more">
+                        Vercel ships updates seamlessly, ensuring high availability.
+                    </div>
+                </div>
+            </div>
+        </section>
+    -->
         <section class="about-section">
             <h2 class="section-title">UB DAYS MEDAL TALLY 2025</h2>
             <p class="section-text">
@@ -152,46 +241,15 @@
     </div>
 </section>
     </div>
-    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .4">
-    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .4">
-    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .4">
+    <img class="bgIcon1" src="img/bgIcon.png">
+    <img class="bgIcon2" src="img/bgIcon.png">
+    <img class="bgIcon3" src="img/bgIcon.png">
 
     <footer>
         <span>Developed by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> University of Bohol Young Thinkers Society</span>
     </footer>
     <div class="background"></div>
 
-    <script>
-        // 3. (Original logic) Handle loader
-        const loader = document.getElementById('loader');
-        if (loader) {
-            loader.classList.add('hide');
-            setTimeout(() => {
-                loader.style.display = 'none';
-            }, 600);
-        }
-
-        // 4. (Original logic) Animate developer cards
-        const cards = document.querySelectorAll('.developer-card');
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.15 });
-        cards.forEach(card => observer.observe(card));
-
-        // 5. (Original logic) Handle tech card "learn more"
-        document.querySelectorAll('.tech-card').forEach(card => {
-            const btn = card.querySelector('.tech-toggle');
-            if (btn) {
-                btn.addEventListener('click', function () {
-                    card.classList.toggle('expanded');
-                });
-            }
-        });
-    </script>
+    <script src="js/about-us.js" defer></script>
 </body>
 </html>
