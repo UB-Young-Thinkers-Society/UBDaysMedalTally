@@ -1,9 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,100..900;1,100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:ital,wght@0,300..900;1,300..900&family=Montserrat:ital,wght@0,300..900;1,300..900&display=swap');
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
-    font-family: "Albert Sans", sans-serif;
-    background: #fff;
+    font-family: "Albert Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #f8fafc;
+    color: #1e293b;
+    -webkit-font-smoothing: antialiased;
 }
 
 .container {
@@ -12,101 +18,290 @@ body {
     background: #fff;
 }
 
+/* ==========================================================================
+   Left: Login Section
+   ========================================================================== */
 .login-section {
     flex: 1;
-    max-width: 35vw;
+    max-width: 480px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 32px;
+    margin: 0 auto;
+    width: 100%;
+}
+
+.logo-link {
+    display: inline-block;
+    transition: transform 0.2s ease;
+}
+
+.logo-link:hover {
+    transform: scale(1.04);
+}
+
+.logo {
+    width: 140px;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 8px;
+}
+
+h2 {
+    font-size: 2.5rem;
+    margin: 8px 0 6px 0;
+    color: #0f172a;
+    font-weight: 700;
+    letter-spacing: -1px;
+    text-align: center;
+}
+
+.login-subtitle {
+    margin: 0 0 28px 0;
+    color: #64748b;
+    font-size: 0.95rem;
+    text-align: center;
+    line-height: 1.4;
+    max-width: 340px;
+}
+
+form {
+    width: 100%;
+    max-width: 380px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================================
+   Form Fields & Groups
+   ========================================================================== */
+.form-group {
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.input-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+    letter-spacing: -0.2px;
+}
+
+.input-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+input[type="email"],
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 13px 16px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: #0f172a;
+    background-color: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="email"]::placeholder,
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+input:focus {
+    outline: none;
+    border-color: #3d4ef4;
+    box-shadow: 0 0 0 3.5px rgba(61, 78, 244, 0.15);
+}
+
+.input-error {
+    border-color: #ef4444 !important;
+    background-color: #fef2f2 !important;
+}
+
+.input-error:focus {
+    box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Password Toggle Eye Button */
+.password-wrapper input {
+    padding-right: 48px;
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 12px;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    color: #64748b;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.toggle-password-btn:hover {
+    color: #1e293b;
+    background: #f1f5f9;
+}
+
+.eye-icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* ==========================================================================
+   Submit Button
+   ========================================================================== */
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    background: #3d4ef4;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 14px rgba(61, 78, 244, 0.25);
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+}
+
+.login-btn:hover:not(:disabled) {
+    background: #2d3ed6;
+    box-shadow: 0 6px 18px rgba(61, 78, 244, 0.35);
+}
+
+.login-btn:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.login-btn:disabled {
+    background: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(255, 255, 255, 0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.75s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   Error Alert Banner
+   ========================================================================== */
+.error-banner {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background-color: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #b91c1c;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.4;
+    animation: fadeIn 0.2s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   Helper & Navigation Links
+   ========================================================================== */
+.bottom-helper {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.back-link:hover {
+    color: #3d4ef4;
+    transform: translateX(-2px);
+}
+
+/* ==========================================================================
+   Right: Image Section
+   ========================================================================== */
+.image-section {
+    flex: 1.2;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    display: flex;
     justify-content: center;
     align-items: center;
     padding: 40px;
 }
 
-.logo {
-    width: 168px;
-}
-
-h2 {
-    font-size: 3.3rem;
-    margin-bottom: 24px;
-    color: #333;
-    font-weight: 500;
-    letter-spacing: -2px;
-}
-
-#formInput {
-    margin: 10px auto;
-    width: 70%;
-    border: 1px solid #969696;
-    border-radius: 8px;
-}
-
-#formInput > p {
-    letter-spacing: -1px;
-}
-
-#formInput > .labelOne {
-    position: relative;
-    top: -16px;
-    background-color: #ffffff;
-    margin: 5px 0px 0px 20px;
-    width: 23%;
-}
-
-#formInput > .labelTwo {
-    position: relative;
-    top: -16px;
-    background-color: #ffffff;
-    margin: 5px 0px 0px 20px;
-    width: 16%;
-}
-
-form {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-input[type="text"],
-input[type="password"] {
-    width: 93%;
-    border: 1px solid #fff;
-    font-size: 1.5rem;
-    margin: -10px 0px 14px 14px;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-  outline: none;
-}
-
-.login-btn {
-    width: 70%;
-    padding: 14px;
-    background: #3d4ef4;    
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 1.1rem;
-    cursor: pointer;
-    margin: 5px auto;
-    transition: background 0.2s;
-}
-
-.login-btn:hover {
-    background: #2c37b8;
-}
-
-.image-section {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 .group-photo {
-    width: 80%;
+    width: 85%;
+    max-width: 680px;
+    height: auto;
     border-radius: 18px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    object-fit: cover;
+}
+
+/* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .image-section {
+        display: none; /* Hide decorative group photo on tablets/mobile to keep focus on form */
+    }
+
+    .login-section {
+        max-width: 100%;
+        padding: 48px 24px;
+        min-height: 100vh;
+    }
+
+    h2 {
+        font-size: 2.1rem;
+    }
 }

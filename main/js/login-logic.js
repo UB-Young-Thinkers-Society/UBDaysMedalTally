@@ -7,20 +7,71 @@ document.addEventListener('DOMContentLoaded', () => {
     checkActiveSession();
     
     const loginForm = document.getElementById('loginForm');
-    loginForm.addEventListener('submit', handleLogin);
-});
-
-async function checkActiveSession() {
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError || !sessionData.session) {
-        console.log('No active session found.');
-        return;
+    if (loginForm) {
+        loginForm.addEventListener('submit', handleLogin);
     }
 
-    const accessToken = sessionData.session.access_token;
+    setupPasswordToggle();
+    setupInputClearError();
+});
 
+/**
+ * Sets up the password visibility toggle button.
+ */
+function setupPasswordToggle() {
+    const toggleBtn = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    if (!toggleBtn || !passwordInput) return;
+
+    toggleBtn.addEventListener('click', () => {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+
+        const eyeOpen = toggleBtn.querySelector('.eye-open');
+        const eyeClosed = toggleBtn.querySelector('.eye-closed');
+
+        if (eyeOpen && eyeClosed) {
+            eyeOpen.style.display = isPassword ? 'none' : 'block';
+            eyeClosed.style.display = isPassword ? 'block' : 'none';
+        }
+
+        toggleBtn.setAttribute('title', isPassword ? 'Hide password' : 'Show password');
+    });
+}
+
+/**
+ * Removes error state as soon as the user edits the input.
+ */
+function setupInputClearError() {
+    const emailInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorBox = document.getElementById('error-message');
+
+    [emailInput, passwordInput].forEach(input => {
+        if (!input) return;
+        input.addEventListener('input', () => {
+            input.classList.remove('input-error');
+            if (errorBox) {
+                errorBox.style.display = 'none';
+                errorBox.textContent = '';
+            }
+        });
+    });
+}
+
+/**
+ * Automatically redirects if a valid session and role already exist.
+ */
+async function checkActiveSession() {
     try {
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+
+        if (sessionError || !sessionData || !sessionData.session) {
+            return;
+        }
+
+        const accessToken = sessionData.session.access_token;
+
         const response = await fetch('/api/auth', {
             method: 'GET',
             headers: {
@@ -29,33 +80,56 @@ async function checkActiveSession() {
         });
         
         if (!response.ok) {
-            console.error('Session check failed, staying on login page.');
+            console.warn('Existing session is invalid or unauthorized, signing out.');
             await supabase.auth.signOut(); 
             return;
         }
 
-        const { role } = await response.json();
-        redirectToRole(role);
-
+        const data = await response.json();
+        if (data && data.role) {
+            redirectToRole(data.role);
+        }
     } catch (error) {
         console.error('Error checking active session:', error);
     }
 }
 
+/**
+ * Handles the login form submission.
+ */
 async function handleLogin(e) {
     e.preventDefault(); 
 
-    const email = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
+    const emailInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
     const loginButton = document.getElementById('login-button');
     const errorMessage = document.getElementById('error-message');
+    const btnSpinner = loginButton.querySelector('.btn-spinner');
+    const btnText = loginButton.querySelector('.btn-text');
 
-    loginButton.disabled = true;
-    loginButton.textContent = 'Logging in...';
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+
+    // Reset previous errors
+    emailInput.classList.remove('input-error');
+    passwordInput.classList.remove('input-error');
+    errorMessage.style.display = 'none';
     errorMessage.textContent = '';
 
+    if (!email || !password) {
+        showError('Please enter both your email and password.');
+        if (!email) emailInput.classList.add('input-error');
+        if (!password) passwordInput.classList.add('input-error');
+        return;
+    }
+
+    // Set loading state
+    loginButton.disabled = true;
+    if (btnSpinner) btnSpinner.style.display = 'inline-block';
+    if (btnText) btnText.textContent = 'Logging in...';
+
     try {
-        // --- STEP 1: LOGIN ON THE CLIENT ---
+        // --- STEP 1: LOGIN ON CLIENT WITH SUPABASE ---
         const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
             email: email,
             password: password,
@@ -65,7 +139,11 @@ async function handleLogin(e) {
             throw authError;
         }
 
-        // --- STEP 2: GET THE ROLE FROM THE SECURE API ---
+        if (!authData || !authData.session) {
+            throw new Error('No active session returned from Supabase.');
+        }
+
+        // --- STEP 2: VERIFY ROLE FROM BACKEND API ---
         const accessToken = authData.session.access_token;
 
         const response = await fetch('/api/auth', {
@@ -76,40 +154,82 @@ async function handleLogin(e) {
         });
         
         if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error || 'Login successful, but failed to get user role.');
+            let errorDetail = 'Login was authenticated, but failed to retrieve user role.';
+            try {
+                const errJson = await response.json();
+                if (errJson && errJson.error) {
+                    errorDetail = errJson.error;
+                }
+            } catch (_) {}
+            throw new Error(errorDetail);
         }
         
         const { role } = await response.json();
 
-        // --- STEP 3: REDIRECT ---
+        // --- STEP 3: REDIRECT TO DESIGNATED WORKSPACE ---
         redirectToRole(role);
 
     } catch (error) {
-        errorMessage.textContent = error.message;
+        console.error('Login error:', error);
+        
+        let friendlyMessage = error.message || 'An unexpected error occurred. Please try again.';
+        if (friendlyMessage.toLowerCase().includes('invalid login credentials')) {
+            friendlyMessage = 'Invalid email or password. Please verify your credentials.';
+            emailInput.classList.add('input-error');
+            passwordInput.classList.add('input-error');
+        } else if (friendlyMessage.toLowerCase().includes('failed to fetch')) {
+            friendlyMessage = 'Network connection error. Please check your internet connection.';
+        }
+
+        showError(friendlyMessage);
+
+        // Reset button state
         loginButton.disabled = false;
-        loginButton.textContent = 'Login';
+        if (btnSpinner) btnSpinner.style.display = 'none';
+        if (btnText) btnText.textContent = 'Login';
     }
 }
 
-// --- 4. REDIRECT HELPER FUNCTION ------------------
+/**
+ * Displays error message in the alert container.
+ */
+function showError(message) {
+    const errorMessage = document.getElementById('error-message');
+    if (errorMessage) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+    }
+}
+
+/**
+ * Redirects the user to the proper page based on their role.
+ */
 function redirectToRole(role) {
     if (role === 'admin' || role === 'tabHead') {
         window.location.replace('tabulation.html'); 
     } else if (role === 'committee') {
         window.location.replace('computation.html');
     } else {
-        console.error('Unknown role, redirecting to login.');
-        const errorMessage = document.getElementById('error-message');
-        if(errorMessage) errorMessage.textContent = 'Unknown user role assigned.';
+        console.error('Unknown role assigned:', role);
+        showError('Your account does not have a valid role assigned. Please contact the administrator.');
+        const loginButton = document.getElementById('login-button');
+        if (loginButton) {
+            loginButton.disabled = false;
+            const btnSpinner = loginButton.querySelector('.btn-spinner');
+            const btnText = loginButton.querySelector('.btn-text');
+            if (btnSpinner) btnSpinner.style.display = 'none';
+            if (btnText) btnText.textContent = 'Login';
+        }
     }
 }
 
-// --- 5. LOGOUT FUNCTION (from your logout.js) ---
+/**
+ * Logs out the active user session.
+ */
 async function signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) {
-        console.error("Error logging out:" + error.message);
+        console.error("Error logging out:", error.message);
     } else {
         console.log("Successfully logged out.");
         window.location.href = 'login.html';

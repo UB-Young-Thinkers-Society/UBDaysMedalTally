@@ -3,37 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UBDays 2025</title>
+    <title>UBDays 2025 - Login</title>
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="icon" type="img/Login-Logo.png" href="img/iconx1.png">
+    <link rel="icon" type="image/png" href="img/iconx1.png">
 
+    <!-- Client-side Supabase for AUTHENTICATION only -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
 </head>
 <body>
     <div class="container">
         <div class="login-section">
-            <img src="img/iconx3.png" alt="Logo" class="logo">
+            <a href="index.html" class="logo-link" title="Go to Live Medal Tally">
+                <img src="img/iconx3.png" alt="UBDays Logo" class="logo">
+            </a>
             <h2>Welcome Back</h2>
+            <p class="login-subtitle">Sign in to access your Tabulation or Committee workspace</p>
 
-            <form id="loginForm">
-                <div id="formInput">
-                    <p class="labelOne"> &nbsp&nbspEmail Address </p>
-                    <input type="text" id="username" name="username" required>
+            <form id="loginForm" novalidate>
+                <div class="form-group">
+                    <label for="username" class="input-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <input 
+                            type="email" 
+                            id="username" 
+                            name="username" 
+                            autocomplete="email" 
+                            inputmode="email"
+                            required 
+                            placeholder="Enter your email address"
+                        >
+                    </div>
                 </div>
-                <div id="formInput">
-                    <p class="labelTwo"> &nbsp&nbspPassword </p>
-                    <input type="password" id="password" name="password" required>
-                </div>
-                <button type="submit" class="login-btn" id="login-button">Login</button>
 
-                <!-- NEW: Element to show error messages -->
-                <div id="error-message" style="color: red; margin-top: 15px; text-align: center; font-weight: 500;"></div>
+                <div class="form-group">
+                    <label for="password" class="input-label">Password</label>
+                    <div class="input-wrapper password-wrapper">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            autocomplete="current-password" 
+                            required 
+                            placeholder="Enter your password"
+                        >
+                        <button 
+                            type="button" 
+                            id="togglePassword" 
+                            class="toggle-password-btn" 
+                            title="Show password" 
+                            aria-label="Toggle password visibility"
+                        >
+                            <svg class="eye-icon eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-icon eye-closed" style="display:none;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="login-btn" id="login-button">
+                    <span class="btn-spinner" style="display:none;" aria-hidden="true"></span>
+                    <span class="btn-text">Login</span>
+                </button>
+
+                <!-- Error alert message container -->
+                <div id="error-message" class="error-banner" style="display:none;" role="alert"></div>
+
+                <div class="bottom-helper">
+                    <a href="index.html" class="back-link">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        <span>Back to Live Medal Feed</span>
+                    </a>
+                </div>
             </form>
-
         </div>
+
         <div class="image-section">
-            <img src="img/Login-Group.png" alt="Group" class="group-photo">
+            <img src="img/Login-Group.png" alt="UBDays Group Photo" class="group-photo">
         </div>
     </div>
     
