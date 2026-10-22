@@ -16,24 +16,42 @@ async function checkSession(authorizedRole) {
         return;
     }
     const accessToken = sessionData.session.access_token;
+    let role = null;
     try {
         const response = await fetch('/api/auth', {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
-        if (!response.ok) {
-            await supabase.auth.signOut();
-            window.location.replace("login.html");
-            return;
+        if (response.ok) {
+            const data = await response.json();
+            role = data.role;
         }
-        const { role } = await response.json();
-        if (role !== authorizedRole && role !== "admin") {
-            if (role === "tabHead") window.location.replace("tabulation.html");
-            else window.location.replace("login.html");
+    } catch (_) {}
+
+    if (!role) {
+        try {
+            const { data: roleData } = await supabase
+                .from('user-roles')
+                .select('roles')
+                .eq('user_id', sessionData.session.user.id)
+                .maybeSingle();
+            if (roleData && roleData.roles) {
+                role = roleData.roles;
+            }
+        } catch (e) {
+            console.error('Role check error:', e);
         }
-    } catch (error) {
-        console.error('Error checking session:', error);
+    }
+
+    if (!role) {
+        await supabase.auth.signOut();
         window.location.replace("login.html");
+        return;
+    }
+
+    if (role !== authorizedRole && role !== "admin") {
+        if (role === "tabHead") window.location.replace("tabulation.html");
+        else window.location.replace("login.html");
     }
 }
 async function signOut() {

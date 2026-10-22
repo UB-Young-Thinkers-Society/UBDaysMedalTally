@@ -12,6 +12,7 @@ async function checkSession(authorizedRole) {
     }
 
     const accessToken = sessionData.session.access_token;
+    let role = null;
 
     try {
         const response = await fetch('/api/auth', {
@@ -19,29 +20,45 @@ async function checkSession(authorizedRole) {
             headers: { 'Authorization': `Bearer ${accessToken}` }
         });
 
-        if (!response.ok) {
-            await supabase.auth.signOut(); 
-            window.location.replace("login.html");
-            return;
+        if (response.ok) {
+            const data = await response.json();
+            role = data.role;
         }
+    } catch (_) {}
 
-        const { role } = await response.json();
-
-        if (role !== authorizedRole && role !== "admin") {
-            console.log("Access Forbidden. Redirecting.");
-            if (role === "committee") {
-                window.location.replace("computation.html");
-            } else {
-                window.location.replace("login.html"); // Fallback
+    // Fallback: query user-roles directly from Supabase (for local dev or network resilience)
+    if (!role) {
+        try {
+            const { data: roleData } = await supabase
+                .from('user-roles')
+                .select('roles')
+                .eq('user_id', sessionData.session.user.id)
+                .maybeSingle();
+            if (roleData && roleData.roles) {
+                role = roleData.roles;
             }
+        } catch (e) {
+            console.error('Role fallback check error:', e);
         }
-        
-        console.log("Session valid, user authorized.");
-
-    } catch (error) {
-        console.error('Error checking session:', error);
-        window.location.replace("login.html");
     }
+
+    if (!role) {
+        await supabase.auth.signOut(); 
+        window.location.replace("login.html");
+        return;
+    }
+
+    if (role !== authorizedRole && role !== "admin") {
+        console.log("Access Forbidden. Redirecting.");
+        if (role === "committee") {
+            window.location.replace("computation.html");
+        } else {
+            window.location.replace("login.html"); // Fallback
+        }
+        return;
+    }
+    
+    console.log("Session valid, user authorized as:", role);
 }
 
 async function signOut() {
