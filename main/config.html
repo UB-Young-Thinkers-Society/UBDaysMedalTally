@@ -45,56 +45,100 @@
 
     <div class="main-card">
         <div class="config-content">
-            <!-- Left: Teams List -->
-            <div class="teams-section">
-                <h2>Participating Teams</h2>
-                <div class="department-list">
-                    <!-- This will be filled by js/config-logic.js -->
+            <!-- Left: Teams Section Card -->
+            <div class="teams-section card-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Participating Teams</h2>
+                        <span class="panel-subtitle">Competing colleges & departments</span>
+                    </div>
+                    <span class="badge-count" id="teams-count-badge">15 Teams</span>
+                </div>
+                <div class="department-list-container">
+                    <div class="department-list">
+                        <!-- Filled by js/config-page-logic.js -->
+                    </div>
                 </div>
             </div>
-            <!-- Center: Add Participant & Events Config -->
-            <div class="config-forms">
-                <form class="add-participant-form" id="add-team-form">
-                    <div class="participant-fields">
-                        <label for="add-logo" class="logo-label" title="Click to upload team logo">
-                            <span class="logo-label-title">Logo:</span>
-                            <div class="logo-preview-box" id="logo-preview-box">
-                                <svg id="upload-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                                    <circle cx="8.5" cy="8.5" r="1.5"/>
-                                    <polyline points="21 15 16 10 5 21"/>
-                                </svg>
-                                <img id="logo-preview" alt="Logo preview" style="display: none;"> 
-                            </div>
-                        </label>
-                        
-                        <input class="add-logo" id="add-logo" type="file" accept="image/*">
-                        <div class="participant-names">
-                            <input class="name" id="team-name" type="text" placeholder="Name" required>
-                            <input class="acronym" id="team-acronym" type="text" placeholder="Acronym" required>
+
+            <!-- Middle: Forms Configuration Card -->
+            <div class="config-forms card-panel">
+                <!-- Sub-card: Team Registration -->
+                <div class="form-section-block">
+                    <div class="panel-header" style="margin-bottom: 10px;">
+                        <div>
+                            <h3 class="panel-subheading" id="team-form-heading">Team Registration</h3>
+                            <span class="panel-subtitle">Upload logo & enter department details</span>
                         </div>
                     </div>
-                    <button type="submit" class="add-btn add_participant_btn">Add Participant</button>
-                </form>
+                    <form class="add-participant-form" id="add-team-form">
+                        <div class="participant-fields">
+                            <label for="add-logo" class="logo-label" title="Click to upload team logo">
+                                <span class="logo-label-title">Logo</span>
+                                <div class="logo-preview-box" id="logo-preview-box">
+                                    <svg id="upload-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                                        <polyline points="21 15 16 10 5 21"/>
+                                    </svg>
+                                    <img id="logo-preview" alt="Logo preview" style="display: none;"> 
+                                </div>
+                            </label>
+                            
+                            <input class="add-logo" id="add-logo" type="file" accept="image/*">
+                            <div class="participant-names">
+                                <input class="styled-input" id="team-name" type="text" placeholder="Full Name (e.g. College of Law)" required>
+                                <input class="styled-input" id="team-acronym" type="text" placeholder="Acronym (e.g. COL)" required>
+                            </div>
+                        </div>
+                        <div class="form-buttons-row" id="team-buttons-row">
+                            <button type="submit" class="btn-primary-blue add_participant_btn" id="team-submit-btn">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                <span>Add Participant</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
 
-                <form class="events-config-form" id="add-event-form">
-                    <h2>Events Config</h2>
-                    <input class="event-name" id="event-name" type="text" placeholder="Name" required>
-                    <input class="event-medal" id="event-medal" type="number" placeholder="Medal Count" required>
-                    <div class="category-select-wrapper">
-                        <select class="event-category" id="event-category" required>
-                            <option value="" disabled selected>Loading Categories...</option>
-                        </select>
-                        <button type="button" class="btn-add-category" id="open-category-modal-btn" title="Add a new category">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <div class="panel-divider"></div>
+
+                <!-- Sub-card: Events Setup -->
+                <div class="form-section-block">
+                    <div class="panel-header" style="margin-bottom: 10px;">
+                        <div>
+                            <h3 class="panel-subheading">Events Configuration</h3>
+                            <span class="panel-subtitle">Create events & assign medal counts</span>
+                        </div>
+                    </div>
+                    <form class="events-config-form" id="add-event-form">
+                        <div class="form-inputs-stack">
+                            <input class="styled-input" id="event-name" type="text" placeholder="Event Name (e.g. 100M Dash Men)" required>
+                            <input class="styled-input" id="event-medal" type="number" min="1" placeholder="Medal Sets (e.g. 1, 3)" required>
+                            <div class="category-select-wrapper">
+                                <select class="styled-select" id="event-category" required>
+                                    <option value="" disabled selected>Loading Categories...</option>
+                                </select>
+                                <button type="button" class="btn-add-category" id="open-category-modal-btn" title="Add a new category">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    </svg>
+                                    <span>Add Category</span>
+                                </button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary-blue add_event_btn">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
                             </svg>
-                            <span>Add Category</span>
+                            <span>Add Event</span>
                         </button>
-                    </div>
-                    <button type="submit" class="add-btn add_event_btn">Add Event</button>
-                </form>
+                    </form>
+                </div>
             </div>
 
             <!-- Right: Accounts Management Section -->

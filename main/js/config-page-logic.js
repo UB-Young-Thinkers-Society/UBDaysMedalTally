@@ -124,14 +124,19 @@ async function loadCategories(selectedId = null) {
 
 async function loadTeams() {
     const departmentList = document.querySelector(".department-list");
+    const countBadge = document.getElementById('teams-count-badge');
     try {
         const response = await fetch('/api/data?type=teams');
         if (!response.ok) throw new Error('Failed to load teams');
 
         const teams = await response.json();
 
+        if (countBadge) {
+            countBadge.textContent = `${teams ? teams.length : 0} Teams`;
+        }
+
         if (!teams || teams.length === 0) {
-            departmentList.innerHTML = "<p style='color:#888;font-size:0.9rem;padding:8px;'>No teams found.</p>";
+            departmentList.innerHTML = "<p style='color:#888;font-size:0.9rem;padding:12px;text-align:center;'>No teams registered yet.</p>";
             return;
         }
 
@@ -142,11 +147,26 @@ async function loadTeams() {
             
             departmentDiv.innerHTML = `
                 <div class="dept-logo-placeholder">
-                    <img src="${team.logo_url}" alt="${team.acronym} Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                    <img src="${team.logo_url}" alt="${escapeHtml(team.acronym)} Logo" loading="lazy">
                 </div>
-                <span class="dept-name" style="font-weight:600;font-size:0.95rem;">${escapeHtml(team.acronym)}</span>
-                <button class="edit-btn" data-id="${team.id}">Edit</button>
-                <button class="delete-btn" data-id="${team.id}">Delete</button>
+                <div class="dept-info">
+                    <span class="dept-acronym">${escapeHtml(team.acronym)}</span>
+                    <span class="dept-fullname" title="${escapeHtml(team.name)}">${escapeHtml(team.name)}</span>
+                </div>
+                <div class="dept-actions">
+                    <button type="button" class="btn-team-action edit-btn" data-id="${team.id}" title="Edit Team">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-team-action btn-delete delete-btn" data-id="${team.id}" title="Delete Team">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
             `;
             departmentList.appendChild(departmentDiv);
             
@@ -156,7 +176,7 @@ async function loadTeams() {
 
     } catch (error) {
         console.error(error);
-        departmentList.innerHTML = "<p style='color:#ef4444;'>Failed to load teams.</p>";
+        departmentList.innerHTML = "<p style='color:#ef4444;padding:8px;'>Failed to load teams.</p>";
     }
 }
 
@@ -182,21 +202,29 @@ async function editTeamClicked(teamId) {
             if (uploadIcon) uploadIcon.style.display = 'block';
         }
 
-        const submitBtn = document.querySelector('#add-team-form button[type="submit"]');
-        submitBtn.textContent = 'Save Changes';
+        const heading = document.getElementById('team-form-heading');
+        if (heading) heading.textContent = 'Edit Team Details';
+
+        const submitBtn = document.getElementById('team-submit-btn') || document.querySelector('#add-team-form button[type="submit"]');
+        submitBtn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <span>Save Changes</span>
+        `;
         submitBtn.setAttribute('data-mode', 'edit');
         submitBtn.setAttribute('data-team-id', teamId);
 
+        const btnRow = document.getElementById('team-buttons-row') || submitBtn.parentNode;
         const existingCancelBtn = document.getElementById('cancel-edit-btn');
         if (!existingCancelBtn) {
             const cancelBtn = document.createElement('button');
             cancelBtn.id = 'cancel-edit-btn';
-            cancelBtn.textContent = 'Cancel Edit';
+            cancelBtn.textContent = 'Cancel';
             cancelBtn.type = 'button';
-            cancelBtn.classList.add('add-btn');
-            cancelBtn.style.backgroundColor = '#64748b';
+            cancelBtn.classList.add('btn-cancel-edit');
             cancelBtn.addEventListener('click', resetTeamForm);
-            submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
+            btnRow.appendChild(cancelBtn);
         }
 
     } catch (error) {
@@ -252,10 +280,21 @@ function resetTeamForm() {
     const addTeamForm = document.getElementById('add-team-form');
     addTeamForm.reset();
 
-    const submitBtn = document.querySelector('#add-team-form button[type="submit"]');
-    submitBtn.textContent = 'Add Participant';
-    submitBtn.removeAttribute('data-mode');
-    submitBtn.removeAttribute('data-team-id');
+    const heading = document.getElementById('team-form-heading');
+    if (heading) heading.textContent = 'Team Registration';
+
+    const submitBtn = document.getElementById('team-submit-btn') || document.querySelector('#add-team-form button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>Add Participant</span>
+        `;
+        submitBtn.removeAttribute('data-mode');
+        submitBtn.removeAttribute('data-team-id');
+    }
 
     const logoPreview = document.getElementById('logo-preview');
     logoPreview.removeAttribute('src');
