@@ -33,8 +33,11 @@ export default async (req, res) => {
             return res.status(500).json({ error: 'Could not find user role.' });
         }
 
-        // Success! Send back the role.
-        return res.status(200).json({ role: roleData.roles });
+        // Success! Send back the role and configured privileges.
+        const privileges = Array.isArray(user.user_metadata?.privileges)
+            ? user.user_metadata.privileges
+            : [];
+        return res.status(200).json({ role: roleData.roles, privileges });
 
     } catch (error) {
         console.error('Error in /api/auth:', error);

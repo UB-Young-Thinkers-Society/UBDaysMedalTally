@@ -38,6 +38,14 @@ async function signOut() {
     }
 }
 
+// Global state for accounts management
+let accountsList = [];
+let visibleSecrets = {
+    email: {},
+    password: {}
+};
+let currentPrivilegeTargetUser = null;
+
 // --- 2. PAGE INITIALIZATION ------------------------
 document.addEventListener('DOMContentLoaded', () => {
     checkSession("tabHead");
@@ -46,10 +54,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const addEventForm = document.getElementById('add-event-form');
     const logoutBtn = document.getElementById('logoutBtn');
     const addLogoInput = document.getElementById('add-logo');
-    const logoPreview = document.getElementById('logo-preview'); // Get the preview box
+    const logoPreview = document.getElementById('logo-preview');
+    const uploadIcon = document.getElementById('upload-icon-svg');
 
     loadCategories();
-    loadTeams(); // This will also attach event listeners for edit/delete
+    loadTeams();
+    initAccountsManagement();
+    initCategoryModal();
 
     addTeamForm.addEventListener('submit', handleAddTeam);
     addEventForm.addEventListener('submit', handleAddEvent);
@@ -58,32 +69,35 @@ document.addEventListener('DOMContentLoaded', () => {
         signOut();
     });
 
-    // --- NEW: Image preview listener ---
+    // Logo file picker preview listener (Fix: clean icon / preview swap without broken image)
     addLogoInput.addEventListener('change', (event) => {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 logoPreview.src = e.target.result;
-                logoPreview.style.display = 'block'; // Show the image
+                logoPreview.style.display = 'block';
+                if (uploadIcon) uploadIcon.style.display = 'none';
             };
             reader.readAsDataURL(file);
         } else {
-            logoPreview.src = '';
-            // logoPreview.style.display = 'none'; // <-- This was part of the original bug, now handled by CSS
+            logoPreview.removeAttribute('src');
+            logoPreview.style.display = 'none';
+            if (uploadIcon) uploadIcon.style.display = 'block';
         }
     });
 
-
     const loader = document.getElementById('loader');
-    loader.classList.add('hide');
-    setTimeout(() => {
-        loader.style.display = 'none';
-    }, 600);
+    if (loader) {
+        loader.classList.add('hide');
+        setTimeout(() => {
+            loader.style.display = 'none';
+        }, 600);
+    }
 });
 
 // --- 3. DYNAMIC DATA LOADING ---------------------
-async function loadCategories() {
+async function loadCategories(selectedId = null) {
     const selectEl = document.getElementById('event-category');
     try {
         const response = await fetch('/api/data?type=categories');
@@ -94,8 +108,11 @@ async function loadCategories() {
         selectEl.innerHTML = '<option value="" disabled selected>Category</option>'; 
         categories.forEach(cat => {
             const option = document.createElement('option');
-            option.value = cat.id; // <-- The UUID
-            option.textContent = cat.name; // <-- The visible name
+            option.value = cat.id;
+            option.textContent = cat.name;
+            if (selectedId && (cat.id === selectedId || cat.name.toLowerCase() === selectedId.toLowerCase())) {
+                option.selected = true;
+            }
             selectEl.appendChild(option);
         });
 
@@ -114,7 +131,7 @@ async function loadTeams() {
         const teams = await response.json();
 
         if (!teams || teams.length === 0) {
-            departmentList.innerHTML = "<p>No teams found.</p>";
+            departmentList.innerHTML = "<p style='color:#888;font-size:0.9rem;padding:8px;'>No teams found.</p>";
             return;
         }
 
@@ -125,75 +142,71 @@ async function loadTeams() {
             
             departmentDiv.innerHTML = `
                 <div class="dept-logo-placeholder">
-                    <img src="${team.logo_url}" alt="${team.acronym} Logo" style="width:100%; height:100%; object-fit:cover;">
+                    <img src="${team.logo_url}" alt="${team.acronym} Logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
                 </div>
-                <span class="dept-name">${team.acronym}</span>
+                <span class="dept-name" style="font-weight:600;font-size:0.95rem;">${escapeHtml(team.acronym)}</span>
                 <button class="edit-btn" data-id="${team.id}">Edit</button>
                 <button class="delete-btn" data-id="${team.id}">Delete</button>
             `;
             departmentList.appendChild(departmentDiv);
             
-            // --- NEW: Attach listeners to the dynamically created buttons ---
             departmentDiv.querySelector('.edit-btn').addEventListener('click', () => editTeamClicked(team.id));
             departmentDiv.querySelector('.delete-btn').addEventListener('click', () => deleteTeamClicked(team.id, team.name));
         });
 
     } catch (error) {
         console.error(error);
-        departmentList.innerHTML = "<p>Failed to load teams.</p>";
+        departmentList.innerHTML = "<p style='color:#ef4444;'>Failed to load teams.</p>";
     }
 }
 
-// --- NEW: Function to handle Edit button click ---
+// Function to handle Edit team
 async function editTeamClicked(teamId) {
     try {
-        // Fetch the specific team's details
-        const response = await fetch(`/api/data?type=teamById&teamId=${teamId}`); // <-- Uses the new API endpoint
-        if (!response.ok) {
-            throw new Error(`Failed to load team ${teamId}`);
-        }
+        const response = await fetch(`/api/data?type=teamById&teamId=${teamId}`);
+        if (!response.ok) throw new Error(`Failed to load team ${teamId}`);
         const team = await response.json();
 
-        // Populate the form
         document.getElementById('team-name').value = team.name;
         document.getElementById('team-acronym').value = team.acronym;
         
         const logoPreview = document.getElementById('logo-preview');
-        logoPreview.src = team.logo_url;
-        logoPreview.style.display = 'block'; // Ensure preview is visible
+        const uploadIcon = document.getElementById('upload-icon-svg');
+        if (team.logo_url) {
+            logoPreview.src = team.logo_url;
+            logoPreview.style.display = 'block';
+            if (uploadIcon) uploadIcon.style.display = 'none';
+        } else {
+            logoPreview.removeAttribute('src');
+            logoPreview.style.display = 'none';
+            if (uploadIcon) uploadIcon.style.display = 'block';
+        }
 
-        // Change button text and add data attribute for edit mode
         const submitBtn = document.querySelector('#add-team-form button[type="submit"]');
         submitBtn.textContent = 'Save Changes';
         submitBtn.setAttribute('data-mode', 'edit');
-        submitBtn.setAttribute('data-team-id', teamId); // Store the ID for submission
+        submitBtn.setAttribute('data-team-id', teamId);
 
-        // Optionally, add a "Cancel Edit" button or clear logic
         const existingCancelBtn = document.getElementById('cancel-edit-btn');
         if (!existingCancelBtn) {
             const cancelBtn = document.createElement('button');
             cancelBtn.id = 'cancel-edit-btn';
             cancelBtn.textContent = 'Cancel Edit';
             cancelBtn.type = 'button';
-            cancelBtn.classList.add('add-btn'); // Use existing button class for styling
-            cancelBtn.style.backgroundColor = '#6c757d'; // Add a grey color
+            cancelBtn.classList.add('add-btn');
+            cancelBtn.style.backgroundColor = '#64748b';
             cancelBtn.addEventListener('click', resetTeamForm);
-            submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling); // Insert after submit
+            submitBtn.parentNode.insertBefore(cancelBtn, submitBtn.nextSibling);
         }
-
 
     } catch (error) {
         console.error('Error fetching team for edit:', error);
-        // MODIFICATION: Use generic modal for error
         showGenericModal('alert', 'Load Error', 'Could not load team details for editing: ' + error.message);
     }
 }
 
-// --- NEW: Function to handle Delete button click ---
-// MODIFICATION: Replaced confirm() with showGenericModal()
+// Function to handle Delete team
 async function deleteTeamClicked(teamId, teamName) {
-
-    // Define the function to run on confirmation
     const onConfirmDelete = async () => {
         try {
             const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -208,7 +221,7 @@ async function deleteTeamClicked(teamId, teamName) {
                     'Authorization': `Bearer ${sessionData.session.access_token}`
                 },
                 body: JSON.stringify({
-                    action: 'deleteTeam', // New action for backend
+                    action: 'deleteTeam',
                     teamId: teamId
                 }),
             });
@@ -218,86 +231,72 @@ async function deleteTeamClicked(teamId, teamName) {
                 throw new Error(err.error || 'Failed to delete team.');
             }
 
-            // MODIFICATION: Use generic modal for success
-            showGenericModal('alert', 'Success', `Team "<strong>${teamName}</strong>" deleted successfully!`);
-            loadTeams(); // Reload the list of teams
+            showGenericModal('alert', 'Success', `Team "<strong>${escapeHtml(teamName)}</strong>" deleted successfully!`);
+            loadTeams();
 
         } catch (error) {
             console.error('Error deleting team:', error);
-            // MODIFICATION: Use generic modal for error
             showGenericModal('alert', 'Delete Error', 'Error deleting team: ' + error.message);
         }
     };
 
-    // Show the confirmation modal
     showGenericModal(
         'confirm',
         'Delete Team?',
-        `Are you sure you want to delete team "<strong>${teamName}</strong>"? This action cannot be undone.`,
+        `Are you sure you want to delete team "<strong>${escapeHtml(teamName)}</strong>"? This action cannot be undone.`,
         onConfirmDelete
     );
 }
 
-// --- NEW: Function to reset the form after edit/add ---
 function resetTeamForm() {
     const addTeamForm = document.getElementById('add-team-form');
-    addTeamForm.reset(); // Clear all form fields
+    addTeamForm.reset();
 
-    // Reset button text and attributes
     const submitBtn = document.querySelector('#add-team-form button[type="submit"]');
     submitBtn.textContent = 'Add Participant';
     submitBtn.removeAttribute('data-mode');
     submitBtn.removeAttribute('data-team-id');
 
-    // Clear and hide logo preview
     const logoPreview = document.getElementById('logo-preview');
-    logoPreview.src = '';
-    // logoPreview.style.display = 'none'; // <-- THIS LINE IS REMOVED (BUG FIX)
-    // By removing this line, the CSS :not([src]) rule will automatically
-    // show the empty dashed box.
+    logoPreview.removeAttribute('src');
+    logoPreview.style.display = 'none';
 
-    // Remove the cancel button if it exists
+    const uploadIcon = document.getElementById('upload-icon-svg');
+    if (uploadIcon) uploadIcon.style.display = 'block';
+
     const cancelBtn = document.getElementById('cancel-edit-btn');
-    if (cancelBtn) {
-        cancelBtn.remove();
-    }
+    if (cancelBtn) cancelBtn.remove();
 }
 
-// --- 4. FORM HANDLERS (CALLING APIs) ----------------
-
-// MODIFICATION: Replaced all alert() calls
+// --- 4. FORM HANDLERS (TEAMS & EVENTS) ----------------
 async function handleAddTeam(e) {
     e.preventDefault(); 
     
     const nameInput = document.getElementById('team-name');
     const acronymInput = document.getElementById('team-acronym');
     const logoInput = document.getElementById('add-logo');
-    const logoPreview = document.getElementById('logo-preview'); // Get preview
+    const logoPreview = document.getElementById('logo-preview');
     
     const submitBtn = e.target.querySelector('button[type="submit"]');
-    const mode = submitBtn.getAttribute('data-mode') || 'add'; // 'add' or 'edit'
-    const teamId = submitBtn.getAttribute('data-team-id'); // Only present in edit mode
+    const mode = submitBtn.getAttribute('data-mode') || 'add';
+    const teamId = submitBtn.getAttribute('data-team-id');
 
     const formData = new FormData();
-    formData.append('action', mode === 'edit' ? 'editTeam' : 'addTeam'); // Dynamic action
+    formData.append('action', mode === 'edit' ? 'editTeam' : 'addTeam');
     formData.append('name', nameInput.value.trim());
     formData.append('acronym', acronymInput.value.trim());
     
-    if (logoInput.files[0]) { // Only append if a new file is selected
+    if (logoInput.files[0]) {
         formData.append('logoFile', logoInput.files[0]);
     } else if (mode === 'edit' && logoPreview.src && !logoPreview.src.startsWith('data:')) {
-        // If in edit mode and no new file, but there's an existing URL, keep it
         formData.append('existing_logo_url', logoPreview.src);
     }
 
-
     if (mode === 'edit' && teamId) {
-        formData.append('teamId', teamId); // Add teamId for editing
+        formData.append('teamId', teamId);
     }
 
-    // --- Validation: Ensure logo is provided when ADDING new team ---
     if (mode === 'add' && !logoInput.files[0]) {
-        // MODIFICATION: Use generic modal for validation
         showGenericModal('alert', 'Missing Information', 'Please select a logo file to add a new team.');
         return;
     }
@@ -312,32 +311,25 @@ async function handleAddTeam(e) {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${sessionData.session.access_token}`
-                // 'Content-Type': 'multipart/form-data' is NOT set here,
-                // the browser does it automatically for FormData
             },
             body: formData, 
         });
 
         if (!response.ok) {
-            let errorText = `Error ${response.status}: `;
             const err = await response.json();
-            errorText += err.error || 'Unknown server error';
-            throw new Error(errorText);
+            throw new Error(err.error || 'Server error');
         }
 
-        // MODIFICATION: Use generic modal for success
         showGenericModal('alert', 'Success', `Team ${mode === 'edit' ? 'updated' : 'added'} successfully!`);
-        resetTeamForm(); // Clear and reset the form
-        loadTeams(); // Reload the list of teams
+        resetTeamForm();
+        loadTeams();
 
     } catch (error) {
         console.error(`Error ${mode === 'edit' ? 'updating' : 'adding'} team:`, error);
-        // MODIFICATION: Use generic modal for error
         showGenericModal('alert', 'Error', `Error ${mode === 'edit' ? 'updating' : 'adding'} team: ` + error.message);
     }
 }
 
-// MODIFICATION: Replaced all alert() calls
 async function handleAddEvent(e) {
     e.preventDefault(); 
     const eventNameInput = document.getElementById('event-name');
@@ -352,7 +344,6 @@ async function handleAddEvent(e) {
     };
 
     if (!eventData.name || !eventData.category_id || isNaN(eventData.medal_value)) {
-        // MODIFICATION: Use generic modal for validation
         showGenericModal('alert', 'Missing Information', 'Please fill out all fields for the event.');
         return;
     }
@@ -365,42 +356,598 @@ async function handleAddEvent(e) {
 
         const response = await fetch('/api/actions', {
             method: 'POST',
-            headers: { 
+            headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${sessionData.session.access_token}` 
+                'Authorization': `Bearer ${sessionData.session.access_token}`
             },
             body: JSON.stringify(eventData),
         });
 
         if (!response.ok) {
-            let errorText = `Error ${response.status}: `;
             const err = await response.json();
-            errorText += err.error || 'Server error';
-            throw new Error(errorText);
+            throw new Error(err.error || 'Failed to add event');
         }
 
-        // MODIFICATION: Use generic modal for success
-        showGenericModal('alert', 'Success', 'Event added successfully!');
+        showGenericModal('alert', 'Success', `Event "<strong>${escapeHtml(eventData.name)}</strong>" added successfully!`);
         eventNameInput.value = '';
         eventCategorySelect.value = '';
         eventMedalInput.value = '';
 
     } catch (error) {
         console.error('Error adding event:', error);
-        // MODIFICATION: Use generic modal for error
         showGenericModal('alert', 'Error', 'Error adding event: ' + error.message);
     }
 }
 
-// --- 5. NEW GENERIC MODAL LOGIC ------------------------
+// --- 5. CATEGORY MODAL LOGIC (REQUIREMENT #3) ------------
+function initCategoryModal() {
+    const openBtn = document.getElementById('open-category-modal-btn');
+    const modalOverlay = document.getElementById('add-category-modal-overlay');
+    const closeBtn = document.getElementById('close-category-modal-x');
+    const cancelBtn = document.getElementById('cancel-category-btn');
+    const submitBtn = document.getElementById('submit-category-btn');
+    const inputEl = document.getElementById('new-category-name');
 
-/**
- * Shows the generic modal for alerts or confirmations.
- * @param {'alert' | 'confirm'} type - The type of modal to show.
- * @param {string} title - The text for the modal header.
- * @param {string} message - The HTML content for the modal body.
- * @param {function} onConfirm - The callback function to run if 'Confirm' is clicked.
- */
+    if (!openBtn || !modalOverlay) return;
+
+    const openModal = () => {
+        inputEl.value = '';
+        modalOverlay.classList.add('visible');
+        setTimeout(() => inputEl.focus(), 150);
+    };
+
+    const closeModal = () => {
+        modalOverlay.classList.remove('visible');
+    };
+
+    openBtn.addEventListener('click', openModal);
+    if (closeBtn) closeBtn.addEventListener('click', closeModal);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+
+    submitBtn.addEventListener('click', async () => {
+        const catName = inputEl.value.trim();
+        if (!catName) {
+            inputEl.focus();
+            return;
+        }
+
+        try {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Adding...';
+
+            const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+            if (sessionError || !sessionData.session) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            const response = await fetch('/api/actions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionData.session.access_token}`
+                },
+                body: JSON.stringify({
+                    action: 'addCategory',
+                    name: catName
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to add category');
+            }
+
+            const resData = await response.json();
+            const newCatId = resData.data?.id;
+
+            closeModal();
+            await loadCategories(newCatId);
+            showGenericModal('alert', 'Category Added', `Category "<strong>${escapeHtml(catName)}</strong>" has been created and added to the list.`);
+
+        } catch (err) {
+            console.error('Error adding category:', err);
+            showGenericModal('alert', 'Error', 'Failed to add category: ' + err.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Add Category';
+        }
+    });
+
+    // Enter key submits
+    inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            submitBtn.click();
+        }
+    });
+}
+
+// --- 6. ACCOUNTS MANAGEMENT LOGIC (REQUIREMENT #4) -------
+function initAccountsManagement() {
+    const searchInput = document.getElementById('accounts-search-input');
+    const openAddBtn = document.getElementById('open-add-account-btn');
+
+    // Modals
+    const accountModal = document.getElementById('account-form-modal-overlay');
+    const closeAccountX = document.getElementById('close-account-modal-x');
+    const cancelAccountBtn = document.getElementById('cancel-account-modal-btn');
+    const submitAccountBtn = document.getElementById('submit-account-modal-btn');
+    const generatePwBtn = document.getElementById('btn-generate-pw');
+
+    const privModal = document.getElementById('privileges-modal-overlay');
+    const closePrivX = document.getElementById('close-privileges-modal-x');
+    const cancelPrivBtn = document.getElementById('cancel-privileges-btn');
+    const submitPrivBtn = document.getElementById('submit-privileges-btn');
+
+    // Search filter
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            renderAccountsTable();
+        });
+    }
+
+    // Open Add Account modal
+    if (openAddBtn) {
+        openAddBtn.addEventListener('click', () => {
+            openAccountModal('create');
+        });
+    }
+
+    // Generate random password helper
+    if (generatePwBtn) {
+        generatePwBtn.addEventListener('click', () => {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+            let gen = 'Ub';
+            for (let i = 0; i < 7; i++) {
+                gen += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('modal-account-password').value = gen;
+        });
+    }
+
+    // Close account modal handlers
+    if (closeAccountX) closeAccountX.addEventListener('click', closeAccountModal);
+    if (cancelAccountBtn) cancelAccountBtn.addEventListener('click', closeAccountModal);
+
+    // Submit Add / Edit Account
+    if (submitAccountBtn) {
+        submitAccountBtn.addEventListener('click', handleSaveAccount);
+    }
+
+    // Close Privileges modal handlers
+    if (closePrivX) closePrivX.addEventListener('click', closePrivilegesModal);
+    if (cancelPrivBtn) cancelPrivBtn.addEventListener('click', closePrivilegesModal);
+
+    // Submit Privileges
+    if (submitPrivBtn) {
+        submitPrivBtn.addEventListener('click', handleSavePrivileges);
+    }
+
+    // Privilege card clickable toggle
+    document.querySelectorAll('.privilege-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            if (e.target.tagName !== 'INPUT') {
+                const chk = card.querySelector('.priv-chk');
+                if (chk) {
+                    chk.checked = !chk.checked;
+                    card.classList.toggle('checked', chk.checked);
+                }
+            } else {
+                card.classList.toggle('checked', e.target.checked);
+            }
+        });
+    });
+
+    loadAccounts();
+}
+
+async function loadAccounts() {
+    const tbody = document.getElementById('accounts-tbody');
+    try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session) return;
+
+        const res = await fetch('/api/accounts', {
+            headers: {
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error(`Failed to load accounts (${res.status})`);
+        }
+
+        const data = await res.json();
+        accountsList = data.accounts || [];
+
+        // By default, leave all passwords and emails masked for privacy
+        accountsList.forEach(a => {
+            if (visibleSecrets.email[a.id] === undefined) visibleSecrets.email[a.id] = false;
+            if (visibleSecrets.password[a.id] === undefined) visibleSecrets.password[a.id] = false;
+        });
+
+        renderAccountsTable();
+
+    } catch (err) {
+        console.error('Error loading accounts:', err);
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #ef4444; padding: 20px;">Could not load accounts: ${escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+}
+
+function renderAccountsTable() {
+    const tbody = document.getElementById('accounts-tbody');
+    const searchInput = document.getElementById('accounts-search-input');
+    const query = (searchInput?.value || '').toLowerCase().trim();
+
+    if (!tbody) return;
+
+    const filtered = accountsList.filter(a => {
+        if (!query) return true;
+        const email = (a.email || '').toLowerCase();
+        const role = (a.role || '').toLowerCase();
+        return email.includes(query) || role.includes(query);
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #94a3b8; padding: 28px;">No accounts match "${escapeHtml(query)}"</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    filtered.forEach(acc => {
+        const tr = document.createElement('tr');
+
+        // Email visibility
+        const isEmailVisible = !!visibleSecrets.email[acc.id];
+        const displayEmail = isEmailVisible ? acc.email : maskEmail(acc.email);
+
+        // Password visibility
+        const isPwVisible = !!visibleSecrets.password[acc.id];
+        const rawPassword = acc.password || '••••••••';
+        const displayPassword = isPwVisible ? rawPassword : '•••••••••••••';
+
+        // Badge styling
+        const roleKey = (acc.role || 'committee').toLowerCase();
+        let badgeClass = 'role-badge badge-committee';
+        let badgeLabel = 'COMMITTEE';
+        if (roleKey === 'admin') {
+            badgeClass = 'role-badge badge-admin';
+            badgeLabel = 'ADMIN';
+        } else if (roleKey === 'tabhead') {
+            badgeClass = 'role-badge badge-tabhead';
+            badgeLabel = 'TABHEAD';
+        }
+
+        tr.innerHTML = `
+            <td>
+                <div class="secret-container">
+                    <span class="secret-text email-text" style="color:#0f172a; font-weight: 500;">${escapeHtml(displayEmail)}</span>
+                    <button type="button" class="btn-toggle-eye toggle-email-btn" data-id="${acc.id}" title="${isEmailVisible ? 'Mask email' : 'Reveal email'}">
+                        ${getEyeIconSvg(isEmailVisible)}
+                    </button>
+                </div>
+            </td>
+            <td>
+                <div class="secret-container">
+                    <span class="secret-text password-text" style="color:#334155;">${escapeHtml(displayPassword)}</span>
+                    <button type="button" class="btn-toggle-eye toggle-pw-btn" data-id="${acc.id}" title="${isPwVisible ? 'Hide password' : 'Show password'}">
+                        ${getEyeIconSvg(isPwVisible)}
+                    </button>
+                </div>
+            </td>
+            <td>
+                <span class="${badgeClass}">${badgeLabel}</span>
+            </td>
+            <td>
+                <div class="actions-cell">
+                    <button type="button" class="btn-privileges" data-id="${acc.id}" title="Configure Access Privileges">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                        <span>Privileges</span>
+                    </button>
+                    <button type="button" class="btn-action-icon edit-account-btn" data-id="${acc.id}" title="Edit Account">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                    </button>
+                    <button type="button" class="btn-action-icon btn-delete delete-account-btn" data-id="${acc.id}" title="Delete Account">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                    </button>
+                </div>
+            </td>
+        `;
+
+        // Wire event listeners on this row
+        tr.querySelector('.toggle-email-btn').addEventListener('click', () => {
+            visibleSecrets.email[acc.id] = !visibleSecrets.email[acc.id];
+            renderAccountsTable();
+        });
+
+        tr.querySelector('.toggle-pw-btn').addEventListener('click', () => {
+            visibleSecrets.password[acc.id] = !visibleSecrets.password[acc.id];
+            renderAccountsTable();
+        });
+
+        tr.querySelector('.btn-privileges').addEventListener('click', () => {
+            openPrivilegesModal(acc);
+        });
+
+        tr.querySelector('.edit-account-btn').addEventListener('click', () => {
+            openAccountModal('edit', acc);
+        });
+
+        tr.querySelector('.delete-account-btn').addEventListener('click', () => {
+            confirmDeleteAccount(acc);
+        });
+
+        tbody.appendChild(tr);
+    });
+}
+
+function maskEmail(email) {
+    if (!email) return '•••••••••••••';
+    const atIdx = email.indexOf('@');
+    if (atIdx === -1) return '•••••••••••••';
+    // Show first 2 characters, dots, then domain
+    const name = email.slice(0, atIdx);
+    const domain = email.slice(atIdx);
+    const visibleName = name.slice(0, Math.min(3, name.length));
+    return `${visibleName}•••••${domain}`;
+}
+
+function getEyeIconSvg(isVisible) {
+    if (isVisible) {
+        // Eye-slash icon
+        return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+        </svg>`;
+    } else {
+        // Normal eye icon
+        return `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+        </svg>`;
+    }
+}
+
+// Account Modal Open / Close / Save
+function openAccountModal(mode, account = null) {
+    const modal = document.getElementById('account-form-modal-overlay');
+    const titleEl = document.getElementById('account-modal-title');
+    const emailInput = document.getElementById('modal-account-email');
+    const pwInput = document.getElementById('modal-account-password');
+    const roleSelect = document.getElementById('modal-account-role');
+    const idInput = document.getElementById('modal-account-id');
+    const submitBtn = document.getElementById('submit-account-modal-btn');
+
+    if (mode === 'create') {
+        titleEl.textContent = 'Add New Account';
+        emailInput.value = '';
+        emailInput.disabled = false;
+        pwInput.value = '';
+        roleSelect.value = 'committee';
+        idInput.value = '';
+        submitBtn.textContent = 'Create Account';
+    } else {
+        titleEl.textContent = 'Edit Account Credentials';
+        emailInput.value = account.email || '';
+        emailInput.disabled = false;
+        pwInput.value = account.password || '';
+        roleSelect.value = account.role || 'committee';
+        idInput.value = account.id || '';
+        submitBtn.textContent = 'Save Changes';
+    }
+
+    modal.classList.add('visible');
+    setTimeout(() => emailInput.focus(), 150);
+}
+
+function closeAccountModal() {
+    const modal = document.getElementById('account-form-modal-overlay');
+    if (modal) modal.classList.remove('visible');
+}
+
+async function handleSaveAccount() {
+    const emailInput = document.getElementById('modal-account-email');
+    const pwInput = document.getElementById('modal-account-password');
+    const roleSelect = document.getElementById('modal-account-role');
+    const idInput = document.getElementById('modal-account-id');
+    const submitBtn = document.getElementById('submit-account-modal-btn');
+
+    const email = emailInput.value.trim();
+    const password = pwInput.value.trim();
+    const role = roleSelect.value;
+    const userId = idInput.value;
+    const isEdit = !!userId;
+
+    if (!email) {
+        showGenericModal('alert', 'Validation Error', 'Email address is required.');
+        return;
+    }
+    if (!password || password.length < 6) {
+        showGenericModal('alert', 'Validation Error', 'Password must be at least 6 characters long.');
+        return;
+    }
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
+
+        const payload = isEdit
+            ? { action: 'update', userId, email, password, role }
+            : { action: 'create', email, password, role };
+
+        const res = await fetch('/api/accounts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to save account.');
+        }
+
+        closeAccountModal();
+        await loadAccounts();
+        showGenericModal(
+            'alert',
+            'Success',
+            `Account "<strong>${escapeHtml(email)}</strong>" ${isEdit ? 'updated' : 'created'} successfully!`
+        );
+
+    } catch (err) {
+        console.error('Error saving account:', err);
+        showGenericModal('alert', 'Error', 'Failed to save account: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = isEdit ? 'Save Changes' : 'Create Account';
+    }
+}
+
+function confirmDeleteAccount(account) {
+    const onConfirm = async () => {
+        try {
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData?.session) {
+                throw new Error('Your session has expired. Please log in again.');
+            }
+
+            const res = await fetch('/api/accounts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionData.session.access_token}`
+                },
+                body: JSON.stringify({ action: 'delete', userId: account.id })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Failed to delete account.');
+            }
+
+            await loadAccounts();
+            showGenericModal('alert', 'Deleted', `Account "<strong>${escapeHtml(account.email)}</strong>" has been deleted.`);
+
+        } catch (err) {
+            console.error('Error deleting account:', err);
+            showGenericModal('alert', 'Error', 'Failed to delete account: ' + err.message);
+        }
+    };
+
+    showGenericModal(
+        'confirm',
+        'Delete Account?',
+        `Are you sure you want to delete account "<strong>${escapeHtml(account.email)}</strong>" (${escapeHtml(account.role)})? This action cannot be undone.`,
+        onConfirm
+    );
+}
+
+// Privileges Modal (Image #5 Spec)
+function openPrivilegesModal(account) {
+    currentPrivilegeTargetUser = account;
+    const modal = document.getElementById('privileges-modal-overlay');
+    const emailEl = document.getElementById('privileges-target-email');
+
+    if (emailEl) emailEl.textContent = account.email;
+
+    const userPrivs = Array.isArray(account.privileges) ? account.privileges : [];
+
+    // Set checkboxes
+    const checkCards = document.querySelectorAll('.privilege-card');
+    checkCards.forEach(card => {
+        const chk = card.querySelector('.priv-chk');
+        if (chk) {
+            const val = chk.value;
+            chk.checked = userPrivs.includes(val);
+            card.classList.toggle('checked', chk.checked);
+        }
+    });
+
+    if (modal) modal.classList.add('visible');
+}
+
+function closePrivilegesModal() {
+    const modal = document.getElementById('privileges-modal-overlay');
+    if (modal) modal.classList.remove('visible');
+    currentPrivilegeTargetUser = null;
+}
+
+async function handleSavePrivileges() {
+    if (!currentPrivilegeTargetUser) return;
+
+    const submitBtn = document.getElementById('submit-privileges-btn');
+    const checkedPrivs = [];
+    document.querySelectorAll('.priv-chk').forEach(chk => {
+        if (chk.checked) checkedPrivs.push(chk.value);
+    });
+
+    try {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
+
+        const res = await fetch('/api/accounts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({
+                action: 'savePrivileges',
+                userId: currentPrivilegeTargetUser.id,
+                privileges: checkedPrivs
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to update privileges.');
+        }
+
+        // Update local state
+        const targetAcc = accountsList.find(a => a.id === currentPrivilegeTargetUser.id);
+        if (targetAcc) targetAcc.privileges = checkedPrivs;
+
+        closePrivilegesModal();
+        showGenericModal(
+            'alert',
+            'Privileges Saved',
+            `Access privileges updated for "<strong>${escapeHtml(currentPrivilegeTargetUser.email)}</strong>".`
+        );
+
+    } catch (err) {
+        console.error('Error saving privileges:', err);
+        showGenericModal('alert', 'Error', 'Failed to save privileges: ' + err.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Privileges';
+    }
+}
+
+// --- 7. GENERIC MODAL LOGIC ------------------------
 function showGenericModal(type, title, message, onConfirm = () => {}) {
     const modal = document.getElementById('generic-modal-overlay');
     const modalTitle = document.getElementById('generic-modal-title');
@@ -410,11 +957,9 @@ function showGenericModal(type, title, message, onConfirm = () => {}) {
     const cancelBtn = document.getElementById('generic-modal-btn-cancel');
     const okBtn = document.getElementById('generic-modal-btn-ok');
 
-    // Set content
     modalTitle.textContent = title;
-    modalMessage.innerHTML = message; // Use .innerHTML to allow <strong> tags
+    modalMessage.innerHTML = message;
 
-    // Clone buttons to remove old listeners
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
     
@@ -425,14 +970,12 @@ function showGenericModal(type, title, message, onConfirm = () => {}) {
     okBtn.parentNode.replaceChild(newOkBtn, okBtn);
 
     if (type === 'confirm') {
-        // Show confirm/cancel, hide OK
         newConfirmBtn.style.display = 'inline-block';
         newCancelBtn.style.display = 'inline-block';
         newOkBtn.style.display = 'none';
 
-        // Add listeners
         newConfirmBtn.addEventListener('click', () => {
-            onConfirm(); // Run the callback
+            onConfirm();
             hideGenericModal();
         });
         newCancelBtn.addEventListener('click', () => {
@@ -440,22 +983,26 @@ function showGenericModal(type, title, message, onConfirm = () => {}) {
         });
 
     } else if (type === 'alert') {
-        // Show OK, hide confirm/cancel
         newConfirmBtn.style.display = 'none';
         newCancelBtn.style.display = 'none';
         newOkBtn.style.display = 'inline-block';
 
-        // Add listener
         newOkBtn.addEventListener('click', () => {
             hideGenericModal();
         });
     }
 
-    // Show the modal
     modal.classList.add('visible');
 }
 
 function hideGenericModal() {
     const modal = document.getElementById('generic-modal-overlay');
-    modal.classList.remove('visible');
+    if (modal) modal.classList.remove('visible');
+}
+
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.innerText = text;
+    return div.innerHTML;
 }

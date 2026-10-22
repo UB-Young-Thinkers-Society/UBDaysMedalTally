@@ -56,40 +56,87 @@
             <div class="config-forms">
                 <form class="add-participant-form" id="add-team-form">
                     <div class="participant-fields">
-                        
-                        <!-- MODIFIED: The label now wraps the text and the preview image -->
-                        <!-- This makes the text AND the box clickable -->
-                        <label for="add-logo" class="logo-label">
-                            Logo:
-                            <img id="logo-preview" src="" alt="Logo preview"> 
+                        <label for="add-logo" class="logo-label" title="Click to upload team logo">
+                            <span class="logo-label-title">Logo:</span>
+                            <div class="logo-preview-box" id="logo-preview-box">
+                                <svg id="upload-icon-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <polyline points="21 15 16 10 5 21"/>
+                                </svg>
+                                <img id="logo-preview" alt="Logo preview" style="display: none;"> 
+                            </div>
                         </label>
                         
-                        <input class="add-logo" id="add-logo" type="file" accept="image/*"> <!-- Removed 'required' as it's not needed for "Edit" -->
+                        <input class="add-logo" id="add-logo" type="file" accept="image/*">
                         <div class="participant-names">
                             <input class="name" id="team-name" type="text" placeholder="Name" required>
                             <input class="acronym" id="team-acronym" type="text" placeholder="Acronym" required>
                         </div>
                     </div>
                     <button type="submit" class="add-btn add_participant_btn">Add Participant</button>
-                    <!-- "Cancel Edit" button will be added here by JS -->
                 </form>
 
                 <form class="events-config-form" id="add-event-form">
                     <h2>Events Config</h2>
                     <input class="event-name" id="event-name" type="text" placeholder="Name" required>
                     <input class="event-medal" id="event-medal" type="number" placeholder="Medal Count" required>
-                    <div class="event-categories-dropdown">
+                    <div class="category-select-wrapper">
                         <select class="event-category" id="event-category" required>
                             <option value="" disabled selected>Loading Categories...</option>
-                            <!-- This will be filled by js/config-logic.js -->
                         </select>
+                        <button type="button" class="btn-add-category" id="open-category-modal-btn" title="Add a new category">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            <span>Add Category</span>
+                        </button>
                     </div>
                     <button type="submit" class="add-btn add_event_btn">Add Event</button>
                 </form>
             </div>
-            <!-- Right: Logo -->
-            <div class="logo-section">
-                <img src="img/iconx3.png" alt="Logo" class="main-logo">
+
+            <!-- Right: Accounts Management Section -->
+            <div class="accounts-section" id="accounts-section">
+                <div class="accounts-card">
+                    <div class="accounts-header">
+                        <div class="accounts-search-box">
+                            <svg class="accounts-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            <input type="text" id="accounts-search-input" placeholder="Search by email address or role..." autocomplete="off">
+                        </div>
+                        <button type="button" class="btn-primary-add" id="open-add-account-btn">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="8.5" cy="7" r="4"></circle>
+                                <line x1="20" y1="8" x2="20" y2="14"></line>
+                                <line x1="23" y1="11" x2="17" y2="11"></line>
+                            </svg>
+                            <span>Add Account</span>
+                        </button>
+                    </div>
+
+                    <div class="accounts-table-wrapper">
+                        <table class="accounts-table" id="accounts-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 32%;">EMAIL ADDRESS</th>
+                                    <th style="width: 25%;">PASSWORD</th>
+                                    <th style="width: 20%;">ACCOUNT TYPE</th>
+                                    <th style="width: 23%; text-align: right;">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="accounts-tbody">
+                                <tr>
+                                    <td colspan="4" style="text-align: center; padding: 24px; color: #888;">Loading registered accounts...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -102,22 +149,155 @@
         <span>Developed by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> UBYTeS - University of Bohol Young Thinkers Society</span>
     </footer>
 
-    <!-- 
-      =========================================
-      NEW: GENERIC CONFIRM/ALERT MODAL
-      =========================================
-    -->
+    <!-- ADD CATEGORY MODAL -->
+    <div class="modal-overlay" id="add-category-modal-overlay">
+        <div class="modal-content modal-content-small" style="max-width: 440px;">
+            <div class="modal-header">
+                <h2>Add Event Category</h2>
+                <button type="button" class="modal-close-icon" id="close-category-modal-x">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 0.95rem; color: #555; margin-bottom: 12px;">Enter the name of the new category to add to the tally:</p>
+                <input type="text" id="new-category-name" class="modal-form-input" placeholder="e.g. Esports, Swimming, Debate" autocomplete="off">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn cancel-gray" id="cancel-category-btn">Cancel</button>
+                <button type="button" class="modal-btn confirm-blue" id="submit-category-btn">Add Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD / EDIT ACCOUNT MODAL -->
+    <div class="modal-overlay" id="account-form-modal-overlay">
+        <div class="modal-content modal-content-small" style="max-width: 480px;">
+            <div class="modal-header">
+                <h2 id="account-modal-title">Add New Account</h2>
+                <button type="button" class="modal-close-icon" id="close-account-modal-x">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Email Address</label>
+                    <input type="email" id="modal-account-email" class="modal-form-input" placeholder="user@universityofbohol.edu.ph" required>
+                </div>
+                <div style="margin-bottom: 14px;">
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Password</label>
+                    <div style="position: relative;">
+                        <input type="text" id="modal-account-password" class="modal-form-input" placeholder="Minimum 6 characters" required>
+                        <button type="button" id="btn-generate-pw" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.8rem; color: #2b00d9; font-weight: 700; cursor: pointer;">Generate</button>
+                    </div>
+                </div>
+                <div style="margin-bottom: 6px;">
+                    <label style="display: block; font-weight: 700; font-size: 0.85rem; color: #334155; margin-bottom: 6px;">Account Type / Role</label>
+                    <select id="modal-account-role" class="modal-form-select">
+                        <option value="committee">Committee (Computation & Scoring)</option>
+                        <option value="tabHead">TabHead (Tabulation & Config)</option>
+                        <option value="admin">Admin (Full System Access)</option>
+                    </select>
+                </div>
+                <input type="hidden" id="modal-account-id" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn cancel-gray" id="cancel-account-modal-btn">Cancel</button>
+                <button type="button" class="modal-btn confirm-blue" id="submit-account-modal-btn">Save Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCOUNT PRIVILEGES CONFIGURATION MODAL (IMAGE #5 SPEC) -->
+    <div class="modal-overlay" id="privileges-modal-overlay">
+        <div class="modal-content privileges-modal-box">
+            <div class="modal-header" style="padding: 20px 24px 14px 24px; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                    <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0;">Account Privileges Configuration</h2>
+                    <div style="font-size: 0.88rem; color: #64748b; margin-top: 4px;">
+                        Define page navigation and action authorization for: <strong id="privileges-target-email" style="color: #2b00d9;"></strong>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-icon" id="close-privileges-modal-x">&times;</button>
+            </div>
+
+            <div class="modal-body privileges-modal-body">
+                <!-- 1. Accounts Management -->
+                <label class="privilege-card" id="card-priv-accounts">
+                    <input type="checkbox" class="priv-chk" value="accounts">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Accounts Management</div>
+                        <div class="priv-card-desc">Access to system user accounts & privileges <span class="priv-path">(Path: /config)</span></div>
+                    </div>
+                </label>
+
+                <!-- 2. Manage Events & Tabulation -->
+                <label class="privilege-card" id="card-priv-tabulation">
+                    <input type="checkbox" class="priv-chk" value="tabulation">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Tabulation Workspace</div>
+                        <div class="priv-card-desc">Review, approve, publish and manage event medal tally <span class="priv-path">(Path: /tabulation)</span></div>
+                    </div>
+                </label>
+
+                <!-- 3. Computation & Scoring -->
+                <label class="privilege-card" id="card-priv-computation">
+                    <input type="checkbox" class="priv-chk" value="computation">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Computation & Scoring</div>
+                        <div class="priv-card-desc">Input rankings, drag-and-drop winners, and award medals <span class="priv-path">(Path: /computation)</span></div>
+                    </div>
+                </label>
+
+                <!-- 4. Teams & Events Config -->
+                <label class="privilege-card" id="card-priv-config">
+                    <input type="checkbox" class="priv-chk" value="config">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Events & Teams Configuration</div>
+                        <div class="priv-card-desc">Add participating departments, upload logos & create categories <span class="priv-path">(Path: /config)</span></div>
+                    </div>
+                </label>
+
+                <!-- 5. System Activity & Audit Logs -->
+                <label class="privilege-card" id="card-priv-log">
+                    <input type="checkbox" class="priv-chk" value="log">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Audit & Activity Logs</div>
+                        <div class="priv-card-desc">Review system audit trail and track actions by user <span class="priv-path">(Path: /log)</span></div>
+                    </div>
+                </label>
+
+                <!-- 6. PDF Export -->
+                <label class="privilege-card" id="card-priv-export">
+                    <input type="checkbox" class="priv-chk" value="export">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Export Medal Reports</div>
+                        <div class="priv-card-desc">Generate official PDF medal tally certificates & standings <span class="priv-path">(Path: /tabulation)</span></div>
+                    </div>
+                </label>
+
+                <!-- 7. Live Leaderboard -->
+                <label class="privilege-card" id="card-priv-live_feed">
+                    <input type="checkbox" class="priv-chk" value="live_feed">
+                    <div class="priv-card-text">
+                        <div class="priv-card-title">Live Public Feed</div>
+                        <div class="priv-card-desc">Access live public spectator leaderboard and department tallies <span class="priv-path">(Path: /index)</span></div>
+                    </div>
+                </label>
+            </div>
+
+            <div class="modal-footer" style="padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="modal-btn-cancel-flat" id="cancel-privileges-btn">Cancel</button>
+                <button type="button" class="modal-btn-save-indigo" id="submit-privileges-btn">Save Privileges</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GENERIC CONFIRM/ALERT MODAL -->
     <div class="modal-overlay" id="generic-modal-overlay">
         <div class="modal-content modal-content-small" id="generic-modal">
             <div class="modal-header">
                 <h2 id="generic-modal-title">Confirm Action</h2>
             </div>
             <div class="modal-body">
-                <!-- Message is inserted here by JS -->
                 <p id="generic-modal-message">Are you sure?</p>
             </div>
             <div class="modal-footer">
-                <!-- Buttons are shown/hidden by JS -->
                 <button class="modal-btn cancel-gray" id="generic-modal-btn-cancel">Cancel</button>
                 <button class="modal-btn confirm-blue" id="generic-modal-btn-confirm">Confirm</button>
                 <button class="modal-btn ok-blue" id="generic-modal-btn-ok" style="display: none;">OK</button>

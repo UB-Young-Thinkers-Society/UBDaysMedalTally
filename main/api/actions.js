@@ -225,6 +225,24 @@ export default async (req, res) => {
             }
 
 
+            // --- Case: Add a new Category (FROM JSON) ---
+            case 'addCategory': {
+                const { name: categoryName } = reqBody;
+                if (!categoryName || !categoryName.trim()) {
+                    return res.status(400).json({ error: 'Category name is required.' });
+                }
+                const cleanName = categoryName.trim();
+                const { data, error } = await supabase
+                    .from('categories')
+                    .insert([{ name: cleanName }])
+                    .select();
+                if (error) throw error;
+
+                await logAction(user.id, 'addCategory', `Created new event category: "${cleanName}"`);
+
+                return res.status(200).json({ success: true, data: data[0] });
+            }
+
             // --- Case: Add a new Event (FROM JSON) ---
             case 'addEvent': {
                 // This case handles JSON body, not FormData, so payload is directly req.body
