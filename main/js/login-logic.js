@@ -71,27 +71,49 @@ async function checkActiveSession() {
         }
 
         const accessToken = sessionData.session.access_token;
+        const role = await getUserRole(sessionData.session, accessToken);
 
-        const response = await fetch('/api/auth', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-        
-        if (!response.ok) {
-            console.warn('Existing session is invalid or unauthorized, signing out.');
+        if (!role) {
+            console.warn('Existing session has no role assigned, signing out.');
             await supabase.auth.signOut(); 
             return;
         }
 
-        const data = await response.json();
-        if (data && data.role) {
-            redirectToRole(data.role);
-        }
+        redirectToRole(role);
     } catch (error) {
         console.error('Error checking active session:', error);
     }
+}
+
+/**
+ * Retrieves the user role via /api/auth with direct Supabase fallback.
+ */
+async function getUserRole(session, accessToken) {
+    try {
+        const response = await fetch('/api/auth', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            if (data && data.role) return data.role;
+        }
+    } catch (_) {}
+
+    try {
+        const userId = session.user.id;
+        const { data } = await supabase
+            .from('user-roles')
+            .select('roles')
+            .eq('user_id', userId)
+            .maybeSingle();
+        if (data && data.roles) {
+            return data.roles;
+        }
+    } catch (e) {
+        console.error('Direct role fallback error:', e);
+    }
+    return null;
 }
 
 /**
@@ -143,28 +165,13 @@ async function handleLogin(e) {
             throw new Error('No active session returned from Supabase.');
         }
 
-        // --- STEP 2: VERIFY ROLE FROM BACKEND API ---
+        // --- STEP 2: VERIFY ROLE (API with Supabase fallback) ---
         const accessToken = authData.session.access_token;
+        const role = await getUserRole(authData.session, accessToken);
 
-        const response = await fetch('/api/auth', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${accessToken}`
-            }
-        });
-        
-        if (!response.ok) {
-            let errorDetail = 'Login was authenticated, but failed to retrieve user role.';
-            try {
-                const errJson = await response.json();
-                if (errJson && errJson.error) {
-                    errorDetail = errJson.error;
-                }
-            } catch (_) {}
-            throw new Error(errorDetail);
+        if (!role) {
+            throw new Error('Login was authenticated, but no valid role is assigned to this account.');
         }
-        
-        const { role } = await response.json();
 
         // --- STEP 3: REDIRECT TO DESIGNATED WORKSPACE ---
         redirectToRole(role);

@@ -2,11 +2,9 @@
 UBDays Medal Tally - System Accounts & Roles
 =======================================================
 
-[Admin Accounts] (Redirects to: tabulation.html)
-Email:                   Password:      Role:
-ubyteshris@gmail.com     123            admin
-ubbytes@gmail.com        123            admin
-crjabines@gmail.com      admin123       admin
+[Admin Account] (Redirects to: tabulation.html)
+Email:                   Password:          Role:
+crjabines@gmail.com      Ub12345678         admin
 
 [Tabulation Head Accounts] (Redirects to: tabulation.html)
 Email:                   Role:
@@ -24,5 +22,5 @@ esportscom1@gmail.com    committee
 musiccom1@gmail.com      committee
 admincom@gmail.com       committee
 
-Note: If any account password needs to be reset, it can be updated
-directly via Supabase Auth Admin API (min length: 6 characters).
+Note: Previous test admin accounts (ubyteshris, ubbytes) were removed.
+Password updates must be at least 6 characters.
