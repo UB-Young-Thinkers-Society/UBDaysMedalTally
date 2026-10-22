@@ -358,9 +358,9 @@ footer {
 
 /* --- COLUMN 1: PARTICIPATING TEAMS --- */
 .teams-section {
-    flex: 0 0 350px;
-    min-width: 320px;
-    max-width: 380px;
+    flex: 0 0 380px;
+    min-width: 340px;
+    max-width: 420px;
 }
 
 .department-list-container {
@@ -501,9 +501,9 @@ footer {
 
 /* --- COLUMN 2: CONFIGURATION FORMS --- */
 .config-forms {
-    flex: 0 0 360px;
-    min-width: 320px;
-    max-width: 390px;
+    flex: 0 0 400px;
+    min-width: 350px;
+    max-width: 440px;
     gap: 0;
 }
 
