@@ -1,49 +1,22 @@
-// --- 1. AUTHENTICATION & SESSION (NEW) -------------------
+// --- 1. AUTHENTICATION & SESSION -------------------
 
 /**
- * Securely checks the user's session and role.
+ * Signs the user out safely and redirects to login.html.
  */
-async function checkSession() {
-    // 1. Get the session from the browser
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-
-    if (sessionError || !sessionData.session) {
-        // No one is logged in, redirect to login
-        window.location.replace("login.html");
-        return;
-    }
-
-    const accessToken = sessionData.session.access_token;
-
+async function signOut() {
     try {
-        // 2. Securely get the user's role from our API
-        const response = await fetch('/api/auth', {
-            method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` }
-        });
-
-        if (!response.ok) {
-            // If the token is bad, sign out and redirect
-            await supabase.auth.signOut(); 
-            window.location.replace("login.html");
-            return;
+        const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
+        if (client && client.auth && typeof client.auth.signOut === 'function') {
+            await client.auth.signOut();
         }
-
-        const { role } = await response.json();
-        
-        // 3. (NEW) Build the navbar based on the role
-        buildNavbar(role);
-        
-        console.log("Session valid, user authorized: " + role);
-
     } catch (error) {
-        console.error('Error checking session:', error);
-        window.location.replace("login.html");
+        console.error("Error logging out:", error);
     }
+    window.location.href = 'login.html';
 }
 
 /**
- * (NEW) Dynamically builds the nav buttons based on user role.
+ * Dynamically builds the nav buttons based on user role.
  */
 function buildNavbar(role) {
     const navContainer = document.querySelector('.navButtons');
@@ -72,50 +45,111 @@ function buildNavbar(role) {
                 <a href="about-us.html" class="nav-btn active">About Us</a>
             `;
             break;
+        case 'visitor':
         default:
-            // Fallback for unknown roles (or just show 'About Us')
+            // Public visitor or unauthenticated user
             navHTML = `
                 <a href="index.html" class="nav-btn">Live</a>
-                <a href="about-us-live.html" class="nav-btn active">About Us</a>
+                <a href="about-us.html" class="nav-btn active">About Us</a>
             `;
+            break;
     }
     
     navContainer.innerHTML = navHTML;
 }
 
 /**
- * (NEW) Signs the user out.
+ * Checks session and role conditionally:
+ * - If user is not logged in (visitor), allows access, shows "Live" nav link, and hides Log Out button.
+ * - If user is logged in (admin, tabHead, committee), shows appropriate nav links and the Log Out button.
  */
-async function signOut() {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-        console.error("Error logging out:" + error.message);
-    } else {
-        console.log("Successfully logged out.");
-        window.location.href = 'login.html';
+async function checkSession() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    const client = window.supabaseClient || (typeof supabase !== 'undefined' ? supabase : null);
+
+    if (!client || !client.auth) {
+        // Fallback to visitor view if supabase client is not loaded
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        buildNavbar('visitor');
+        return;
+    }
+
+    try {
+        const { data: sessionData, error: sessionError } = await client.auth.getSession();
+
+        if (sessionError || !sessionData || !sessionData.session) {
+            // Not logged in -> Visitor mode (accessible by anyone)
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            buildNavbar('visitor');
+            return;
+        }
+
+        const accessToken = sessionData.session.access_token;
+        let role = null;
+
+        // Try getting role via backend API
+        try {
+            const response = await fetch('/api/auth', {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                role = data.role;
+            }
+        } catch (apiErr) {
+            console.warn('API /api/auth failed, attempting direct DB query:', apiErr);
+        }
+
+        // Direct fallback to user-roles table if API was unreachable
+        if (!role) {
+            try {
+                const { data: roleData } = await client
+                    .from('user-roles')
+                    .select('roles')
+                    .eq('user_id', sessionData.session.user.id)
+                    .maybeSingle();
+                if (roleData && roleData.roles) {
+                    role = roleData.roles;
+                }
+            } catch (dbErr) {
+                console.error('Role fallback error:', dbErr);
+            }
+        }
+
+        if (role === 'admin' || role === 'tabHead' || role === 'committee') {
+            if (logoutBtn) logoutBtn.style.display = 'block';
+            buildNavbar(role);
+        } else {
+            // Unknown role or invalid token
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            buildNavbar('visitor');
+        }
+
+    } catch (error) {
+        console.error('Error checking session on about-us page:', error);
+        if (logoutBtn) logoutBtn.style.display = 'none';
+        buildNavbar('visitor');
     }
 }
 
 
-// --- 2. PAGE INITIALIZATION (MODIFIED) -----------------
+// --- 2. PAGE INITIALIZATION -----------------
 
-// We wrap all page logic in one 'DOMContentLoaded' listener
 document.addEventListener('DOMContentLoaded', async () => {
-    
-    // 1. (NEW) Check session and build navbar first
-    // This function will also handle redirecting if no session exists.
-    await checkSession();
-
-    // 2. (NEW) Attach logout listener
+    // 1. Immediately attach logout listener so it always responds to clicks
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.onclick = function (e) {
+        logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
             signOut();
-        };
+        });
     }
-    
-    // 3. (Original logic) Handle loader
+
+    // 2. Check session & conditionally show/hide role features
+    await checkSession();
+
+    // 3. Handle loader
     const loader = document.getElementById('loader');
     if (loader) {
         loader.classList.add('hide');
@@ -124,19 +158,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 600);
     }
 
-    // 4. (Original logic) Animate developer cards
+    // 4. Animate developer cards
     const cards = document.querySelectorAll('.developer-card');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.15 });
-    cards.forEach(card => observer.observe(card));
+    if (cards.length > 0 && 'IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+        cards.forEach(card => observer.observe(card));
+    } else {
+        cards.forEach(card => card.classList.add('visible'));
+    }
 
-    // 5. (Original logic) Handle tech card "learn more"
+    // 5. Handle tech card "learn more"
     document.querySelectorAll('.tech-card').forEach(card => {
         const btn = card.querySelector('.tech-toggle');
         if (btn) {

@@ -601,7 +601,7 @@ async function handleExportPDF() {
         // Title
         doc.setFontSize(22);
         doc.setTextColor(...colors.dark);
-        doc.text("UB Days 2025 - Official Medal Tally", 14, 20);
+        doc.text("UB Days 2026 - Official Medal Tally", 14, 20);
         
         doc.setFontSize(10);
         doc.setTextColor(100);
@@ -863,7 +863,7 @@ async function handleExportPDF() {
         }
 
         // Save
-        doc.save(`UBDays2025_Full_Report.pdf`);
+        doc.save(`UBDays2026_Full_Report.pdf`);
 
         showGenericModal('alert', 'Export Complete', 'The PDF report has been downloaded successfully.');
 
