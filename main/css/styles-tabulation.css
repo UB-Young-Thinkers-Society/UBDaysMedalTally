@@ -7,7 +7,10 @@ body {
     background-size: cover !important;
     position: relative;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     letter-spacing: -0.2px;
+    box-sizing: border-box;
 }
 
 .background {
@@ -56,14 +59,15 @@ body {
 .header {
     display: flex;
     flex-direction: row;
-    width: calc(100vw - 2in);
-    max-width: 1400px;
-    height: 80px;
-    margin: 2rem auto 1rem auto;
+    width: calc(100vw - 48px);
+    max-width: 1820px;
+    height: 72px;
+    margin: 20px auto 16px auto;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
     box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .navSection {
@@ -110,7 +114,7 @@ body {
 .accInfo {
     display: flex;
     align-items: center;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #0f172a;
     padding: 0 24px;
@@ -151,21 +155,22 @@ body {
 .main-card {
     position: relative;
     z-index: 1;
-    width: calc(100vw - 2in);
-    max-width: 1400px;
-    min-height: calc(100vh - 3in);
-    margin: 0 auto 40px auto;
+    width: calc(100vw - 48px);
+    max-width: 1820px;
+    flex: 1;
+    min-height: calc(100vh - 180px);
+    margin: 0 auto 20px auto;
     background: #fff;
     border: 1px solid #DBDBDB;
     border-radius: 16px;
-    padding: 32px 32px 24px 32px;
+    padding: 36px 36px 28px 36px;
     box-sizing: border-box;
 }
 
 .categories {
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 16px;
 }
 
 .category {
@@ -176,9 +181,9 @@ body {
     border: 1px solid #DBDBDB;
     border-radius: 16px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    padding: 18px 24px;
-    font-size: 1.1rem;
-    transition: box-shadow 0.2s;
+    padding: 20px 28px;
+    font-size: 1.15rem;
+    transition: box-shadow 0.2s, transform 0.1s;
 }
 
 .category:hover{
@@ -190,7 +195,7 @@ body {
 }
 
 .cat-title {
-    font-size: 1.45rem !important;
+    font-size: 1.7rem !important;
     font-weight: 700 !important;
     letter-spacing: -0.3px !important;
     color: #1e293b !important;
@@ -200,15 +205,15 @@ body {
 
 .cat-status {
     color: #64748b;
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 500;
     margin-right: 24px;
     white-space: nowrap;
 }
 
 .cat-arrow {
-    font-size: 1.5rem;
-    color: #bbb;
+    font-size: 1.6rem;
+    color: #94a3b8;
     cursor: pointer;
     transition: color 0.2s;
 }
@@ -236,16 +241,17 @@ body {
 
 footer {
     position: relative;
-    margin: 32px 0 24px 0;
+    margin: 8px 0 20px 0;
     width: 100%;
     text-align: center;
     z-index: 2;
-    font-size: 0.88rem;
+    font-size: 0.9rem;
     letter-spacing: normal;
     color: #334155;
     background: none;
     font-weight: 500;
     clear: both;
+    flex-shrink: 0;
 }
 
 .ub-logo {

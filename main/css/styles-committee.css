@@ -1,13 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,300..900;1,300..900&display=swap');
 
 body {
-    background: url('../img/2026/gradientBG.png') no-repeat center center fixed;
-    background-size: cover;
+    background: url('../img/2026/gradientBG.png') no-repeat center center fixed !important;
+    background-size: cover !important;
     margin: 0;
     font-family: 'Figtree', sans-serif;
     position: relative;
-    min-height: 90vh;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
     letter-spacing: -0.2px;
+    box-sizing: border-box;
 }
 
 #loader {
@@ -64,14 +67,15 @@ body {
 .header {
     display: flex;
     flex-direction: row;
-    width: calc(100vw - 2in);
-    max-width: 1400px;
-    height: 80px;
-    margin: 2rem auto 1rem auto;
+    width: calc(100vw - 48px);
+    max-width: 1820px;
+    height: 72px;
+    margin: 20px auto 16px auto;
     justify-content: space-between;
     align-items: center;
     gap: 16px;
     box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .navSection {
@@ -117,7 +121,7 @@ body {
 .accInfo {
     display: flex;
     align-items: center;
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
     color: #0f172a;
     padding: 0 24px;
@@ -158,10 +162,11 @@ body {
 .main-card {
     position: relative;
     z-index: 1;
-    width: calc(100vw - 2in);
-    max-width: 1400px;
-    min-height: calc(100vh - 3in);
-    margin: 0 auto 40px auto;
+    width: calc(100vw - 48px);
+    max-width: 1820px;
+    flex: 1;
+    min-height: calc(100vh - 180px);
+    margin: 0 auto 20px auto;
     background: #fff;
     border: 1px solid #DBDBDB;
     border-radius: 16px;
@@ -393,16 +398,18 @@ body {
 
 
 footer {
-    position: fixed;
-    bottom: 18px;
-    left: 0;
+    position: relative;
+    margin: 8px 0 20px 0;
     width: 100%;
     text-align: center;
     z-index: 2;
-    font-size: 1.4rem;
-    letter-spacing: -1px;
-    color: #222;
+    font-size: 0.9rem;
+    letter-spacing: normal;
+    color: #334155;
     background: none;
+    font-weight: 500;
+    clear: both;
+    flex-shrink: 0;
 }
 
 .ub-logo {
