@@ -43,12 +43,12 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function updateTimestamp() {
-    // ... (This function is unchanged)
     const subtitle = document.getElementById('last-updated');
     if (!subtitle) return;
     const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-    subtitle.textContent = `As of ${now.toLocaleDateString('en-US', options)}`;
+    const datePart = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const timePart = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    subtitle.textContent = `as of ${datePart} | ${timePart}`;
 }
 
 // --- 3. DROPDOWN POPULATION FUNCTIONS --------------

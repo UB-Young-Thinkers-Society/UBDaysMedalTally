@@ -2,71 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>UBDays 2025 Medal Tally</title>
+    <title>UBDays 2026 Medal Tally</title>
     <link rel="stylesheet" href="css/live-feed.css">
     <link rel="stylesheet" href="css/details-styles.css">
-    
     <link rel="icon" href="img/iconx1.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
 </head>
 <body>
-    <div class="main-header">
-        <img src="img/titleLogo.png" alt="Logo">
-        <div>
-            <div class="main-title">Official Medal Tally</div>
-            <div class="subtitle" id="last-updated">Loading...</div>
-        </div>
-    </div>
-
     <div class="tally-card">
-        <div class="top-buttons" role="group" aria-label="Page navigation">
-            <button class="top-btn" onclick="window.location.href='index.html'">Live Count</button>
-            <button class="top-btn active">Details</button>
+        <!-- Center Watermark Logo -->
+        <div class="watermark-container" aria-hidden="true">
+            <img src="img/2026/ubdays2026.png" class="card-watermark" alt="">
         </div>
-        
+
+        <!-- Top Gradient Header Banner (Text + Logo only, size increased by 15%) -->
+        <header class="gradient-header-banner">
+            <div class="banner-branding">
+                <img src="img/2026/ubdays2026.png" alt="UBDays 2026 Logo" class="banner-logo">
+                <div class="banner-title-group">
+                    <h1 class="banner-title">OFFICIAL MEDAL TALLY</h1>
+                    <div class="banner-subtitle" id="last-updated">as of Loading...</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filter Bar (Image #4) -->
         <div class="details-filter-bar">
-            <!-- 
-              MODIFIED: (Request #1) Replaced <select> with custom searchable dropdown
-            -->
+            <!-- Category Searchable Dropdown -->
             <div class="custom-select-wrapper" id="category-select-wrapper">
                 <div class="custom-select-box" id="filter-category-box" data-category-id="null">
                     <input type="text" id="filter-category-search" class="custom-select-search" placeholder="Loading Categories..." disabled>
                     <span class="custom-select-arrow"></span>
                 </div>
                 <div class="custom-select-list hidden" id="category-list">
-                    <!-- Category options will be built by JS -->
+                    <!-- Category options populated by JS -->
                 </div>
             </div>
 
-            <!-- 
-              MODIFIED: (Request #1) Replaced <select> with custom searchable dropdown
-            -->
+            <!-- Event Searchable Dropdown -->
             <div class="custom-select-wrapper" id="event-select-wrapper">
                 <div class="custom-select-box" id="filter-event-box" data-event-id="null">
                     <input type="text" id="filter-event-search" class="custom-select-search" placeholder="Select Category First" disabled>
                     <span class="custom-select-arrow"></span>
                 </div>
                 <div class="custom-select-list hidden" id="event-list">
-                    <!-- Event options will be built by JS -->
+                    <!-- Event options populated by JS -->
                 </div>
             </div>
             
-            <!-- This is the existing Department dropdown -->
+            <!-- Department Dropdown -->
             <div class="custom-select-wrapper">
                 <div class="custom-select-box" id="filter-department" data-team-id="null">
                     <span class="placeholder">Enter Department</span>
                 </div>
                 <div class="custom-select-list hidden" id="department-list">
-                    <!-- Team options will be built by JS -->
+                    <!-- Team options populated by JS -->
                 </div>
             </div>
-            
         </div>
 
-        <!-- This wrapper holds BOTH page views -->
+        <!-- Details Views (Image #4) -->
         <div id="details-view-wrapper">
-
             <!-- View 1: Category/Event Rankings -->
             <div id="category-details-view">
                 <div class="details-title-bar">
@@ -75,14 +71,14 @@
                 <table class="tally-table details-rank-list">
                     <thead>
                         <tr id="tally-headers">
-                            <th>Department</th>
+                            <th class="col-dept">Department</th>
                             <th class="gold">Gold</th>
                             <th class="silver">Silver</th>
                             <th class="bronze">Bronze</th>
                             <th class="total">Total</th>
                         </tr>
                         <tr id="rank-header" style="display: none;">
-                            <th>Department</th>
+                            <th class="col-dept">Department</th>
                             <th style="text-align: center;">Rank</th>
                         </tr>
                     </thead>
@@ -96,27 +92,26 @@
                 </table>
             </div>
 
-            <!-- 
-              NEW: View 2: Department-Specific Results (for Request #2)
-              This is hidden by default.
-            -->
+            <!-- View 2: Department-Specific Results (Hidden by default) -->
             <div id="department-details-view" style="display: none;">
-                <!-- This will be built by js/details-category.js -->
+                <!-- Dynamically built by js/details-category.js -->
             </div>
+        </div>
 
-        </div> <!-- end #details-view-wrapper -->
-
+        <footer class="footer">
+            <span>Developed by <img src="img/ubytesLogo@3x.png" class="ub-logo" alt="UBYTeS Logo"> 
+                <a href="about-us-live.html" style="color: inherit; text-decoration: underline;">UBYTeS - University of Bohol Young Thinkers Society</a>
+            </span>
+        </footer>
     </div>
 
-    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .4">
-    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .2">
-    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .4">
-    
-    <footer class="footer">
-        <span>Developed by <img src="img/ubytesLogo@3x.png" class="ub-logo" alt="UBYTeS Logo"> 
-            <a href="about-us-live.html" style="color: inherit; text-decoration: underline;">UBYTeS - University of Bohol Young Thinkers Society</a>
-        </span>
-    </footer>
+    <!-- Floating Bottom Navigation Pill (Sticky & Centered 24px above bottom) -->
+    <div class="nav-bar-container">
+        <div class="banner-pill" role="group" aria-label="Page navigation">
+            <button class="pill-btn" onclick="window.location.href='index.html'">LIVE COUNT</button>
+            <button class="pill-btn active" aria-current="page">DETAILS</button>
+        </div>
+    </div>
 
     <script src="js/details-category.js" defer></script>
 </body>
