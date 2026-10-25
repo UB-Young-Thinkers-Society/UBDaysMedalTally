@@ -773,6 +773,7 @@ function openAccountModal(mode, account = null) {
         emailInput.value = '';
         emailInput.disabled = false;
         pwInput.value = '';
+        pwInput.placeholder = 'Minimum 6 characters';
         roleSelect.value = 'committee';
         idInput.value = '';
         submitBtn.textContent = 'Create Account';
@@ -781,6 +782,7 @@ function openAccountModal(mode, account = null) {
         emailInput.value = account.email || '';
         emailInput.disabled = false;
         pwInput.value = account.password || '';
+        pwInput.placeholder = 'Enter new password or leave as-is';
         roleSelect.value = account.role || 'committee';
         idInput.value = account.id || '';
         submitBtn.textContent = 'Save Changes';
@@ -812,7 +814,11 @@ async function handleSaveAccount() {
         showGenericModal('alert', 'Validation Error', 'Email address is required.');
         return;
     }
-    if (!password || password.length < 6) {
+    if (!isEdit && (!password || password.length < 6)) {
+        showGenericModal('alert', 'Validation Error', 'Password must be at least 6 characters long.');
+        return;
+    }
+    if (isEdit && password && password !== '••••••••' && password.length < 6) {
         showGenericModal('alert', 'Validation Error', 'Password must be at least 6 characters long.');
         return;
     }

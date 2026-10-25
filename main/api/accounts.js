@@ -39,6 +39,31 @@ async function logAction(userId, action, details) {
     }
 }
 
+// Safely set or update user role in user-roles table without requiring a unique constraint
+async function setUserRole(userId, role) {
+    const { data: existingRows, error: checkError } = await supabase
+        .from('user-roles')
+        .select('*')
+        .eq('user_id', userId);
+
+    if (checkError) {
+        console.warn('Warning checking user-roles table:', checkError.message);
+    }
+
+    if (existingRows && existingRows.length > 0) {
+        const { error: updateError } = await supabase
+            .from('user-roles')
+            .update({ roles: role })
+            .eq('user_id', userId);
+        if (updateError) throw updateError;
+    } else {
+        const { error: insertError } = await supabase
+            .from('user-roles')
+            .insert({ user_id: userId, roles: role });
+        if (insertError) throw insertError;
+    }
+}
+
 const defaultPrivilegesByRole = {
     admin: ['accounts', 'tabulation', 'computation', 'config', 'log', 'live_feed', 'export'],
     tabHead: ['tabulation', 'config', 'live_feed', 'export'],
@@ -112,6 +137,9 @@ export default async (req, res) => {
                     ? privileges
                     : (defaultPrivilegesByRole[role] || ['computation', 'live_feed']);
 
+                let userId;
+                let createdAt;
+
                 const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
                     email: email.trim(),
                     password: password,
@@ -121,15 +149,40 @@ export default async (req, res) => {
                         privileges: userPrivileges
                     }
                 });
-                if (createError) throw createError;
 
-                const userId = newUser.user.id;
+                if (createError) {
+                    // If account was already registered in auth during a prior failed attempt, update credentials and finish setup
+                    if (createError.message && createError.message.toLowerCase().includes('already')) {
+                        const { data: listData } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
+                        const existingUser = listData?.users?.find(u => (u.email || '').toLowerCase() === email.trim().toLowerCase());
+                        if (existingUser) {
+                            userId = existingUser.id;
+                            createdAt = existingUser.created_at;
+                            await supabase.auth.admin.updateUserById(userId, {
+                                password: password,
+                                user_metadata: {
+                                    ...(existingUser.user_metadata || {}),
+                                    password_display: password,
+                                    privileges: userPrivileges
+                                }
+                            });
+                        } else {
+                            throw createError;
+                        }
+                    } else {
+                        throw createError;
+                    }
+                } else {
+                    userId = newUser.user.id;
+                    createdAt = newUser.user.created_at;
+                }
 
-                // Upsert role in user-roles
-                const { error: roleInsertError } = await supabase
-                    .from('user-roles')
-                    .upsert({ user_id: userId, roles: role }, { onConflict: 'user_id' });
-                if (roleInsertError) throw roleInsertError;
+                try {
+                    await setUserRole(userId, role);
+                } catch (roleError) {
+                    console.error('Role insertion failed for user:', userId, roleError);
+                    throw roleError;
+                }
 
                 await logAction(caller.id, 'createAccount', `Created new ${role} account: "${email.trim()}"`);
 
@@ -141,7 +194,7 @@ export default async (req, res) => {
                         role,
                         password,
                         privileges: userPrivileges,
-                        created_at: newUser.user.created_at
+                        created_at: createdAt
                     }
                 });
             }
@@ -161,21 +214,18 @@ export default async (req, res) => {
                     user_metadata: { ...(targetUser.user_metadata || {}) }
                 };
 
-                if (email && email.trim() !== targetUser.email) {
+                if (email && email.trim() && email.trim() !== targetUser.email) {
                     updatePayload.email = email.trim();
                     updatePayload.email_confirm = true;
                 }
 
-                if (password && password.trim()) {
+                if (password && password.trim() && password.trim() !== '••••••••') {
                     updatePayload.password = password.trim();
                     updatePayload.user_metadata.password_display = password.trim();
                 }
 
                 if (role) {
-                    const { error: roleUpdateError } = await supabase
-                        .from('user-roles')
-                        .upsert({ user_id: userId, roles: role }, { onConflict: 'user_id' });
-                    if (roleUpdateError) throw roleUpdateError;
+                    await setUserRole(userId, role);
                 }
 
                 const { data: updatedUser, error: updateError } = await supabase.auth.admin.updateUserById(
