@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UBDays 2026 - Log</title>
     <!-- Re-using the config page styles -->
-    <link rel="stylesheet" href="css/styles-config.css">
+    <link rel="stylesheet" href="css/styles-config.css?v=20261025_v5">
     <!-- New styles just for this log page -->
-    <link rel="stylesheet" href="css/styles-log.css">
+    <link rel="stylesheet" href="css/styles-log.css?v=20261025_v5">
     <link rel="icon" href="img/2026/ubdays2026.png">
 
     <!-- Client-side Supabase for AUTHENTICATION only -->
@@ -21,7 +21,7 @@
         window.supabaseClient = supabase;
     </script>
 </head>
-<body>
+<body style="background: url('img/2026/gradientBG.png') no-repeat center center fixed; background-size: cover;">
     <div id="loader">
         <div class="spinner"></div>
     </div>
@@ -29,7 +29,6 @@
     <div class="header">
         <div class="navSection">
             <div class="accInfo">
-                <img src="img/2026/ubdays2026.png" alt="UBDays 2026 Logo" class="admin-icon">
                 <span>UBDays 2026 - Log</span>
             </div>
             <!-- This navbar will be built by js/log-logic.js -->
@@ -59,11 +58,6 @@
         <span>Developed by <img src="img/ubytesLogo@3x.png" alt="UB Logo" class="ub-logo"> UBYTeS - University of Bohol Young Thinkers Society</span>
     </footer>
 
-    <img class="bgIcon1" src="img/bgIcon.png" style="opacity: .8">
-    <img class="bgIcon2" src="img/bgIcon.png" style="opacity: .8">
-    <img class="bgIcon3" src="img/bgIcon.png" style="opacity: .8">
-
-    <div class="background"></div>
     <script src="js/log-logic.js" defer></script>
 </body>
 </html>

@@ -3,10 +3,10 @@
 body {
     margin: 0;
     font-family: 'Figtree', sans-serif;
-    background: url('../img/2026/gradientBG.png') no-repeat center center fixed;
-    background-size: cover;
+    background: url('../img/2026/gradientBG.png') no-repeat center center fixed !important;
+    background-size: cover !important;
     position: relative;
-    min-height: 90vh;
+    min-height: 100vh;
     letter-spacing: -0.2px;
 }
 
@@ -56,16 +56,19 @@ body {
 .header {
     display: flex;
     flex-direction: row;
-    width: calc(100vw - 1.3in);
+    width: calc(100vw - 2in);
     max-width: 1400px;
     height: 80px;
     margin: 2rem auto 1rem auto;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+    box-sizing: border-box;
 }
 
 .navSection {
-    width: 92%;
+    flex: 1;
+    min-width: 0;
     height: 60px;
     display: flex;
     justify-content: space-between;
@@ -75,15 +78,22 @@ body {
     border: 1px solid #DBDBDB;
     border-radius: 16px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
 }
 
 #logoutBtn {
+    flex-shrink: 0;
     background: #ff4d4d;
     border: none;
     border-radius: 8px;
-    padding: 8px 18px;
+    padding: 0 20px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
+    box-sizing: border-box;
 }
 
 #logoutBtn:hover {
@@ -100,20 +110,15 @@ body {
 .accInfo {
     display: flex;
     align-items: center;
-    width: auto;
-    gap: 12px;
     font-size: 1.05rem;
-    font-weight: 600;
-    color: #1e293b;
+    font-weight: 700;
+    color: #0f172a;
     padding: 0 24px;
+    letter-spacing: -0.2px;
 }
 
 .admin-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 0;
-    background: transparent;
-    object-fit: contain;
+    display: none !important;
 }
 
 .navButtons {
@@ -143,12 +148,14 @@ body {
     position: relative;
     z-index: 1;
     width: calc(100vw - 2in);
+    max-width: 1400px;
     min-height: calc(100vh - 3in);
-    margin: 0 auto 5% auto;
+    margin: 0 auto 40px auto;
     background: #fff;
     border: 1px solid #DBDBDB;
     border-radius: 16px;
     padding: 32px 32px 24px 32px;
+    box-sizing: border-box;
 }
 
 .about-section {
@@ -385,10 +392,9 @@ footer {
     margin: 0 4px;
 }
 
-@media (max-width: 700px) {
-    .header { width: calc(100vw - 0.6in); margin: 2rem auto 1rem auto; }
+@media (max-width: 900px) {
+    .header, .main-card { width: calc(100vw - 32px) !important; }
     .navSection { gap: 12px; }
-    .main-card { width: calc(100vw - 0.8in); margin-bottom: 1.4in; }
     .intro-hero { grid-template-columns: 1fr; }
 }
 .tech-grid {
