@@ -273,7 +273,8 @@ export default async (req, res) => {
                     return res.status(400).json({ error: 'User ID and privileges array are required.' });
                 }
 
-                const { data: { user: targetUser }, error: getError } = await supabase.auth.admin.getUserById(userId);
+                const { data, error: getError } = await supabase.auth.admin.getUserById(userId);
+                const targetUser = data?.user;
                 if (getError || !targetUser) throw new Error('Target user not found.');
 
                 const meta = { ...(targetUser.user_metadata || {}), privileges };
@@ -283,7 +284,8 @@ export default async (req, res) => {
                 });
                 if (updateError) throw updateError;
 
-                await logAction(caller.id, 'savePrivileges', `Updated access privileges for "${targetUser.email}"`);
+                const targetEmail = targetUser.email || userId;
+                await logAction(caller.id, 'savePrivileges', `Updated access privileges for "${targetEmail}"`);
 
                 return res.status(200).json({ success: true, privileges });
             }

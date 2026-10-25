@@ -972,15 +972,19 @@ async function handleSavePrivileges() {
             throw new Error(err.error || 'Failed to update privileges.');
         }
 
+        // Capture user info before closing modal (which resets currentPrivilegeTargetUser to null)
+        const targetEmail = currentPrivilegeTargetUser?.email || 'User';
+        const targetId = currentPrivilegeTargetUser?.id;
+
         // Update local state
-        const targetAcc = accountsList.find(a => a.id === currentPrivilegeTargetUser.id);
+        const targetAcc = accountsList.find(a => a.id === targetId);
         if (targetAcc) targetAcc.privileges = checkedPrivs;
 
         closePrivilegesModal();
         showGenericModal(
             'alert',
             'Privileges Saved',
-            `Access privileges updated for "<strong>${escapeHtml(currentPrivilegeTargetUser.email)}</strong>".`
+            `Access privileges updated for "<strong>${escapeHtml(targetEmail)}</strong>".`
         );
 
     } catch (err) {
