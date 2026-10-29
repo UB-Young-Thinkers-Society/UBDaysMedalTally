@@ -6,6 +6,17 @@
     <title>UBDays 2026 - Config</title>
     <link rel="stylesheet" href="css/styles-config.css?v=20261025_v6">
     <link rel="icon" href="img/2026/ubdays2026.png">
+
+    <!-- Client-side Supabase for AUTHENTICATION only -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://nmftggrzxxkvpepqywmm.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tZnRnZ3J6eHhrdnBlcHF5d21tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxNDkzNzYsImV4cCI6MjA3NTcyNTM3Nn0.Y-BXGIQ0r_HqLZAvU8RSpZwOa3Rtvvjlp0xzbeARTto";
+        var supabase = (window.supabase && typeof window.supabase.createClient === 'function')
+            ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+            : (window.supabase || null);
+        window.supabaseClient = supabase;
+    </script>
     <style>
         /* Embedded Critical Styles for Config Left-Side Card Panels */
         .config-content {
@@ -97,26 +108,103 @@
             display: flex !important;
             flex-direction: column !important;
             gap: 7px !important;
-            max-height: calc(100vh - 290px) !important;
-            min-height: 380px !important;
+            max-height: calc((100vh - 430px) / 2) !important;
+            min-height: 200px !important;
             overflow-y: auto !important;
             padding-right: 4px !important;
             width: 100% !important;
             box-sizing: border-box !important;
         }
-        .department-list::-webkit-scrollbar {
+        .department-list::-webkit-scrollbar,
+        .juniors-list::-webkit-scrollbar {
             width: 5px;
         }
-        .department-list::-webkit-scrollbar-track {
+        .department-list::-webkit-scrollbar-track,
+        .juniors-list::-webkit-scrollbar-track {
             background: #f8fafc;
             border-radius: 4px;
         }
-        .department-list::-webkit-scrollbar-thumb {
+        .department-list::-webkit-scrollbar-thumb,
+        .juniors-list::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
         }
-        .department-list::-webkit-scrollbar-thumb:hover {
+        .department-list::-webkit-scrollbar-thumb:hover,
+        .juniors-list::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+        .juniors-list-container {
+            width: 100% !important;
+            flex: 1 !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        .juniors-list {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 7px !important;
+            max-height: calc((100vh - 430px) / 2) !important;
+            min-height: 200px !important;
+            overflow-y: auto !important;
+            padding-right: 4px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        .junior-team-item {
+            justify-content: space-between !important;
+        }
+        .junior-toggle-wrap {
+            display: flex !important;
+            align-items: center !important;
+            flex-shrink: 0 !important;
+            margin-left: auto !important;
+        }
+        .switch-toggle {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 22px;
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .switch-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider-round {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .2s ease;
+            border-radius: 22px;
+        }
+        .slider-round:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .2s ease;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .switch-toggle input:checked + .slider-round {
+            background-color: #002A93;
+        }
+        .switch-toggle input:checked + .slider-round:before {
+            transform: translateX(20px);
+        }
+        .badge-juniors {
+            background: #eff6ff !important;
+            color: #002A93 !important;
+            border: 1px solid #bfdbfe !important;
         }
         .department {
             display: flex !important;
@@ -445,10 +533,25 @@
                         <h2 class="panel-title">Participating Teams</h2>
                         <span class="panel-subtitle">Competing colleges & departments</span>
                     </div>
-                    <span class="badge-count" id="teams-count-badge">15 Teams</span>
+                    <span class="badge-count" id="teams-count-badge">0 Teams</span>
                 </div>
                 <div class="department-list-container">
                     <div class="department-list">
+                        <!-- Filled by js/config-page-logic.js -->
+                    </div>
+                </div>
+
+                <div class="panel-divider" style="margin: 14px 0 !important;"></div>
+
+                <div class="panel-header">
+                    <div>
+                        <h2 class="panel-title">Juniors League Teams</h2>
+                        <span class="panel-subtitle">Select teams competing in Juniors League</span>
+                    </div>
+                    <span class="badge-count badge-juniors" id="juniors-count-badge">0 Teams</span>
+                </div>
+                <div class="juniors-list-container">
+                    <div class="juniors-list" id="juniors-list">
                         <!-- Filled by js/config-page-logic.js -->
                     </div>
                 </div>
@@ -742,6 +845,6 @@
     <!-- End of Generic Modal -->
 
     <div class="background"></div>
-    <script src="js/config-page-logic.js?v=20261025_v7" defer></script>
+    <script src="js/config-page-logic.js?v=20261029_v2" defer></script>
 </body>
 </html>

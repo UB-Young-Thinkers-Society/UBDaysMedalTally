@@ -19,12 +19,22 @@ async function getUserFromToken(req) {
 
 /**
  * Helper function to build the medal tally.
+ * @param {string|null} categoryId - Optional category ID to filter by
+ * @param {string} league - 'seniors' (default), 'juniors', or 'all'
  */
-async function getMedalTally(categoryId = null) {
-    const { data: allTeams, error: allTeamsError } = await supabase
+async function getMedalTally(categoryId = null, league = 'seniors') {
+    let teamsQuery = supabase
         .from('teams')
-        .select('id, name, acronym, logo_url');
-    if (allTeamsError) throw allTeamsError;
+        .select('id, name, acronym, logo_url, is_junior');
+
+    if (league === 'juniors') {
+        teamsQuery = teamsQuery.eq('is_junior', true);
+    } else if (league === 'seniors') {
+        teamsQuery = teamsQuery.eq('is_junior', false);
+    } // if league === 'all', include all teams
+
+    const { data: targetTeams, error: teamsError } = await teamsQuery;
+    if (teamsError) throw teamsError;
 
     let query = supabase
         .from('results')
@@ -38,21 +48,16 @@ async function getMedalTally(categoryId = null) {
         .eq('events.status', 'published');
 
     if (categoryId) {
-        // CASE 1: Specific Category Selected (Details Page)
-        // We strictly filter by this ID. Even if it's "Juniors League", it will show up here.
+        // Specific Category Selected (Details Page)
         query = query.eq('events.category_id', categoryId);
     } else {
-        // CASE 2: No Category Selected (Main Live Feed)
-        // Requirement: Exclude "Juniors League" from the overall count.
-        
-        // 1. Find the ID of the category named "Juniors League" (case-insensitive)
+        // Exclude category named "Juniors League" if it exists as an event category
         const { data: excludedCategory } = await supabase
             .from('categories')
             .select('id')
             .ilike('name', 'Juniors League') 
             .maybeSingle();
 
-        // 2. If found, exclude its ID from the calculation
         if (excludedCategory) {
             query = query.neq('events.category_id', excludedCategory.id);
         }
@@ -62,7 +67,7 @@ async function getMedalTally(categoryId = null) {
     if (resultsError) throw resultsError;
 
     const tallyMap = new Map();
-    allTeams.forEach(team => {
+    targetTeams.forEach(team => {
         tallyMap.set(team.id, { ...team, gold: 0, silver: 0, bronze: 0, total: 0 });
     });
 
@@ -96,19 +101,20 @@ async function getMedalTally(categoryId = null) {
 // --- Main API Handler ---
 export default async (req, res) => {
     try {
-        const { type, eventId, categoryId, teamId } = req.query; // Added teamId
+        const { type, eventId, categoryId, teamId, league } = req.query;
 
         switch (type) {
             
             // --- PUBLIC-FACING DATA (No Auth Required) ---
 
             case 'medalTally': {
-                const tally = await getMedalTally(null);
+                const activeLeague = league === 'juniors' ? 'juniors' : (league === 'all' ? 'all' : 'seniors');
+                const tally = await getMedalTally(null, activeLeague);
                 return res.status(200).json(tally);
             }
             case 'categoryTally': {
                 if (!categoryId) return res.status(400).json({ error: 'Missing categoryId.' });
-                const tally = await getMedalTally(categoryId);
+                const tally = await getMedalTally(categoryId, league || 'all');
                 return res.status(200).json(tally);
             }
             case 'allEvents': {
@@ -124,23 +130,23 @@ export default async (req, res) => {
                 return res.status(200).json(data);
             }
             case 'teams': {
-                const { data, error } = await supabase.from('teams').select('id, name, acronym, logo_url');
+                const { data, error } = await supabase.from('teams').select('id, name, acronym, logo_url, is_junior');
                 if (error) throw error;
                 return res.status(200).json(data);
             }
             
-            // --- NEW: CASE TO GET A SINGLE TEAM BY ID (for the Edit button) ---
+            // --- CASE TO GET A SINGLE TEAM BY ID (for the Edit button) ---
             case 'teamById': {
                 if (!teamId) return res.status(400).json({ error: 'Missing teamId.' });
                 const { data, error } = await supabase
                     .from('teams')
-                    .select('id, name, acronym, logo_url')
+                    .select('id, name, acronym, logo_url, is_junior')
                     .eq('id', teamId)
-                    .single(); // Use .single() to get one object, not an array
+                    .single();
                 if (error) throw error;
                 return res.status(200).json(data);
             }
-            // --- END OF NEW CASE ---
+            // --- END OF CASE ---
 
             case 'eventResults': {
                 if (!eventId) return res.status(400).json({ error: 'Missing eventId.' });

@@ -174,9 +174,120 @@ async function loadTeams() {
             departmentDiv.querySelector('.delete-btn').addEventListener('click', () => deleteTeamClicked(team.id, team.name));
         });
 
+        // --- Render Juniors League Teams Section ---
+        renderJuniorsLeagueList(teams);
+
     } catch (error) {
         console.error(error);
         departmentList.innerHTML = "<p style='color:#ef4444;padding:8px;'>Failed to load teams.</p>";
+        const juniorsList = document.getElementById('juniors-list');
+        if (juniorsList) {
+            juniorsList.innerHTML = "<p style='color:#ef4444;padding:8px;'>Failed to load teams.</p>";
+        }
+    }
+}
+
+/**
+ * Renders the Juniors League selection list with toggles
+ */
+function renderJuniorsLeagueList(teams) {
+    const juniorsList = document.getElementById('juniors-list');
+    const juniorsBadge = document.getElementById('juniors-count-badge');
+    if (!juniorsList) return;
+
+    if (!teams || teams.length === 0) {
+        juniorsList.innerHTML = "<p style='color:#888;font-size:0.9rem;padding:12px;text-align:center;'>No teams available.</p>";
+        if (juniorsBadge) juniorsBadge.textContent = "0 Teams";
+        return;
+    }
+
+    const juniorCount = teams.filter(t => Boolean(t.is_junior)).length;
+    if (juniorsBadge) {
+        juniorsBadge.textContent = `${juniorCount} Team${juniorCount === 1 ? '' : 's'}`;
+    }
+
+    juniorsList.innerHTML = "";
+    teams.forEach(team => {
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("department", "junior-team-item");
+
+        const isChecked = Boolean(team.is_junior);
+
+        itemDiv.innerHTML = `
+            <div class="dept-logo-placeholder">
+                <img src="${team.logo_url}" alt="${escapeHtml(team.acronym)} Logo" loading="lazy">
+            </div>
+            <div class="dept-info">
+                <span class="dept-acronym">${escapeHtml(team.acronym)}</span>
+                <span class="dept-fullname" title="${escapeHtml(team.name)}">${escapeHtml(team.name)}</span>
+            </div>
+            <div class="junior-toggle-wrap">
+                <label class="switch-toggle" title="Toggle Juniors League participation">
+                    <input type="checkbox" class="junior-checkbox" data-id="${team.id}" data-name="${escapeHtml(team.name)}" ${isChecked ? 'checked' : ''}>
+                    <span class="slider-round"></span>
+                </label>
+            </div>
+        `;
+
+        juniorsList.appendChild(itemDiv);
+
+        const checkbox = itemDiv.querySelector('.junior-checkbox');
+        checkbox.addEventListener('change', async (e) => {
+            const newStatus = e.target.checked;
+            await handleToggleJunior(team.id, newStatus, team.name, e.target);
+        });
+    });
+}
+
+/**
+ * Handles toggling a team's junior status via /api/actions
+ */
+async function handleToggleJunior(teamId, isJunior, teamName, checkboxEl) {
+    try {
+        if (checkboxEl) checkboxEl.disabled = true;
+
+        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+        if (sessionError || !sessionData.session) {
+            throw new Error('Your session has expired. Please log in again.');
+        }
+
+        const response = await fetch('/api/actions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({
+                action: 'toggleJuniorStatus',
+                teamId: teamId,
+                isJunior: isJunior
+            }),
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Failed to update team league status.');
+        }
+
+        // Recalculate badge count dynamically
+        const allCheckboxes = document.querySelectorAll('.junior-checkbox');
+        let activeCount = 0;
+        allCheckboxes.forEach(cb => {
+            if (cb.checked) activeCount++;
+        });
+        const juniorsBadge = document.getElementById('juniors-count-badge');
+        if (juniorsBadge) {
+            juniorsBadge.textContent = `${activeCount} Team${activeCount === 1 ? '' : 's'}`;
+        }
+
+    } catch (error) {
+        console.error('Error toggling junior status:', error);
+        if (checkboxEl) {
+            checkboxEl.checked = !isJunior; // Revert checkbox state
+        }
+        showGenericModal('alert', 'Update Failed', `Could not update league status for "${escapeHtml(teamName)}": ${error.message}`);
+    } finally {
+        if (checkboxEl) checkboxEl.disabled = false;
     }
 }
 

@@ -19,7 +19,7 @@
             <div class="banner-branding">
                 <img src="img/2026/ubdays2026.png" alt="UBDays 2026 Logo" class="banner-logo">
                 <div class="banner-title-group">
-                    <h1 class="banner-title">OFFICIAL MEDAL TALLY</h1>
+                    <h1 class="banner-title" id="tally-banner-title">OFFICIAL MEDAL TALLY</h1>
                     <div class="banner-subtitle" id="last-updated">as of Loading...</div>
                 </div>
             </div>
@@ -98,12 +98,13 @@
     <!-- Floating Bottom Navigation Pill (Sticky & Centered 24px above bottom) -->
     <div class="nav-bar-container">
         <div class="banner-pill" role="group" aria-label="Page navigation">
-            <button class="pill-btn active" aria-current="page">LIVE COUNT</button>
+            <button class="pill-btn active" id="tab-live-btn" data-league="seniors" aria-current="page">LIVE COUNT</button>
+            <button class="pill-btn" id="tab-juniors-btn" data-league="juniors">JUNIORS LEAGUE</button>
             <button class="pill-btn" onclick="window.location.href='details-category.html'">DETAILS</button>
         </div>
     </div>
 
     <!-- Live Feed Logic with Sorting & Chevrons -->
-    <script src="js/live-feed.js" defer></script>
+    <script src="js/live-feed.js?v=20261029_v1" defer></script>
 </body>
 </html>

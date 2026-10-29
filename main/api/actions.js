@@ -224,6 +224,30 @@ export default async (req, res) => {
                 return res.status(200).json({ success: true });
             }
 
+            // --- Case: Toggle / Set Team Junior Status (FROM JSON) ---
+            case 'toggleJuniorStatus': {
+                const { teamId, isJunior } = reqBody;
+                if (!teamId) return res.status(400).json({ error: 'Team ID is required.' });
+
+                const boolValue = Boolean(isJunior);
+                const { data, error } = await supabase
+                    .from('teams')
+                    .update({ is_junior: boolValue })
+                    .eq('id', teamId)
+                    .select();
+
+                if (error) throw error;
+
+                const teamName = await getTeamName(teamId);
+                await logAction(
+                    user.id,
+                    'toggleJuniorStatus',
+                    `${boolValue ? 'Assigned' : 'Removed'} "${teamName}" ${boolValue ? 'to' : 'from'} Juniors League`
+                );
+
+                return res.status(200).json({ success: true, data: data[0] });
+            }
+
 
             // --- Case: Add a new Category (FROM JSON) ---
             case 'addCategory': {

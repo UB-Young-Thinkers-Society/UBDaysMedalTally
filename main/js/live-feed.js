@@ -1,12 +1,14 @@
 // UBDays 2026 - Live Medal Tally Feed Logic
 
 let rawTeams = [];
+let currentLeague = 'seniors'; // 'seniors' (Live Count) or 'juniors' (Juniors League)
 let currentSort = {
     key: 'default', // 'default', 'name', 'gold', 'silver', 'bronze', 'total'
     direction: 'desc' // 'desc' (highest to lowest), 'asc' (lowest to highest)
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    initTabs();
     setupSortListeners();
     fetchAndRenderTally();
     updateTimestamp();
@@ -17,6 +19,87 @@ document.addEventListener('DOMContentLoaded', () => {
         updateTimestamp();
     }, 60000);
 });
+
+/**
+ * Initializes the bottom floating pill tabs (LIVE COUNT vs JUNIORS LEAGUE)
+ */
+function initTabs() {
+    const liveBtn = document.getElementById('tab-live-btn');
+    const juniorsBtn = document.getElementById('tab-juniors-btn');
+
+    // Check URL parameters (e.g., from details-category.html or bookmark: ?tab=juniors)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam === 'juniors') {
+        currentLeague = 'juniors';
+    } else {
+        currentLeague = 'seniors';
+    }
+
+    updateTabUI();
+
+    if (liveBtn) {
+        liveBtn.addEventListener('click', () => {
+            if (currentLeague === 'seniors') return;
+            currentLeague = 'seniors';
+            onLeagueTabChanged();
+        });
+    }
+
+    if (juniorsBtn) {
+        juniorsBtn.addEventListener('click', () => {
+            if (currentLeague === 'juniors') return;
+            currentLeague = 'juniors';
+            onLeagueTabChanged();
+        });
+    }
+}
+
+/**
+ * Updates UI buttons, banner title, and URL parameter when tab changes
+ */
+function onLeagueTabChanged() {
+    updateTabUI();
+    const newTabParam = currentLeague === 'juniors' ? 'juniors' : 'live';
+    const newUrl = `${window.location.pathname}?tab=${newTabParam}`;
+    window.history.replaceState(null, '', newUrl);
+    fetchAndRenderTally(true);
+}
+
+/**
+ * Synchronizes pill button active states and header banner title
+ */
+function updateTabUI() {
+    const liveBtn = document.getElementById('tab-live-btn');
+    const juniorsBtn = document.getElementById('tab-juniors-btn');
+    const bannerTitle = document.getElementById('tally-banner-title');
+
+    if (currentLeague === 'juniors') {
+        if (liveBtn) {
+            liveBtn.classList.remove('active');
+            liveBtn.removeAttribute('aria-current');
+        }
+        if (juniorsBtn) {
+            juniorsBtn.classList.add('active');
+            juniorsBtn.setAttribute('aria-current', 'page');
+        }
+        if (bannerTitle) {
+            bannerTitle.textContent = 'JUNIORS LEAGUE MEDAL TALLY';
+        }
+    } else {
+        if (juniorsBtn) {
+            juniorsBtn.classList.remove('active');
+            juniorsBtn.removeAttribute('aria-current');
+        }
+        if (liveBtn) {
+            liveBtn.classList.add('active');
+            liveBtn.setAttribute('aria-current', 'page');
+        }
+        if (bannerTitle) {
+            bannerTitle.textContent = 'OFFICIAL MEDAL TALLY';
+        }
+    }
+}
 
 /**
  * Updates the timestamp with the format: "as of [Month Day, Year] | [Time AM/PM]"
@@ -139,7 +222,10 @@ function renderTallyRows() {
     if (!tbody) return;
 
     if (!rawTeams || rawTeams.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; font-weight: 600;">No teams or results found.</td></tr>`;
+        const emptyMsg = currentLeague === 'juniors' 
+            ? 'No teams assigned to Juniors League yet.' 
+            : 'No teams or results found.';
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; font-weight: 600; color: #64748B;">${emptyMsg}</td></tr>`;
         return;
     }
 
@@ -167,14 +253,20 @@ function renderTallyRows() {
 
 /**
  * Fetches the medal tally from the API and renders the table without resetting sort
+ * @param {boolean} showLoading - If true, displays quick loading row (e.g. on manual tab switch)
  */
-async function fetchAndRenderTally() {
+async function fetchAndRenderTally(showLoading = false) {
     const tbody = document.getElementById('tally-body');
     const scrollY = window.scrollY;
     const activeElement = document.activeElement;
 
+    if (showLoading && tbody) {
+        const leagueLabel = currentLeague === 'juniors' ? 'Juniors League' : 'live';
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; font-weight: 600; color: #64748B;">Loading ${leagueLabel} medal tally...</td></tr>`;
+    }
+
     try {
-        const response = await fetch('/api/data?type=medalTally');
+        const response = await fetch(`/api/data?type=medalTally&league=${encodeURIComponent(currentLeague)}`);
         if (!response.ok) {
             throw new Error('Failed to load data from the server.');
         }
@@ -186,11 +278,13 @@ async function fetchAndRenderTally() {
         renderTallyRows();
     } catch (error) {
         console.error('Error fetching medal tally:', error);
-        if (tbody && rawTeams.length === 0) {
+        if (tbody) {
             tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 40px; font-weight: 600; color: #DC2626;">Error: ${error.message}</td></tr>`;
         }
     } finally {
-        window.scrollTo(0, scrollY);
+        if (!showLoading) {
+            window.scrollTo(0, scrollY);
+        }
         if (activeElement && activeElement.focus) {
             activeElement.focus();
         }
