@@ -1,4 +1,4 @@
-﻿// --- 1. AUTHENTICATION & SESSION -------------------
+// --- 1. AUTHENTICATION & SESSION -------------------
 async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadTeams();
     initAccountsManagement();
     initCategoryModal();
+    initHideTally();
 
     addTeamForm.addEventListener('submit', handleAddTeam);
     addEventForm.addEventListener('submit', handleAddEvent);
