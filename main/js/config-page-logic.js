@@ -1,4 +1,4 @@
-// --- 1. AUTHENTICATION & SESSION -------------------
+﻿// --- 1. AUTHENTICATION & SESSION -------------------
 async function checkSession(authorizedRole) {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
     if (sessionError || !sessionData.session) {
@@ -1165,4 +1165,107 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.innerText = text;
     return div.innerHTML;
+}
+// --- 8. HIDE TALLY OVERLAY LOGIC (DB-backed, syncs to all screens) ---
+
+async function initHideTally() {
+    const btn = document.getElementById('btn-hide-tally');
+    const dateInput = document.getElementById('tally-end-date');
+    const statusEl = document.getElementById('hide-tally-status');
+    if (!btn || !dateInput) return;
+
+    // Load current state from DB
+    await _loadHideTallyState(dateInput, statusEl);
+
+    btn.addEventListener('click', async () => {
+        const currentlyHidden = btn.classList.contains('active');
+        const newState = !currentlyHidden;
+        const chosenDate = dateInput.value;
+
+        if (newState && !chosenDate) {
+            showGenericModal('alert', 'Date Required', 'Please set the <strong>UBDays End Date</strong> before hiding the tally.');
+            return;
+        }
+
+        try {
+            btn.disabled = true;
+            const labelEl = document.getElementById('btn-hide-tally-label');
+            if (labelEl) labelEl.textContent = 'Saving...';
+
+            const { data: sessionData } = await supabase.auth.getSession();
+            if (!sessionData?.session) throw new Error('Session expired. Please log in again.');
+
+            const res = await fetch('/api/actions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${sessionData.session.access_token}`
+                },
+                body: JSON.stringify({
+                    action: 'setHideTally',
+                    hidden: newState,
+                    endDate: chosenDate || ''
+                })
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || 'Failed to update overlay state.');
+            }
+
+            _updateHideTallyUI(newState, statusEl);
+
+        } catch (err) {
+            console.error('Error toggling hide tally:', err);
+            showGenericModal('alert', 'Error', 'Could not update overlay: ' + err.message);
+            // Restore label
+            _updateHideTallyUI(btn.classList.contains('active'), statusEl);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    // Persist date input change (does not save to DB alone — saved on button click)
+    dateInput.addEventListener('change', () => {
+        if (statusEl && btn.classList.contains('active')) {
+            statusEl.textContent = 'Date changed — click "Show Tally" then "Hide Tally" to re-apply.';
+        }
+    });
+}
+
+async function _loadHideTallyState(dateInput, statusEl) {
+    try {
+        const res = await fetch('/api/data?type=appSettings');
+        if (!res.ok) return;
+        const settings = await res.json();
+
+        const isHidden = settings['hide_tally'] === 'true';
+        const savedDate = settings['hide_tally_date'] || '';
+
+        if (savedDate && dateInput) dateInput.value = savedDate;
+        _updateHideTallyUI(isHidden, statusEl);
+    } catch (err) {
+        console.error('Could not load hide tally state:', err);
+    }
+}
+
+function _updateHideTallyUI(isHidden, statusEl) {
+    const btn = document.getElementById('btn-hide-tally');
+    const labelEl = document.getElementById('btn-hide-tally-label');
+    if (!btn || !labelEl) return;
+
+    if (isHidden) {
+        btn.classList.add('active');
+        labelEl.textContent = 'Show Tally';
+        if (statusEl) statusEl.textContent = 'Overlay is currently active on all live feed screens.';
+    } else {
+        btn.classList.remove('active');
+        labelEl.textContent = 'Hide Tally';
+        if (statusEl) statusEl.textContent = '';
+    }
+}
+
+function formatClosingDate(isoDate) {
+    const d = new Date(isoDate + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }

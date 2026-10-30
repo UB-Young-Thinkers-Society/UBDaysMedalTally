@@ -1,4 +1,4 @@
-import { supabase } from './db_connection.js';
+﻿import { supabase } from './db_connection.js';
 import { Formidable } from 'formidable'; // <-- ADD THIS IMPORT
 import fs from 'fs'; // <-- ADD THIS IMPORT
 
@@ -378,6 +378,36 @@ export default async (req, res) => {
             }
             // --- END NEW CASE ---
 
+            // --- Case: Set Hide Tally overlay state (FROM JSON) ---
+            case 'setHideTally': {
+                const { hidden, endDate } = reqBody;
+                if (typeof hidden !== 'boolean') {
+                    return res.status(400).json({ error: 'Missing or invalid hidden boolean.' });
+                }
+
+                const year = endDate ? String(new Date(endDate + 'T00:00:00').getFullYear()) : String(new Date().getFullYear());
+
+                // Upsert each setting key (app_settings table: key TEXT PRIMARY KEY, value TEXT)
+                const upserts = [
+                    { key: 'hide_tally',      value: String(hidden) },
+                    { key: 'hide_tally_date', value: endDate || '' },
+                    { key: 'hide_tally_year', value: year },
+                ];
+
+                for (const row of upserts) {
+                    const { error } = await supabase
+                        .from('app_settings')
+                        .upsert({ key: row.key, value: row.value }, { onConflict: 'key' });
+                    if (error) throw error;
+                }
+
+                const logDetail = hidden
+                    ? ('Tally overlay activated' + (endDate ? ' - closing date: ' + endDate : ''))
+                    : 'Tally overlay deactivated';
+                await logAction(user.id, 'setHideTally', logDetail);
+
+                return res.status(200).json({ success: true, hidden, endDate, year });
+            }
             default:
                 return res.status(400).json({ error: 'Invalid "action" parameter.' });
         }

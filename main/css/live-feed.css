@@ -662,3 +662,46 @@ footer,
         font-size: 0.78em;
     }
 }
+/* ===== Hide Tally Overlay (triggered from Config page) ===== */
+.hide-tally-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 8000;
+    background: rgba(71, 85, 105, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: hideTallyFadeIn 0.4s ease;
+}
+@keyframes hideTallyFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.hide-tally-overlay-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    max-width: 560px;
+    padding: 40px 32px;
+    text-align: center;
+}
+.hide-tally-logo {
+    width: 140px;
+    height: auto;
+    filter: drop-shadow(0 4px 24px rgba(0,0,0,0.28));
+}
+.hide-tally-message {
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: #ffffff;
+    line-height: 1.65;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.hide-tally-message strong {
+    font-weight: 800;
+    color: #fde68a;
+}

@@ -1,4 +1,4 @@
-// This is your merged API for all GET requests
+﻿// This is your merged API for all GET requests
 import { supabase } from './db_connection.js';
 
 /**
@@ -133,6 +133,19 @@ export default async (req, res) => {
                 const { data, error } = await supabase.from('teams').select('id, name, acronym, logo_url, is_junior');
                 if (error) throw error;
                 return res.status(200).json(data);
+            }
+
+            // --- PUBLIC: App-wide settings (hide_tally overlay state) ---
+            case 'appSettings': {
+                const { data, error } = await supabase
+                    .from('app_settings')
+                    .select('key, value')
+                    .in('key', ['hide_tally', 'hide_tally_date', 'hide_tally_year']);
+                if (error) throw error;
+                // Flatten into a plain object { hide_tally: "true", hide_tally_date: "...", ... }
+                const settings = {};
+                (data || []).forEach(row => { settings[row.key] = row.value; });
+                return res.status(200).json(settings);
             }
             
             // --- CASE TO GET A SINGLE TEAM BY ID (for the Edit button) ---

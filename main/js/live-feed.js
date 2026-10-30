@@ -1,4 +1,4 @@
-// UBDays 2026 - Live Medal Tally Feed Logic
+﻿// UBDays 2026 - Live Medal Tally Feed Logic
 
 let rawTeams = [];
 let currentLeague = 'seniors'; // 'seniors' (Live Count) or 'juniors' (Juniors League)
@@ -290,3 +290,51 @@ async function fetchAndRenderTally(showLoading = false) {
         }
     }
 }
+// --- HIDE TALLY OVERLAY LOGIC (DB-backed, visible on all screens) ---
+
+async function fetchAndApplyOverlay() {
+    const overlay = document.getElementById('hide-tally-overlay');
+    const msgEl = document.getElementById('hide-tally-message');
+    const dateEl = document.getElementById('hide-tally-date-display');
+    if (!overlay) return;
+
+    try {
+        const res = await fetch('/api/data?type=appSettings');
+        if (!res.ok) return;
+        const settings = await res.json();
+
+        const isHidden = settings['hide_tally'] === 'true';
+        const savedDate = settings['hide_tally_date'] || '';
+        const year = settings['hide_tally_year'] || new Date().getFullYear();
+
+        if (isHidden) {
+            const formattedDate = savedDate ? formatOverlayDate(savedDate) : 'a date to be announced';
+            if (dateEl) dateEl.textContent = formattedDate;
+            // Update year in the message text node
+            if (msgEl) {
+                const firstText = msgEl.firstChild;
+                if (firstText && firstText.nodeType === Node.TEXT_NODE) {
+                    firstText.textContent = `The UBDays ${year} Tabulation Team is working hard to finalize the final list of winners.`;
+                }
+            }
+            overlay.style.display = 'flex';
+            overlay.setAttribute('aria-hidden', 'false');
+        } else {
+            overlay.style.display = 'none';
+            overlay.setAttribute('aria-hidden', 'true');
+        }
+    } catch (err) {
+        console.warn('Could not fetch overlay state:', err);
+    }
+}
+
+function formatOverlayDate(isoDate) {
+    const d = new Date(isoDate + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchAndApplyOverlay();
+    // Re-check overlay state every 30 seconds (same cadence as the live feed refresh)
+    setInterval(fetchAndApplyOverlay, 30000);
+});

@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UBDays 2026 - Config</title>
-    <link rel="stylesheet" href="css/styles-config.css?v=20261025_v6">
+    <link rel="stylesheet" href="css/styles-config.css?v=20261029_v7">
     <link rel="icon" href="img/2026/ubdays2026.png">
 
     <!-- Client-side Supabase for AUTHENTICATION only -->
@@ -623,6 +623,32 @@
                         </button>
                     </form>
                 </div>
+
+                <div class="panel-divider"></div>
+
+                <!-- Sub-card: Hide Tally Overlay -->
+                <div class="form-section-block">
+                    <div class="panel-header" style="margin-bottom: 10px;">
+                        <div>
+                            <h3 class="panel-subheading">Live Feed Overlay</h3>
+                            <span class="panel-subtitle">Show a holding screen on the public live feed</span>
+                        </div>
+                    </div>
+                    <div class="hide-tally-block">
+                        <div class="hide-tally-date-row">
+                            <label class="hide-tally-date-label" for="tally-end-date">UBDays End Date</label>
+                            <input class="styled-input" type="date" id="tally-end-date" title="Set the closing program date shown on the overlay">
+                        </div>
+                        <button type="button" class="btn-hide-tally" id="btn-hide-tally">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                            <span id="btn-hide-tally-label">Hide Tally</span>
+                        </button>
+                        <p class="hide-tally-status" id="hide-tally-status"></p>
+                    </div>
+                </div>
             </div>
 
             <!-- Right: Accounts Management Section -->
@@ -833,6 +859,6 @@
     <!-- End of Generic Modal -->
 
     <div class="background"></div>
-    <script src="js/config-page-logic.js?v=20261029_v2" defer></script>
+    <script src="js/config-page-logic.js?v=20261030_v1" defer></script>
 </body>
 </html>

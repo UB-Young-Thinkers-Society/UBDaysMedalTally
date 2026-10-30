@@ -1125,3 +1125,58 @@ footer {
     height: 22px;
     margin: 0 4px;
 }
+/* ===== Hide Tally Block (Live Feed Overlay Controls) ===== */
+.hide-tally-block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+.hide-tally-date-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+.hide-tally-date-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #475569;
+    letter-spacing: 0.01em;
+}
+.btn-hide-tally {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 16px;
+    background: #475569;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    font-family: inherit;
+}
+.btn-hide-tally:hover {
+    background: #334155;
+}
+.btn-hide-tally:active {
+    transform: scale(0.99);
+}
+.btn-hide-tally.active {
+    background: #16a34a;
+}
+.btn-hide-tally.active:hover {
+    background: #15803d;
+}
+.hide-tally-status {
+    font-size: 0.78rem;
+    color: #64748b;
+    margin: 0;
+    text-align: center;
+    min-height: 1.1em;
+}
