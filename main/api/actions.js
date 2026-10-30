@@ -1,4 +1,4 @@
-﻿import { supabase } from './db_connection.js';
+import { supabase } from './db_connection.js';
 import { Formidable } from 'formidable'; // <-- ADD THIS IMPORT
 import fs from 'fs'; // <-- ADD THIS IMPORT
 
@@ -380,7 +380,7 @@ export default async (req, res) => {
 
             // --- Case: Set Hide Tally overlay state (FROM JSON) ---
             case 'setHideTally': {
-                const { hidden, endDate } = reqBody;
+                const { hidden, endDate, location } = reqBody;
                 if (typeof hidden !== 'boolean') {
                     return res.status(400).json({ error: 'Missing or invalid hidden boolean.' });
                 }
@@ -389,9 +389,10 @@ export default async (req, res) => {
 
                 // Upsert each setting key (app_settings table: key TEXT PRIMARY KEY, value TEXT)
                 const upserts = [
-                    { key: 'hide_tally',      value: String(hidden) },
-                    { key: 'hide_tally_date', value: endDate || '' },
-                    { key: 'hide_tally_year', value: year },
+                    { key: 'hide_tally',          value: String(hidden) },
+                    { key: 'hide_tally_date',     value: endDate || '' },
+                    { key: 'hide_tally_year',     value: year },
+                    { key: 'hide_tally_location', value: location || '' },
                 ];
 
                 for (const row of upserts) {
@@ -402,11 +403,11 @@ export default async (req, res) => {
                 }
 
                 const logDetail = hidden
-                    ? ('Tally overlay activated' + (endDate ? ' - closing date: ' + endDate : ''))
+                    ? ('Tally overlay activated' + (endDate ? ' - closing date: ' + endDate : '') + (location ? ' at ' + location : ''))
                     : 'Tally overlay deactivated';
                 await logAction(user.id, 'setHideTally', logDetail);
 
-                return res.status(200).json({ success: true, hidden, endDate, year });
+                return res.status(200).json({ success: true, hidden, endDate, year, location });
             }
             default:
                 return res.status(400).json({ error: 'Invalid "action" parameter.' });

@@ -1,4 +1,4 @@
-﻿// This is your merged API for all GET requests
+// This is your merged API for all GET requests
 import { supabase } from './db_connection.js';
 
 /**
@@ -140,7 +140,7 @@ export default async (req, res) => {
                 const { data, error } = await supabase
                     .from('app_settings')
                     .select('key, value')
-                    .in('key', ['hide_tally', 'hide_tally_date', 'hide_tally_year']);
+                    .in('key', ['hide_tally', 'hide_tally_date', 'hide_tally_year', 'hide_tally_location']);
                 if (error) throw error;
                 // Flatten into a plain object { hide_tally: "true", hide_tally_date: "...", ... }
                 const settings = {};

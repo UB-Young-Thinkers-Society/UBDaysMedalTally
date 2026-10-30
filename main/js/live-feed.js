@@ -1,4 +1,4 @@
-﻿// UBDays 2026 - Live Medal Tally Feed Logic
+// UBDays 2026 - Live Medal Tally Feed Logic
 
 let rawTeams = [];
 let currentLeague = 'seniors'; // 'seniors' (Live Count) or 'juniors' (Juniors League)
@@ -294,8 +294,10 @@ async function fetchAndRenderTally(showLoading = false) {
 
 async function fetchAndApplyOverlay() {
     const overlay = document.getElementById('hide-tally-overlay');
-    const msgEl = document.getElementById('hide-tally-message');
+    const yearEl = document.getElementById('hide-tally-year-display');
     const dateEl = document.getElementById('hide-tally-date-display');
+    const locWrap = document.getElementById('hide-tally-location-wrap');
+    const locEl = document.getElementById('hide-tally-location-display');
     if (!overlay) return;
 
     try {
@@ -305,18 +307,24 @@ async function fetchAndApplyOverlay() {
 
         const isHidden = settings['hide_tally'] === 'true';
         const savedDate = settings['hide_tally_date'] || '';
-        const year = settings['hide_tally_year'] || new Date().getFullYear();
+        const savedLocation = (settings['hide_tally_location'] || '').trim();
+        const year = settings['hide_tally_year'] || (savedDate ? new Date(savedDate + 'T00:00:00').getFullYear() : new Date().getFullYear());
 
         if (isHidden) {
+            if (yearEl) yearEl.textContent = year;
+
             const formattedDate = savedDate ? formatOverlayDate(savedDate) : 'a date to be announced';
             if (dateEl) dateEl.textContent = formattedDate;
-            // Update year in the message text node
-            if (msgEl) {
-                const firstText = msgEl.firstChild;
-                if (firstText && firstText.nodeType === Node.TEXT_NODE) {
-                    firstText.textContent = `The UBDays ${year} Tabulation Team is working hard to finalize the final list of winners.`;
+
+            if (locWrap && locEl) {
+                if (savedLocation) {
+                    locEl.textContent = savedLocation;
+                    locWrap.style.display = 'inline';
+                } else {
+                    locWrap.style.display = 'none';
                 }
             }
+
             overlay.style.display = 'flex';
             overlay.setAttribute('aria-hidden', 'false');
         } else {

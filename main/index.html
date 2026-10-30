@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>UBDays 2026 Medal Tally</title>
-    <link rel="stylesheet" href="css/live-feed.css">
+    <link rel="stylesheet" href="css/live-feed.css?v=20261030_v3">
     <link rel="icon" href="img/2026/ubdays2026.png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
@@ -105,17 +105,17 @@
     </div>
 
     <!-- Hide Tally Overlay -->
-    <div id="hide-tally-overlay" class="hide-tally-overlay" style="display:none;" aria-hidden="true">
+    <div id="hide-tally-overlay" class="hide-tally-overlay" style="display:none; position:fixed; inset:0; width:100vw; height:100vh; z-index:99999;" aria-hidden="true">
         <div class="hide-tally-overlay-inner">
-            <img src="img/2026/ubdays2026.png" alt="UBDays 2026 Logo" class="hide-tally-logo">
+            <img src="img/2026/ubdays2026.png" alt="UBDays 2026 Logo" class="hide-tally-logo" width="140" height="140" style="width:140px; max-width:140px; height:auto; object-fit:contain;">
             <p class="hide-tally-message" id="hide-tally-message">
-                The UBDays 2026 Tabulation Team is working hard to finalize the final list of winners.<br>
-                The results will be announced during the closing program on <strong id="hide-tally-date-display"></strong>.
+                The UBDays <span id="hide-tally-year-display">2026</span> Tabulation Team is working hard to finalize the final list of winners.<br>
+                The final results will be announced during the Closing Program on <strong id="hide-tally-date-display"></strong><span id="hide-tally-location-wrap"> at the <strong id="hide-tally-location-display"></strong></span>.
             </p>
         </div>
     </div>
 
     <!-- Live Feed Logic with Sorting & Chevrons -->
-    <script src="js/live-feed.js?v=20261030_v1" defer></script>
+    <script src="js/live-feed.js?v=20261030_v3" defer></script>
 </body>
 </html>

@@ -1172,16 +1172,18 @@ function escapeHtml(text) {
 async function initHideTally() {
     const btn = document.getElementById('btn-hide-tally');
     const dateInput = document.getElementById('tally-end-date');
+    const locationInput = document.getElementById('tally-location');
     const statusEl = document.getElementById('hide-tally-status');
     if (!btn || !dateInput) return;
 
     // Load current state from DB
-    await _loadHideTallyState(dateInput, statusEl);
+    await _loadHideTallyState(dateInput, locationInput, statusEl);
 
     btn.addEventListener('click', async () => {
         const currentlyHidden = btn.classList.contains('active');
         const newState = !currentlyHidden;
         const chosenDate = dateInput.value;
+        const chosenLocation = locationInput ? locationInput.value.trim() : '';
 
         if (newState && !chosenDate) {
             showGenericModal('alert', 'Date Required', 'Please set the <strong>UBDays End Date</strong> before hiding the tally.');
@@ -1205,7 +1207,8 @@ async function initHideTally() {
                 body: JSON.stringify({
                     action: 'setHideTally',
                     hidden: newState,
-                    endDate: chosenDate || ''
+                    endDate: chosenDate || '',
+                    location: chosenLocation
                 })
             });
 
@@ -1226,15 +1229,19 @@ async function initHideTally() {
         }
     });
 
-    // Persist date input change (does not save to DB alone — saved on button click)
-    dateInput.addEventListener('change', () => {
+    // Persist date/location input change notices
+    const onFieldChanged = () => {
         if (statusEl && btn.classList.contains('active')) {
-            statusEl.textContent = 'Date changed — click "Show Tally" then "Hide Tally" to re-apply.';
+            statusEl.textContent = 'Details changed — click "Show Tally" then "Hide Tally" to update live feed.';
         }
-    });
+    };
+    dateInput.addEventListener('change', onFieldChanged);
+    if (locationInput) {
+        locationInput.addEventListener('input', onFieldChanged);
+    }
 }
 
-async function _loadHideTallyState(dateInput, statusEl) {
+async function _loadHideTallyState(dateInput, locationInput, statusEl) {
     try {
         const res = await fetch('/api/data?type=appSettings');
         if (!res.ok) return;
@@ -1242,8 +1249,10 @@ async function _loadHideTallyState(dateInput, statusEl) {
 
         const isHidden = settings['hide_tally'] === 'true';
         const savedDate = settings['hide_tally_date'] || '';
+        const savedLocation = settings['hide_tally_location'] || '';
 
         if (savedDate && dateInput) dateInput.value = savedDate;
+        if (savedLocation && locationInput) locationInput.value = savedLocation;
         _updateHideTallyUI(isHidden, statusEl);
     } catch (err) {
         console.error('Could not load hide tally state:', err);
