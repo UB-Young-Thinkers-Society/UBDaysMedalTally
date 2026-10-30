@@ -50,18 +50,30 @@ async function getMedalTally(categoryId = null, league = 'seniors') {
     if (categoryId) {
         // Specific Category Selected (Details Page)
         query = query.eq('events.category_id', categoryId);
-    } else {
-        // Exclude category named "Juniors League" if it exists as an event category
+    } else if (league === 'seniors') {
+        // For the main college tally, exclude Juniors League events
         const { data: excludedCategory } = await supabase
             .from('categories')
             .select('id')
-            .ilike('name', 'Juniors League') 
+            .ilike('name', 'Juniors League')
             .maybeSingle();
 
         if (excludedCategory) {
             query = query.neq('events.category_id', excludedCategory.id);
         }
+    } else if (league === 'juniors') {
+        // For the Juniors League tally, only include events in the Juniors League category
+        const { data: juniorCategory } = await supabase
+            .from('categories')
+            .select('id')
+            .ilike('name', 'Juniors League')
+            .maybeSingle();
+
+        if (juniorCategory) {
+            query = query.eq('events.category_id', juniorCategory.id);
+        }
     }
+    // league === 'all': no category filter - include all events
 
     const { data: publishedResults, error: resultsError } = await query;
     if (resultsError) throw resultsError;

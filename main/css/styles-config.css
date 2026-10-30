@@ -1168,13 +1168,37 @@ footer {
     transform: scale(0.99);
 }
 .btn-hide-tally.active {
-    background: #16a34a;
+    background: #dc2626;
 }
 .btn-hide-tally.active:hover {
-    background: #15803d;
+    background: #b91c1c;
+}
+.btn-update-tally {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 10px 16px;
+    background: #2b00d9;
+    color: #ffffff;
+    font-size: 0.88rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    font-family: inherit;
+}
+.btn-update-tally:hover {
+    background: #2300b0;
+}
+.btn-update-tally:active {
+    transform: scale(0.99);
 }
 .hide-tally-status {
-    font-size: 0.78rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     color: #64748b;
     margin: 0;
     text-align: center;

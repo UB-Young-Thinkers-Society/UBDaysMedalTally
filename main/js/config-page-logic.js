@@ -1170,17 +1170,19 @@ function escapeHtml(text) {
 // --- 8. HIDE TALLY OVERLAY LOGIC (DB-backed, syncs to all screens) ---
 
 async function initHideTally() {
-    const btn = document.getElementById('btn-hide-tally');
+    const btnToggle = document.getElementById('btn-hide-tally');
+    const btnUpdate = document.getElementById('btn-update-tally');
     const dateInput = document.getElementById('tally-end-date');
     const locationInput = document.getElementById('tally-location');
     const statusEl = document.getElementById('hide-tally-status');
-    if (!btn || !dateInput) return;
+    if (!btnToggle || !dateInput) return;
 
     // Load current state from DB
     await _loadHideTallyState(dateInput, locationInput, statusEl);
 
-    btn.addEventListener('click', async () => {
-        const currentlyHidden = btn.classList.contains('active');
+    // Main Toggle Button: "Hide Tally" (turn on) <-> "Show Tally" (turn off)
+    btnToggle.addEventListener('click', async () => {
+        const currentlyHidden = btnToggle.classList.contains('active');
         const newState = !currentlyHidden;
         const chosenDate = dateInput.value;
         const chosenLocation = locationInput ? locationInput.value.trim() : '';
@@ -1190,54 +1192,110 @@ async function initHideTally() {
             return;
         }
 
-        try {
-            btn.disabled = true;
-            const labelEl = document.getElementById('btn-hide-tally-label');
-            if (labelEl) labelEl.textContent = 'Saving...';
-
-            const { data: sessionData } = await supabase.auth.getSession();
-            if (!sessionData?.session) throw new Error('Session expired. Please log in again.');
-
-            const res = await fetch('/api/actions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${sessionData.session.access_token}`
-                },
-                body: JSON.stringify({
-                    action: 'setHideTally',
-                    hidden: newState,
-                    endDate: chosenDate || '',
-                    location: chosenLocation
-                })
-            });
-
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Failed to update overlay state.');
-            }
-
-            _updateHideTallyUI(newState, statusEl);
-
-        } catch (err) {
-            console.error('Error toggling hide tally:', err);
-            showGenericModal('alert', 'Error', 'Could not update overlay: ' + err.message);
-            // Restore label
-            _updateHideTallyUI(btn.classList.contains('active'), statusEl);
-        } finally {
-            btn.disabled = false;
-        }
+        await _saveHideTallySettings({
+            hidden: newState,
+            endDate: chosenDate || '',
+            location: chosenLocation,
+            statusEl,
+            sourceBtn: btnToggle
+        });
     });
 
-    // Persist date/location input change notices
-    const onFieldChanged = () => {
-        if (statusEl && btn.classList.contains('active')) {
-            statusEl.textContent = 'Details changed — click "Show Tally" then "Hide Tally" to update live feed.';
-        }
+    // Dedicated "Update Overlay Details" Button: saves date/venue while keeping overlay active
+    if (btnUpdate) {
+        btnUpdate.addEventListener('click', async () => {
+            const chosenDate = dateInput.value;
+            const chosenLocation = locationInput ? locationInput.value.trim() : '';
+
+            if (!chosenDate) {
+                showGenericModal('alert', 'Date Required', 'Please set the <strong>UBDays End Date</strong>.');
+                return;
+            }
+
+            await _saveHideTallySettings({
+                hidden: true,
+                endDate: chosenDate,
+                location: chosenLocation,
+                statusEl,
+                sourceBtn: btnUpdate
+            });
+        });
+    }
+
+    // Auto-save on change / blur when overlay is active
+    const autoSaveIfActive = async () => {
+        if (!btnToggle.classList.contains('active')) return;
+        const chosenDate = dateInput.value;
+        const chosenLocation = locationInput ? locationInput.value.trim() : '';
+        if (!chosenDate) return;
+
+        await _saveHideTallySettings({
+            hidden: true,
+            endDate: chosenDate,
+            location: chosenLocation,
+            statusEl,
+            silent: true
+        });
     };
-    dateInput.addEventListener('change', onFieldChanged);
+
+    dateInput.addEventListener('change', autoSaveIfActive);
     if (locationInput) {
-        locationInput.addEventListener('input', onFieldChanged);
+        locationInput.addEventListener('change', autoSaveIfActive);
+        locationInput.addEventListener('blur', autoSaveIfActive);
+    }
+}
+
+async function _saveHideTallySettings({ hidden, endDate, location, statusEl, sourceBtn = null, silent = false }) {
+    const btnToggle = document.getElementById('btn-hide-tally');
+    const toggleLabel = document.getElementById('btn-hide-tally-label');
+    const updateLabel = document.getElementById('btn-update-tally-label');
+
+    try {
+        if (sourceBtn) {
+            sourceBtn.disabled = true;
+            if (sourceBtn === btnToggle && toggleLabel) toggleLabel.textContent = 'Saving...';
+            if (sourceBtn !== btnToggle && updateLabel) updateLabel.textContent = 'Saving...';
+        }
+
+        if (statusEl && !silent) {
+            statusEl.textContent = 'Saving to live feed...';
+        }
+
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (!sessionData?.session) throw new Error('Session expired. Please log in again.');
+
+        const res = await fetch('/api/actions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${sessionData.session.access_token}`
+            },
+            body: JSON.stringify({
+                action: 'setHideTally',
+                hidden: hidden,
+                endDate: endDate || '',
+                location: location || ''
+            })
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || 'Failed to update overlay settings.');
+        }
+
+        _updateHideTallyUI(hidden, statusEl, endDate, location);
+
+    } catch (err) {
+        console.error('Error saving overlay settings:', err);
+        if (!silent) {
+            showGenericModal('alert', 'Error', 'Could not update overlay: ' + err.message);
+        }
+        _updateHideTallyUI(btnToggle.classList.contains('active'), statusEl);
+    } finally {
+        if (sourceBtn) {
+            sourceBtn.disabled = false;
+        }
+        if (updateLabel) updateLabel.textContent = 'Update Overlay Details';
     }
 }
 
@@ -1253,25 +1311,36 @@ async function _loadHideTallyState(dateInput, locationInput, statusEl) {
 
         if (savedDate && dateInput) dateInput.value = savedDate;
         if (savedLocation && locationInput) locationInput.value = savedLocation;
-        _updateHideTallyUI(isHidden, statusEl);
+        _updateHideTallyUI(isHidden, statusEl, savedDate, savedLocation);
     } catch (err) {
         console.error('Could not load hide tally state:', err);
     }
 }
 
-function _updateHideTallyUI(isHidden, statusEl) {
-    const btn = document.getElementById('btn-hide-tally');
+function _updateHideTallyUI(isHidden, statusEl, dateVal = '', locationVal = '') {
+    const btnToggle = document.getElementById('btn-hide-tally');
     const labelEl = document.getElementById('btn-hide-tally-label');
-    if (!btn || !labelEl) return;
+    const btnUpdate = document.getElementById('btn-update-tally');
+    const iconSvg = document.getElementById('btn-hide-tally-icon');
+    if (!btnToggle || !labelEl) return;
 
     if (isHidden) {
-        btn.classList.add('active');
-        labelEl.textContent = 'Show Tally';
-        if (statusEl) statusEl.textContent = 'Overlay is currently active on all live feed screens.';
+        btnToggle.classList.add('active');
+        labelEl.textContent = 'Show Tally (Turn Off Overlay)';
+        if (btnUpdate) btnUpdate.style.display = 'inline-flex';
+
+        if (statusEl) {
+            const locText = locationVal ? ` at ${locationVal}` : '';
+            const dateText = dateVal ? ` on ${dateVal}` : '';
+            statusEl.innerHTML = `<span style="color:#16a34a; font-weight:700;">✓ Overlay is active on live feed</span><br><span style="color:#64748b; font-size:0.75rem;">Showing Closing Program${dateText}${locText}</span>`;
+        }
     } else {
-        btn.classList.remove('active');
+        btnToggle.classList.remove('active');
         labelEl.textContent = 'Hide Tally';
-        if (statusEl) statusEl.textContent = '';
+        if (btnUpdate) btnUpdate.style.display = 'none';
+        if (statusEl) {
+            statusEl.innerHTML = `<span style="color:#64748b;">Live feed is showing official medal tally.</span>`;
+        }
     }
 }
 
